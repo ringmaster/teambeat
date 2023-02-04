@@ -1,5 +1,7 @@
 # docker build -t teambeat .
 # docker run -p 8080:8080 teambeat
+# docker run -p 8080:8080 -v "$(pwd)"/pb/pb_data:/pb/pb_data teambeat
+# pb/pocketbase serve --http=localhost:8080 --dir pb/pb_data/
 
 FROM node:19-alpine
 
