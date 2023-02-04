@@ -6,6 +6,9 @@
 		"dev": "vite dev",
 		"build": "vite build",
 		"preview": "vite preview",
+		"pocketbase": "pb/pocketbase serve --http=localhost:8080 --dir pb/pb_data/",
+		"dockerbuild": "docker build -t teambeat .",
+		"dockerrun": "docker run -p 8080:8080 -v \"$(pwd)\"/pb/pb_data:/pb/pb_data teambeat",
 		"lint": "prettier --plugin-search-dir . --check . && eslint .",
 		"format": "prettier --plugin-search-dir . --write ."
 	},
@@ -21,5 +24,10 @@
 		"svelte": "^3.54.0",
 		"vite": "^4.0.0"
 	},
-	"type": "module"
+	"type": "module",
+	"dependencies": {
+		"milligram": "^1.4.1",
+		"svelte-cookie": "^1.0.1",
+		"svelte-pocketbase": "^0.0.4"
+	}
 }
