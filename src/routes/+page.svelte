@@ -24,14 +24,14 @@
         <tr>
             <td><a href="/board/{board.id}">{board.name}</a></td>
             <td>
-                <ul>{#each board.facilitators as facilitator}
-                    <li>{facilitator}</li>
+                <ul>{#each board.expand.facilitators as facilitator}
+                    <li>{facilitator.name}</li>
                     {/each}
                 </ul>
             </td>
             <td>
-                <ul>{#each board.users as user}
-                    <li>{user}</li>
+                <ul>{#each board.expand.users as user}
+                    <li>{user.name}</li>
                     {/each}
                 </ul>
             </td>
