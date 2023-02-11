@@ -1,39 +1,43 @@
 <script>
-    import { pbStore, User } from 'svelte-pocketbase';
-    import { env } from '$env/dynamic/public';
+    export let data
     
-    pbStore.set(env.PUBLIC_POCKETBASE_URL);
-    
-    let username = ''
-    let password = ''
-    
-    async function doLogin() {
-        const authData = await $pbStore.collection('users').authWithPassword(username, password)
-        document.cookie = $pbStore.authStore.exportToCookie({ httpOnly: false })
-        document.location = "/"
-    }
+    $: loggedIn = data.pb.authStore.isValid
 </script>
 
 <h1>Welcome to Teambeat</h1>
 
 <p>Teambeat is a tool for realtime retrospectives, surveys, and team pulse checks.</p>
 
-<User let:user>
-    <div>
-        <p>Name: {user?.name}</p>
-        <p>Email: {user?.email}</p>
-    </div>
-    <div slot="signedout">
-        <form on:submit={doLogin}>
-            <fieldset>
-                <label for="username">Username</label>
-                <input type="text" placeholder="username" id="username" bind:value="{username}">
-                
-                <label for="password">Password</label>
-                <input type="password" placeholder="password" id="password" bind:value="{password}">
-                
-                <input class="button-primary" type="submit" value="Send">
-            </fieldset>
-        </form>
-    </div>
-</User>
+{#if loggedIn}
+<h2>Your Boards</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Board Name</th>
+            <th>Facilitators</th>
+            <th>Users</th>
+            <th>Created</th>
+        </tr>
+    </thead>
+    <tbody>
+        {#each data.boards as board}
+        <tr>
+            <td><a href="/board/{board.id}">{board.name}</a></td>
+            <td>
+                <ul>{#each board.facilitators as facilitator}
+                    <li>{facilitator}</li>
+                    {/each}
+                </ul>
+            </td>
+            <td>
+                <ul>{#each board.users as user}
+                    <li>{user}</li>
+                    {/each}
+                </ul>
+            </td>
+            <td>{board.created}</td>
+        </tr>
+        {/each}
+    </tbody>
+</table>
+{/if}

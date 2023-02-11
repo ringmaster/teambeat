@@ -5,7 +5,6 @@ export const ssr = false;
 import { env } from '$env/dynamic/public';
 
 import PocketBase from 'pocketbase';
-import { getCookie, setCookie, deleteCookie } from 'svelte-cookie';
 
 export async function load() {
     let cookie = document.cookie
@@ -26,6 +25,6 @@ export async function load() {
     console.log("COOKIE SET", pb.authStore.exportToCookie({ httpOnly: false }))
 
     return {
-        db: new PocketBase(env.PUBLIC_POCKETBASE_URL)
+        pb: pb
     };
 }
