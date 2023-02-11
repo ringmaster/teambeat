@@ -1,12 +1,14 @@
 <script>
     import { pbStore, User } from 'svelte-pocketbase';
-    import { env } from '$env/dynamic/public';
-    
-    pbStore.set(env.PUBLIC_POCKETBASE_URL);
 
+    export let data
+
+    $: loggedIn = data.pb.authStore.isValid
+    $: user = data.pb.authStore.model
+    
     function doLogout() {
-        $pbStore.authStore.clear()
-        document.cookie = $pbStore.authStore.exportToCookie({ httpOnly: false, expires: 0 })
+        data.pb.authStore.clear()
+        document.cookie = data.pb.authStore.exportToCookie({ httpOnly: false, expires: 0 })
         document.location = "/"
     }
 </script>
@@ -24,19 +26,18 @@
             </a>
             <ul class="navigation-list float-right">
                 <li class="navigation-item">
-                    <User let:user>
+                    {#if loggedIn}
                         <a href="/account" class="navigation-link">
                             <i class="fa-solid fa-user"></i>
                             {user.name}
                         </a>
                         <a href="#" class="navigation-link" on:click="{doLogout}"><i class="fa-solid fa-right-from-bracket"></i></a>
-                        <span slot="signedout">
-                            <a href="/" class="navigation-link">
-                                <i class="fa-solid fa-user"></i>
-                                Log In
-                            </a>        
-                        </span>
-                    </User>
+                    {:else}
+                        <a href="/login" class="navigation-link">
+                            <i class="fa-solid fa-user"></i>
+                            Log In
+                        </a>        
+                    {/if}
                 </li>
             </ul>
         </div>
