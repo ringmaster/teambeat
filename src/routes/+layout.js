@@ -8,7 +8,6 @@ import PocketBase from 'pocketbase';
 
 export async function load() {
     let cookie = document.cookie
-    console.log("COOKIE DATA", cookie)
 
     let pb = new PocketBase(env.PUBLIC_POCKETBASE_URL)
 
@@ -22,8 +21,6 @@ export async function load() {
 
     document.cookie = pb.authStore.exportToCookie({ httpOnly: false })
 	
-    console.log("COOKIE SET", pb.authStore.exportToCookie({ httpOnly: false }))
-
     return {
         pb: pb
     };

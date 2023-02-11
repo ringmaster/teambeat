@@ -3,7 +3,7 @@ export async function load({ parent, params }) {
 
     const boards = await pb.collection('boards').getFullList(10, {
         sort: '-created',
-        expand: "users,facilitators.*"
+        expand: "users,facilitators"
     });
 
     return {
