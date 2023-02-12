@@ -22,12 +22,16 @@
 		"prettier": "^2.8.0",
 		"prettier-plugin-svelte": "^2.8.1",
 		"svelte": "^3.54.0",
+		"svelte-dnd-action": "^0.9.22",
 		"vite": "^4.0.0"
 	},
 	"type": "module",
 	"dependencies": {
+		"@neodrag/svelte": "^2.0.3",
+		"@shoelace-style/shoelace": "^2.0.0",
 		"milligram": "^1.4.1",
 		"svelte-cookie": "^1.0.1",
+		"svelte-drag-and-drop-actions": "^1.0.0",
 		"svelte-pocketbase": "^0.0.4"
 	}
 }

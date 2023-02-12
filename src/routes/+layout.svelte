@@ -1,6 +1,4 @@
 <script>
-    import { pbStore, User } from 'svelte-pocketbase';
-
     export let data
 
     $: loggedIn = data.pb.authStore.isValid
@@ -15,6 +13,8 @@
 
 <svelte:head>
 <script src="https://kit.fontawesome.com/7e2abaa70e.js" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0/dist/themes/light.css" />
+<script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0/dist/shoelace.js"></script>
 </svelte:head>
 
     <nav class="navigation">
@@ -26,12 +26,19 @@
             <ul class="navigation-list float-right">
                 <li class="navigation-item">
                     {#if loggedIn}
-                        <a href="/account" class="navigation-link">
-                            <i class="fa-solid fa-user"></i>
-                            {user.name}
-                        </a>
-                        <a href="#" class="navigation-link" on:click="{doLogout}"><i class="fa-solid fa-right-from-bracket"></i></a>
-                    {:else}
+                    <sl-dropdown>
+                        <sl-button slot="trigger" caret><i class="fa-solid fa-user"></i> {user.name}</sl-button>
+                        <sl-menu>
+                          <sl-menu-item><a href="/account">Account</a></sl-menu-item>
+                          <sl-divider></sl-divider>
+                          <!-- svelte-ignore a11y-click-events-have-key-events -->
+                          <sl-menu-item on:click="{doLogout}">
+                            Log Out
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                          </sl-menu-item>
+                        </sl-menu>
+                      </sl-dropdown>
+                {:else}
                         <a href="/login" class="navigation-link">
                             <i class="fa-solid fa-user"></i>
                             Log In
@@ -64,7 +71,7 @@
     }
     
     :global(.navigation + .container) {
-        padding-bottom: 7.5rem;
+        /* padding-bottom: 7.5rem; */
         padding-top: 7.5rem;
     }
     :global(.container) {
