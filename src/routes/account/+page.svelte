@@ -5,6 +5,8 @@
     pbStore.set(env.PUBLIC_POCKETBASE_URL);
 </script>
 
+<div class="container">
+
 <User let:user>
 
 <h1>Account - {user.name}</h1>
@@ -28,3 +30,4 @@
   </form>
 
 </User>
+</div>

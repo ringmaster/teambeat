@@ -20,6 +20,8 @@
   }
 </script>
 
+<div class="container">
+
 <h1>Login</h1>
 
 {#if loggedIn}
@@ -37,3 +39,4 @@
   </fieldset>
 </form>
 {/if}
+</div>

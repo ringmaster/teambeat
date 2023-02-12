@@ -4,6 +4,8 @@
     $: loggedIn = data.pb.authStore.isValid
 </script>
 
+<div class="container">
+
 <h1>Welcome to Teambeat</h1>
 
 <p>Teambeat is a tool for realtime retrospectives, surveys, and team pulse checks.</p>
@@ -41,3 +43,4 @@
     </tbody>
 </table>
 {/if}
+</div>

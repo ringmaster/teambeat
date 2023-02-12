@@ -17,7 +17,6 @@
 <script src="https://kit.fontawesome.com/7e2abaa70e.js" crossorigin="anonymous"></script>
 </svelte:head>
 
-<div class="wrapper">
     <nav class="navigation">
         <div class="container">
             <a href="/" class="navigation-title">
@@ -42,22 +41,14 @@
             </ul>
         </div>
     </nav>
-    <div class="container">
-        <slot/>
-    </div>
-</div>
+<slot/>
 
 <style>
     @import "../../node_modules/milligram/dist/milligram.min.css";
     :global(html) {
         color: red;
     }
-    .wrapper {
-        display: block;
-        overflow: hidden;
-        position: relative;
-        width: 100%;
-    }
+
     .navigation {
         background: #f4f5f6;
         border-bottom: 0.1rem solid #d1d1d1;
@@ -72,11 +63,11 @@
         z-index: 2;
     }
     
-    .wrapper>.container {
+    :global(.navigation + .container) {
         padding-bottom: 7.5rem;
         padding-top: 7.5rem;
     }
-    .wrapper .container {
+    :global(.container) {
         max-width: 80rem;
     }
     .navigation .navigation-link, .navigation .navigation-title, .navigation .title {
