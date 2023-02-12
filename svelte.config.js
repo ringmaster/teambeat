@@ -19,7 +19,7 @@ const config = {
 			strict: true,
 			trailingSlash: 'always'
 		}),
-		prerender: {entries: ['*']}
+		prerender: {entries: ['*', '/board/[boardid]']}
 	}
 };
 
