@@ -1,9 +1,5 @@
-export async function load({ parent, params }) {
-    const {pb} = await parent()
-
-    const board = await pb.collection('boards').getOne(params.boardid, {expand: "users,facilitators,columns,columns.cards,columns.cards.user"});
-
+export async function load({ params }) {
     return {
-        board: board
+        params: params
     };
 }

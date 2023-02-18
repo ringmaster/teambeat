@@ -29,6 +29,7 @@
 	"dependencies": {
 		"@neodrag/svelte": "^2.0.3",
 		"@shoelace-style/shoelace": "^2.0.0",
+		"@zerodevx/svelte-toast": "1.0.0-rc.1",
 		"milligram": "^1.4.1",
 		"svelte-cookie": "^1.0.1",
 		"svelte-drag-and-drop-actions": "^1.0.0",
