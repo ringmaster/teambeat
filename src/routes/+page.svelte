@@ -10,7 +10,7 @@
     
 </script>
 
-<div class="container">
+<div class="container content">
     
     <h1>Welcome to Teambeat</h1>
     
@@ -18,7 +18,7 @@
     
     {#if loggedIn}
     <h2>Your Boards</h2>
-    <table>
+    <table class="table is-fullwidth">
         <thead>
             <tr>
                 <th>Board Name</th>

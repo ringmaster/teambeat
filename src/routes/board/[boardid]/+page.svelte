@@ -166,9 +166,10 @@
 </div>
 <div>Loading...</div>    
 {:then board} 
-<div class="container">
+<div class="container content">
     <h1>{board.name}</h1>
-    <sl-breadcrumb>
+    <sl-breadcrumb class="breadcrumb">
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
         <sl-breadcrumb-item on:click={debugBoard}>Testing</sl-breadcrumb-item>
         {#each board.scenes as scene}
         <sl-breadcrumb-item>{scene.title}</sl-breadcrumb-item>
@@ -177,11 +178,11 @@
 </div>
 <div class="boardscroll">
     <div class="board">
-        <div class="row">
+        <div class="row columns">
             {#each board.columns as column}
             
-            <div class="column" on:dragenter={handleDragEnter} on:dragleave={handleDragLeave} on:dragover={handleDragOver} on:drop={handleDragDrop} id="{column.id}">
-                <h2>{column.title}</h2>
+            <div class="column content" on:dragenter={handleDragEnter} on:dragleave={handleDragLeave} on:dragover={handleDragOver} on:drop={handleDragDrop} id="{column.id}">
+                <h2 class="subtitle">{column.title}</h2>
                 
                 <div class="addcard">
                     <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -204,7 +205,7 @@
 
 {/await}
 
-<style>
+<style lang="scss">
     .container {
         padding-bottom: 0;
     }
@@ -213,7 +214,7 @@
         
     }
     .board {
-        margin: 0 calc((100% - 80rem)/2) 3rem;
+        // margin: 0 calc((100% - 80rem)/2) 3rem;
         padding: 20px;
         min-height: 70vh;
     }
@@ -235,5 +236,8 @@
     }
     :global(.novis) {
         opacity: 0.0;
+    }
+    .breadcrumb::part(label) {
+        font-size: var(--sl-font-size-xlarge);
     }
 </style>
