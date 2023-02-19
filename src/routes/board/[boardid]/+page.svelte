@@ -177,16 +177,17 @@
             <div class="column" on:dragenter={handleDragEnter} on:dragleave={handleDragLeave} on:dragover={handleDragOver} on:drop={handleDragDrop} id="{column.id}">
                 <h2>{column.title}</h2>
                 
-                {#each column.cards as card(card.id)}
-                <Card bind:card={card} on:dragstart={handleDragStart} on:dragend={handleDragEnd} />
-                {/each}
-                
                 <div class="addcard">
                     <!-- svelte-ignore a11y-click-events-have-key-events -->
                     <sl-button variant="default" size="large" circle on:click={debugBoard}>
                         <i class="fa-solid fa-plus-large"></i>
                     </sl-button>
                 </div>
+                                
+                {#each column.cards as card(card.id)}
+                <Card bind:card={card} on:dragstart={handleDragStart} on:dragend={handleDragEnd} />
+                {/each}
+
                 
             </div>
             

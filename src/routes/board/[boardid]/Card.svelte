@@ -1,14 +1,14 @@
 <script>
     import { createEventDispatcher } from 'svelte';
-
+    
     const dispatch = createEventDispatcher();
-
+    
     export let card;
-
+    
     function handleDragStart(e) {
         dispatch("dragstart", e)
     }
-
+    
     function handleDragEnd(e) {
         dispatch("dragend", e)
     }
@@ -20,9 +20,12 @@
     {card.description}
     <div slot="footer">
         <sl-rating></sl-rating>
-        <sl-tooltip content="{card.expand.user.name}">
-            <i class="fa-solid fa-user"></i>
-        </sl-tooltip>
+        <div>
+            <i class="fa-regular fa-face-smile"></i>
+            <sl-tooltip content="{card.expand.user.name}">
+                <i class="fa-solid fa-user"></i>
+            </sl-tooltip>
+        </div>
     </div>
 </sl-card>
 
