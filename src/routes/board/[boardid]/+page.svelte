@@ -30,22 +30,27 @@
         return alert.toast();
     }
     
-    async function getBoard() {
-        let boardData = await $pbStore.collection('boards').getOne(data.params.boardid, {expand: "users,facilitators,scenes(board),columns(board)"});
-        let board = {
-            name: boardData.name
-        }
+    function getBoard() {
+        let boardData = $pbStore.collection('boards').getOne(data.params.boardid, {expand: "users,facilitators,scenes(board),columns(board)"});
         
-        let columnData = boardData.expand["columns(board)"];
-        
-        board.columns = columnData.map(async (column) => {
-            await column;
-            column.reload = ()=>column.cards = loadCards(column);
-            column.reload();
-            return column;
+        boardData.then((data) => {
+            board = {
+                name: data.name,
+                columns: makeColumns(data.expand["columns(board)"])
+            }
         })
-        
-        return board;
+    }
+    
+    function makeColumns(columnData) {
+        columnData.map((item) => {
+            item.cards = [];
+            loadCards(item).then((cards) => {
+                item.cards = cards;
+                board = board;
+            })
+            return item;
+        })
+        return columnData;
     }
     
     async function loadCards(column) {
@@ -58,7 +63,12 @@
         return cardData;
     }
     
-    let board = getBoard();
+    function debugBoard() {
+        console.log(board);
+    }
+    
+    let board = {columns: []};
+    getBoard();
     
     // https://svelte.dev/repl/adf5a97b91164c239cc1e6d0c76c2abe?version=3.14.1
     // https://www.javascripttutorial.net/web-apis/javascript-drag-and-drop/
@@ -126,28 +136,21 @@
         let record = await $pbStore.collection('cards').getOne(element_id);
         
         // Update the column on the card
+        let oldColumnId = record.column;
         record.column = e.target.closest('.column').id;
         
         // Submit the updated data
         record = await $pbStore.collection('cards').update(element_id, record);
         
-        // Reload the whole board
-        //board = getBoard();
-        
         // Reload the destination column
-        board.then((board)=>{
-            console.log("COLUMNS 2", board);
-            for(let column of board.columns) {
-                column.then((column) => {
-                    console.log(column.id, e.target.closest('.column').id)
-                    //if(column.id == e.target.closest('.column').id) {
-                        column.cards = loadCards(column);
-                    //}
-                    return column;
-                })
+        for(let column of board.columns) {
+            if(column.id == record.column || column.id == oldColumnId) {
+                loadCards(column).then((cards) => {
+                    column.cards = cards;
+                    board = board;
+                });
             }
-            return board;
-        })
+        }
         
         // Reload the source column
     }
@@ -170,25 +173,22 @@
     <div class="board">
         <div class="row">
             {#each board.columns as column}
-            {#await column then column}
             
             <div class="column" on:dragenter={handleDragEnter} on:dragleave={handleDragLeave} on:dragover={handleDragOver} on:drop={handleDragDrop} id="{column.id}">
                 <h2>{column.title}</h2>
                 
-                {#await column.cards then cards}
-                {#each cards as card(card.id)}
+                {#each column.cards as card(card.id)}
                 <Card bind:card={card} on:dragstart={handleDragStart} on:dragend={handleDragEnd} />
                 {/each}
-                {/await}
                 
                 <div class="addcard">
-                    <sl-button variant="default" size="large" circle>
+                    <!-- svelte-ignore a11y-click-events-have-key-events -->
+                    <sl-button variant="default" size="large" circle on:click={debugBoard}>
                         <i class="fa-solid fa-plus-large"></i>
                     </sl-button>
                 </div>
                 
             </div>
-            {/await}
             
             {/each}
         </div>
