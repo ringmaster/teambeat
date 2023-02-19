@@ -36,7 +36,8 @@
         boardData.then((data) => {
             board = {
                 name: data.name,
-                columns: makeColumns(data.expand["columns(board)"])
+                columns: makeColumns(data.expand["columns(board)"]),
+                scenes: data.expand["scenes(board)"]
             }
         })
     }
@@ -67,7 +68,7 @@
         console.log(board);
     }
     
-    let board = {columns: []};
+    let board = {columns: [], scenes: []};
     getBoard();
     
     // https://svelte.dev/repl/adf5a97b91164c239cc1e6d0c76c2abe?version=3.14.1
@@ -167,7 +168,12 @@
 {:then board} 
 <div class="container">
     <h1>{board.name}</h1>
-    <p>{status}</p>
+    <sl-breadcrumb>
+        <sl-breadcrumb-item on:click={debugBoard}>Testing</sl-breadcrumb-item>
+        {#each board.scenes as scene}
+        <sl-breadcrumb-item>{scene.title}</sl-breadcrumb-item>
+        {/each}
+    </sl-breadcrumb>
 </div>
 <div class="boardscroll">
     <div class="board">
@@ -183,11 +189,11 @@
                         <i class="fa-solid fa-plus-large"></i>
                     </sl-button>
                 </div>
-                                
+                
                 {#each column.cards as card(card.id)}
                 <Card bind:card={card} on:dragstart={handleDragStart} on:dragend={handleDragEnd} />
                 {/each}
-
+                
                 
             </div>
             
