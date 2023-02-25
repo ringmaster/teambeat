@@ -10,6 +10,10 @@
     
 </script>
 
+<svelte:head>
+    <title>Teambeat</title>
+</svelte:head>
+
 <div class="container content">
     
     <h1>Welcome to Teambeat</h1>

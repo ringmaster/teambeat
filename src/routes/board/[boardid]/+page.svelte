@@ -1,11 +1,13 @@
 <script>
     import { pbStore } from "svelte-pocketbase";
     import Card from "./Card.svelte";
+	import Drawer from "./Drawer.svelte";
     
     export let data;
     
     let status = '';
     let dropped_in = false;
+    let drawer;
     
     // Always escape HTML for text arguments!
     function escapeHtml(html) {
@@ -58,7 +60,7 @@
         let cardData = await $pbStore.collection('cards').getFullList(10, {
             sort: "+created",
             filter: 'column = "' + column.id + '"',
-            expand: 'user',
+            expand: 'user,comments(card)',
             '$cancelKey': column.id // Wihtout this, the client cancels separate column requests as non-unique
         })
         return cardData;
@@ -66,6 +68,10 @@
     
     function debugBoard() {
         console.log(board);
+    }
+
+    function configBoard() {
+        drawer.show();
     }
     
     let board = {columns: [], scenes: []};
@@ -158,6 +164,10 @@
     
 </script>
 
+<svelte:head>
+    <title>Teambeat - {board.name}</title>
+</svelte:head>
+
 
 {#await board}
 <div class="container">
@@ -170,7 +180,7 @@
     <h1>{board.name}</h1>
     <sl-breadcrumb class="breadcrumb">
         <!-- svelte-ignore a11y-click-events-have-key-events -->
-        <sl-breadcrumb-item on:click={debugBoard}>Testing</sl-breadcrumb-item>
+        <sl-breadcrumb-item on:click={configBoard}>Config</sl-breadcrumb-item>
         {#each board.scenes as scene}
         <sl-breadcrumb-item>{scene.title}</sl-breadcrumb-item>
         {/each}
@@ -204,6 +214,12 @@
 </div>
 
 {/await}
+
+<sl-drawer label="Config" placement="top" class="drawer-placement-top" bind:this={drawer}>
+    This drawer will show 
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <sl-button slot="footer" variant="primary" on:click={()=>drawer.hide()}>Close</sl-button>
+</sl-drawer>
 
 <style lang="scss">
     .container {
