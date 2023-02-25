@@ -11,7 +11,7 @@
 </script>
 
 <svelte:head>
-    <title>Teambeat</title>
+<title>Teambeat</title>
 </svelte:head>
 
 <div class="container content">
@@ -39,16 +39,18 @@
             <tr>
                 <td><a href="/board/{board.id}">{board.name}</a></td>
                 <td>
-                    <ul>{#each board.expand.facilitators as facilitator}
-                        <li>{facilitator.name}</li>
-                        {/each}
-                    </ul>
+                    {#each board.expand.facilitators as facilitator}
+                    <div>{facilitator.name}</div>
+                    {/each}
+                    
                 </td>
                 <td>
-                    <ul>{#each board.expand.users as user}
-                        <li>{user.name}</li>
-                        {/each}
-                    </ul>
+                    {#each board.expand.users as user}
+                    <sl-tooltip content="Author: {user.name}">
+                        <i class="fa-solid fa-user"></i>
+                    </sl-tooltip>
+                    {/each}
+                    
                 </td>
                 <td>{board.created}</td>
             </tr>

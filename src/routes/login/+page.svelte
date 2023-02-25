@@ -1,18 +1,29 @@
 <script>
   import { pbStore } from 'svelte-pocketbase';
+  import notify from "../../utils/notify";
   
   $: loggedIn = $pbStore.authStore.isValid
   $: user = $pbStore.authStore.model
   
-  export let data
-  
   let username = ''
-  let password = ''  
+  let password = ''
+  let loggingin = false
+  
+  let providerCall = $pbStore.collection('users').listAuthMethods();
+  
+  const redirectUrl = location.protocol + '//' + location.host + "/redirect"
   
   async function doLogin() {
-    const authData = await $pbStore.collection('users').authWithPassword(username, password)
-    document.cookie = $pbStore.authStore.exportToCookie({ httpOnly: false, secure: false })
-    document.location = "/"
+    loggingin = true;
+    $pbStore.collection('users').authWithPassword(username, password)
+    .then((authData)=>{
+      document.cookie = $pbStore.authStore.exportToCookie({ httpOnly: false, secure: false })
+      document.location = "/"
+    })
+    .catch((error)=>{
+      notify("There was a problem authenticating.  Please check your credentials and try again.", "error", "error");
+      loggingin = false;
+    })
   }
   
   function doLogout() {
@@ -20,29 +31,66 @@
     document.cookie = $pbStore.authStore.exportToCookie({ httpOnly: false, expires: 0, secure: false })
     document.location = "/"
   }
+  
+  function setProvider(provider) {
+    localStorage.setItem('provider', JSON.stringify(provider));
+  }
 </script>
 
 <svelte:head>
-    <title>Teambeat - Log In</title>
+<title>Teambeat - Log In</title>
 </svelte:head>
 
 <div class="container">
   
-  <h1>Login</h1>
+  <h1 class="title">Login</h1>
   
   {#if loggedIn}
   <button on:click={doLogout}>Log Out</button>
   {:else}
-  <form on:submit={doLogin}>
-    <fieldset>
-      <label for="username">Username</label>
-      <input type="text" placeholder="username" id="username" bind:value="{username}">
+  
+  <div class="columns">
+    <div class="column">
+      <form on:submit={doLogin}>
+        
+        <div class="field">
+          <label for="username" class="label">Username</label>
+          <div class="control">
+            <input type="text" class="input" placeholder="username" id="username" bind:value="{username}">
+          </div>
+        </div>
+        
+        <div class="field">
+          <label class="label" for="password">Password</label>
+          <div class="control">
+            <input class="input" type="password" placeholder="password" id="password" bind:value="{password}">
+          </div>
+        </div>
+        
+        <div class="field is-grouped">
+          <div class="control">
+            <input class="button is-primary" type="submit" value="Log In" class:is-loading="{loggingin}">
+          </div>
+        </div>
+      </form>
       
-      <label for="password">Password</label>
-      <input type="password" placeholder="password" id="password" bind:value="{password}">
+    </div>
+    <div class="column">
       
-      <input class="button-primary" type="submit" value="Send">
-    </fieldset>
-  </form>
+      <h2 class="title">3rd Party Logins</h2>
+      <p>You may also use one of the following providers to log in:</p>
+      
+      {#await providerCall}
+      <p>Loading available providers...</p>
+      {:then authMethods} 
+      <ul>
+        {#each authMethods.authProviders as provider}
+        <li><a href="{provider.authUrl + redirectUrl}" on:click="{()=>setProvider(provider)}">{provider.name}</a></li>
+        {/each}
+      </ul>    
+      {/await}
+    </div>
+  </div>
+  
   {/if}
 </div>
