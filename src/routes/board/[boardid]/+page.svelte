@@ -2,14 +2,16 @@
     import { pbStore } from "svelte-pocketbase";
     import Card from "./Card.svelte";
     import notify from "../../../utils/notify.js";
-	import Drawer from "./Drawer.svelte";
+    import Drawer from "./Drawer.svelte";
     
     export let data;
+    
+    $: user = $pbStore.authStore.model
     
     let status = '';
     let dropped_in = false;
     let drawer;
-        
+    
     function getBoard() {
         let boardData = $pbStore.collection('boards').getOne(data.params.boardid, {expand: "users,facilitators,scenes(board),columns(board)"});
         
@@ -22,13 +24,26 @@
         })
     }
     
+    function columnWatch(column) {
+        $pbStore.collection('cards').subscribe('*', function (e) {
+            console.log(column, e);
+            debugger;
+        });
+    }
+    
     function makeColumns(columnData) {
         columnData.map((item) => {
             item.cards = [];
-            loadCards(item).then((cards) => {
-                item.cards = cards;
-                board = board;
-            })
+            item.update = function(){
+                loadCards(item).then((cards) => {
+                    item.cards = cards;
+                    board = board;
+                })
+            }
+            $pbStore.collection('cards').subscribe('*', function (e) {
+                item.update();
+            });
+            item.update();
             return item;
         })
         return columnData;
@@ -44,10 +59,6 @@
         return cardData;
     }
     
-    function debugBoard() {
-        console.log(board);
-    }
-
     function configBoard() {
         drawer.show();
     }
@@ -113,7 +124,6 @@
         document.getElementById(element_id).classList.remove('novis');
         dropped_in = true;
         status = "You droped " + element_id + " into drop zone " + e.target.closest('.column').id;
-        notify(status)
         
         console.log("BOARD", board);
         
@@ -128,6 +138,8 @@
         record = await $pbStore.collection('cards').update(element_id, record);
         
         // Reload the destination column
+        /*
+        // This will be done by the column watch
         for(let column of board.columns) {
             if(column.id == record.column || column.id == oldColumnId) {
                 loadCards(column).then((cards) => {
@@ -136,14 +148,27 @@
                 });
             }
         }
+        */
         
         // Reload the source column
+    }
+    
+    function addCard(column) {
+        const data = {
+            "user": user.id,
+            "type": "default",
+            "description": "",
+            "options": "{}",
+            "column": column.id
+        };
+        
+        $pbStore.collection('cards').create(data)
     }
     
 </script>
 
 <svelte:head>
-    <title>Teambeat - {board.name}</title>
+<title>Teambeat - {board.name}</title>
 </svelte:head>
 
 
@@ -174,7 +199,7 @@
                 
                 <div class="addcard">
                     <!-- svelte-ignore a11y-click-events-have-key-events -->
-                    <sl-button variant="default" size="large" circle on:click={debugBoard}>
+                    <sl-button variant="default" size="large" circle on:click={()=>addCard(column)}>
                         <i class="fa-solid fa-plus-large"></i>
                     </sl-button>
                 </div>

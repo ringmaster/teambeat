@@ -1,10 +1,16 @@
 <script>
     import { pbStore } from 'svelte-pocketbase';
     import { env } from '$env/dynamic/public';
+    import { onMount } from 'svelte';
     //import "./milligram-mod.sass";
-
     
     pbStore.set(env.PUBLIC_POCKETBASE_URL);
+    
+    if(!$pbStore.authStore.isValid) {
+        if (["/", "/login"].indexOf(location.href) === false) {
+            location.href = "/";
+        }
+    }
     
     $: loggedIn = $pbStore.authStore.isValid
     $: user = $pbStore.authStore.model
@@ -14,6 +20,7 @@
         document.cookie = $pbStore.authStore.exportToCookie({ httpOnly: false, expires: 0 })
         document.location = "/"
     }
+    
 </script>
 
 <svelte:head>
