@@ -22,6 +22,10 @@
   }
 </script>
 
+<svelte:head>
+    <title>Teambeat - Log In</title>
+</svelte:head>
+
 <div class="container">
   
   <h1>Login</h1>
