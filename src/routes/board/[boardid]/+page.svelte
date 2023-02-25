@@ -1,6 +1,7 @@
 <script>
     import { pbStore } from "svelte-pocketbase";
     import Card from "./Card.svelte";
+    import notify from "../../../utils/notify.js";
 	import Drawer from "./Drawer.svelte";
     
     export let data;
@@ -8,30 +9,7 @@
     let status = '';
     let dropped_in = false;
     let drawer;
-    
-    // Always escape HTML for text arguments!
-    function escapeHtml(html) {
-        const div = document.createElement('div');
-        div.textContent = html;
-        return div.innerHTML;
-    }
-    
-    // Custom function to emit toast notifications
-    function notify(message, variant = 'primary', icon = 'info-circle', duration = 3000) {
-        const alert = Object.assign(document.createElement('sl-alert'), {
-            variant,
-            closable: true,
-            duration: duration,
-            innerHTML: `
-            <sl-icon name="${icon}" slot="icon"></sl-icon>
-            ${escapeHtml(message)}
-            `
-        });
         
-        document.body.append(alert);
-        return alert.toast();
-    }
-    
     function getBoard() {
         let boardData = $pbStore.collection('boards').getOne(data.params.boardid, {expand: "users,facilitators,scenes(board),columns(board)"});
         

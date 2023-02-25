@@ -3,7 +3,7 @@ export const prerender = true;
 export const ssr = false;
 
 import { registerIconLibrary } from '@shoelace-style/shoelace/dist/utilities/icon-library.js';
-    
+
 registerIconLibrary('fa', {
     resolver: name => {
         const filename = name.replace(/^fa[rbs]-/, '');
