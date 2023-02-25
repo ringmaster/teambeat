@@ -24,13 +24,6 @@
         })
     }
     
-    function columnWatch(column) {
-        $pbStore.collection('cards').subscribe('*', function (e) {
-            console.log(column, e);
-            debugger;
-        });
-    }
-    
     function makeColumns(columnData) {
         columnData.map((item) => {
             item.cards = [];
@@ -51,7 +44,7 @@
     
     async function loadCards(column) {
         let cardData = await $pbStore.collection('cards').getFullList(10, {
-            sort: "+created",
+            sort: "-created",
             filter: 'column = "' + column.id + '"',
             expand: 'user,comments(card)',
             '$cancelKey': column.id // Wihtout this, the client cancels separate column requests as non-unique
@@ -180,28 +173,57 @@
 <div>Loading...</div>    
 {:then board} 
 <div class="container content">
-    <h1>{board.name}</h1>
-    <sl-breadcrumb class="breadcrumb">
-        <!-- svelte-ignore a11y-click-events-have-key-events -->
-        <sl-breadcrumb-item on:click={configBoard}>Config</sl-breadcrumb-item>
-        {#each board.scenes as scene}
-        <sl-breadcrumb-item>{scene.title}</sl-breadcrumb-item>
-        {/each}
-    </sl-breadcrumb>
+    <div class="level">
+        <div class="level-left">
+            <div class="level-item">
+                <h1 class="title">{board.name}</h1>
+            </div>
+            <div class="level-item">
+                <h2 class="subtitle">        
+                    {#each board.scenes as scene}
+                    {scene.title}
+                    {/each}
+                </h2>
+            </div>
+        </div>
+        <div class="level-right">
+            <div class="field has-addons">
+                <!-- svelte-ignore a11y-click-events-have-key-events -->
+                <p class="control">
+                    <button class="button is-small is-rounded" on:click={configBoard}>
+                        <span class="icon is-small">
+                            <i class="fa-light fa-square-kanban"></i>
+                        </span>
+                        <span>Configure Board</span>
+                    </button>
+                </p>
+                <p class="control">
+                    <button class="button is-small is-rounded" on:click={configBoard}>
+                        <span class="icon is-small">
+                            <i class="fa-light fa-clapperboard"></i>
+                        </span>
+                        <span>Configure Scene</span>
+                    </button>
+                </p>
+            </div>
+        </div>
+    </div>
 </div>
 <div class="boardscroll">
     <div class="board">
         <div class="row columns">
             {#each board.columns as column}
             
-            <div class="column content" on:dragenter={handleDragEnter} on:dragleave={handleDragLeave} on:dragover={handleDragOver} on:drop={handleDragDrop} id="{column.id}">
+            <div class="column cardcolumn content" on:dragenter={handleDragEnter} on:dragleave={handleDragLeave} on:dragover={handleDragOver} on:drop={handleDragDrop} id="{column.id}">
                 <h2 class="subtitle">{column.title}</h2>
-                
-                <div class="addcard">
+                <div class="field has-addons">
                     <!-- svelte-ignore a11y-click-events-have-key-events -->
-                    <sl-button variant="default" size="large" circle on:click={()=>addCard(column)}>
-                        <i class="fa-solid fa-plus-large"></i>
-                    </sl-button>
+                    <button class="button is-small is-rounded" on:click={()=>addCard(column)}>
+                        <span class="icon is-small">
+                            <i class="fa-light fa-cards-blank"></i>
+                        </span>
+                        <span>Add Card</span>
+                    </button>
                 </div>
                 
                 {#each column.cards as card(card.id)}
@@ -218,7 +240,8 @@
 
 {/await}
 
-<sl-drawer label="Config" placement="top" class="drawer-placement-top" bind:this={drawer}>
+<sl-drawer placement="top" class="drawer-placement-top" bind:this={drawer}>
+    <div slot="label"><h1 class="title"><i class="fa-light fa-square-kanban"></i> Configure Board</h1></div>
     This drawer will show 
     <!-- svelte-ignore a11y-click-events-have-key-events -->
     <sl-button slot="footer" variant="primary" on:click={()=>drawer.hide()}>Close</sl-button>
@@ -243,7 +266,7 @@
         background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(248,248,248,1) 13%); 
         */
     }
-    .column {
+    .cardcolumn {
         min-width: 30rem;
     }
     .addcard {

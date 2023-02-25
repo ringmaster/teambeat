@@ -1,5 +1,6 @@
 <script>
     import { createEventDispatcher } from 'svelte';
+    import { pbStore } from 'svelte-pocketbase';
     
     const dispatch = createEventDispatcher();
     
@@ -25,8 +26,14 @@
         editing = true;
         descriptionEl.focus();
     }
+
+    function handleDelete(e){
+        $pbStore.collection('cards').delete(card.id);
+    }
     
     function handleDoneEdit(e) {
+        card.description = descriptionEl.innerHTML
+        $pbStore.collection("cards").update(card.id, card)
         editing = false;
     }
     
@@ -48,9 +55,14 @@
                 <i class="fa-solid fa-user"></i>
             </sl-tooltip>
             <!-- svelte-ignore a11y-click-events-have-key-events -->
+            {#if card.expand.user.id == $pbStore.authStore.model.id}
             <sl-tooltip content="Edit Card Description" on:click={handleEdit}>
                 <i class="fa-solid fa-pencil"></i>
             </sl-tooltip>
+            <sl-tooltip content="Delete Card" on:click={handleDelete}>
+                <i class="fa-solid fa-trash"></i>
+            </sl-tooltip>
+            {/if}
         </div>
     </div>
     {#if card.expand["comments(card)"]}
