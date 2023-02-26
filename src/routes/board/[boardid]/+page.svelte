@@ -1,10 +1,8 @@
 <script>
     import { pbStore } from "svelte-pocketbase";
     import Card from "./Card.svelte";
-    import {onDestroy} from "svelte"
+    import {onDestroy, tick} from "svelte"
     import { fly, fade } from 'svelte/transition';
-    import { Doughnut } from 'svelte-chartjs';
-    import Color from "colorjs.io";
     import notify from "../../../utils/notify";
     
     import {
@@ -15,6 +13,7 @@
         ArcElement,
         CategoryScale,
     } from 'chart.js';
+    import TimerDial from "./TimerDial.svelte";
     
     ChartJS.register(Title, ArcElement, CategoryScale);
     
@@ -27,19 +26,10 @@
     let drawer;
     let timer = false;
     let timerexpanded = false;
-    let timeleft = 0;
-    let timerlength = 0;
-    let timerint;
+    let timeLimit = 0;
+    let startTimer;
+    let stopTimer;
     let confirmDelete = false;
-    
-    let timerdata = {
-        datasets: [
-        {
-            data: [60, 0],
-            backgroundColor: ['green', '#ffffff']
-        },
-        ],
-    };
     
     onDestroy(()=>{
         board.columns.forEach((column) => {
@@ -171,21 +161,6 @@
         
         // Submit the updated data
         record = await $pbStore.collection('cards').update(element_id, record);
-        
-        // Reload the destination column
-        /*
-        // This will be done by the column watch
-        for(let column of board.columns) {
-            if(column.id == record.column || column.id == oldColumnId) {
-                loadCards(column).then((cards) => {
-                    column.cards = cards;
-                    board = board;
-                });
-            }
-        }
-        */
-        
-        // Reload the source column
     }
     
     function addCard(column) {
@@ -202,42 +177,25 @@
     
     function doTimer() {
         if(!timer) {
-            timeleft = 60;
-            timerlength = 60;
-            timerdata = {
-                datasets: [
-                {
-                    data: [timeleft, timerlength-timeleft],
-                    backgroundColor: ['green', '#ffffff']
-                },
-                ],
-            };
-            timerint = window.setInterval(()=>{
-                timeleft = timeleft - 1;
-                if(timeleft <= 0 ) {
-                    window.clearInterval(timerint);
-                    timer = false;
-                }
-                let color = new Color("red");
-                let dorange = color.range("green", {
-                    space: "lch", 
-                    outputSpace: "srgb"
-                });
-                let timercol = dorange(timeleft/timerlength);
-                timerdata = {
-                    datasets: [
-                    {
-                        data: [timeleft, timerlength-timeleft],
-                        backgroundColor: [timercol, '#ffffff']
-                    },
-                    ],
-                };
-                console.log(timerdata);
-            }, 1000)
-        } else {
-            window.clearInterval(timerint);
+            timeLimit = 60;
+            tick().then(() => startTimer());
         }
         timer = !timer;
+    }
+
+    function extendTimer(sec) {
+        if(timer) {
+            timeLimit += sec;
+        } else {
+            timeLimit = sec;
+            tick().then(() => startTimer());
+            timer = true;
+        }
+    }
+
+    function endTimer() {
+        stopTimer();
+        timer = false;
     }
     
     function doTimerClick() {
@@ -301,14 +259,36 @@
                         <span>Configure Scene</span>
                     </button>
                 </div>
-                <div class="control">
-                    <button class="button is-small is-rounded" on:click={doTimer}>
+                <div class="control dropdown is-hoverable is-right">
+                    <button class="button is-small is-rounded">
                         <span class="icon is-small">
                             <i class="fa-light fa-timer"></i>
                         </span>
                         <span>Timer</span>
+                        <span class="icon is-small">
+                            <i class="fas fa-angle-down" aria-hidden="true"></i>
+                        </span>
                     </button>
+                    <div class="dropdown-menu" id="dropdown-menu" role="menu">
+                        <div class="dropdown-content">
+                            <a href="#" class="dropdown-item" on:click={()=>extendTimer(30)}>
+                                + 0:30
+                            </a>
+                            <a href="#" class="dropdown-item" on:click={()=>extendTimer(60)}>
+                                + 1:00
+                            </a>
+                            <a href="#" class="dropdown-item" on:click={()=>extendTimer(300)}>
+                                + 5:00
+                            </a>
+                            <hr class="dropdown-divider">
+                            <a href="#" class="dropdown-item" on:click={endTimer}>
+                                Stop Timer
+                            </a>
+                        </div>
+                    </div>
+                    
                 </div>
+                
             </div>
         </div>
     </div>
@@ -399,7 +379,8 @@
             </div>
         </div>
         {/if}
-        <Doughnut class="timerdial" data={timerdata} options={{animation: {animateRotate: false }}}  on:click={doTimerClick} />
+        <!--Doughnut class="timerdial" data={timerdata} options={{animation: {animateRotate: false }}}  on:click={doTimerClick} /-->
+        <TimerDial bind:timeLimit bind:start={startTimer} bind:stop={stopTimer}/>
     </div>
 </div>
 {/if}
