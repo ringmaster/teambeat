@@ -51,7 +51,7 @@
         }, 1000);
     }
 
-    $: timeLeft = timeLimit - timePassed;
+    $: timeLeft = Math.max(0, timeLimit - timePassed);
     
     function formatTime(time) {
         const minutes = Math.floor(time / 60);
@@ -167,5 +167,6 @@
         justify-content: center;
         font-size: 16px;
         font-family: 'Courier New', Courier, monospace;
+        font-weight: bold;
     }
 </style>

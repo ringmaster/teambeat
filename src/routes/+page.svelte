@@ -29,7 +29,8 @@
         $pbStore.collection('boards').create(data).then((newboard)=>{
             const scenedata = {
                 "board": newboard.id,
-                "title": "default"
+                "title": "default",
+                "current": true,
             };
             $pbStore.collection('scenes').create(scenedata).then((scene)=>{
                 location.href = "/board/" + newboard.id;

@@ -5,17 +5,7 @@
     import { fly, fade } from 'svelte/transition';
     import notify from "../../../utils/notify";
     
-    import {
-        Chart as ChartJS,
-        Title,
-        Tooltip,
-        Legend,
-        ArcElement,
-        CategoryScale,
-    } from 'chart.js';
     import TimerDial from "./TimerDial.svelte";
-    
-    ChartJS.register(Title, ArcElement, CategoryScale);
     
     export let data;
     
@@ -30,6 +20,8 @@
     let startTimer;
     let stopTimer;
     let confirmDelete = false;
+    let newColumnName = '';
+    let newColumnVote = true;
     
     onDestroy(()=>{
         board.columns.forEach((column) => {
@@ -44,7 +36,16 @@
             board = {
                 name: data.name,
                 columns: makeColumns(data.expand["columns(board)"]),
-                scenes: data.expand["scenes(board)"]
+                scenes: data.expand["scenes(board)"],
+                currentScene: null
+            }
+            board.scenes.forEach((scene)=>{
+                if(scene.current) {
+                    board.currentScene = scene
+                }
+            })
+            if(board.currentScene == null) {
+                board.currentScene = board.scenes[0];
             }
         })
     }
@@ -88,7 +89,7 @@
         drawer.show();
     }
     
-    let board = {columns: [], scenes: []};
+    let board = {columns: [], scenes: [], currentScene: {title: ''}};
     getBoard();
     
     // https://svelte.dev/repl/adf5a97b91164c239cc1e6d0c76c2abe?version=3.14.1
@@ -175,14 +176,6 @@
         $pbStore.collection('cards').create(data)
     }
     
-    function doTimer() {
-        if(!timer) {
-            timeLimit = 60;
-            tick().then(() => startTimer());
-        }
-        timer = !timer;
-    }
-
     function extendTimer(sec) {
         if(timer) {
             timeLimit += sec;
@@ -192,7 +185,7 @@
             timer = true;
         }
     }
-
+    
     function endTimer() {
         stopTimer();
         timer = false;
@@ -210,6 +203,25 @@
         } else {
             notify("Check the box to confirm the deletion of this board.", "warning", "exclamation-triangle")
         }
+    }
+    
+    function addColumn() {
+        const maxseq = board.columns.reduce((prev, cur)=>{return Math.max(prev,cur.seq)}, 0) + 1;
+        const columnData = {
+            "title": newColumnName,
+            "seq": maxseq,
+            "board": data.params.boardid
+        }
+        $pbStore.collection('columns').create(columnData).then(()=>{
+            getBoard();
+            newColumnName = '';
+        })
+    }
+
+    function delColumn(id) {
+        $pbStore.collection('columns').delete(id).then(()=>{
+            getBoard();
+        })
     }
     
 </script>
@@ -233,11 +245,25 @@
                 <h1 class="title">{board.name}</h1>
             </div>
             <div class="level-item">
-                <h2 class="subtitle">        
-                    {#each board.scenes as scene}
-                    {scene.title}
-                    {/each}
-                </h2>
+                <div class="dropdown is-hoverable">
+                    <div class="dropdown-trigger">
+                        <button class="button is-small is-white" aria-haspopup="true" aria-controls="dropdown-menu">
+                            <span>{board.currentScene.title}</span>
+                            <span class="icon is-small">
+                                <i class="fas fa-angle-down" aria-hidden="true"></i>
+                            </span>
+                        </button>
+                    </div>
+                    <div class="dropdown-menu" id="dropdown-menu" role="menu">
+                        <div class="dropdown-content">
+                            {#each board.scenes as scene}
+                            <a href="#" class="dropdown-item">
+                                {scene.title}
+                            </a>
+                            {/each}
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="level-right is-flex is-justify-content-right is-align-content-center">
@@ -248,15 +274,7 @@
                         <span class="icon is-small">
                             <i class="fa-light fa-square-kanban"></i>
                         </span>
-                        <span>Configure Board</span>
-                    </button>
-                </div>
-                <div class="control">
-                    <button class="button is-small is-rounded" on:click={configBoard}>
-                        <span class="icon is-small">
-                            <i class="fa-light fa-clapperboard"></i>
-                        </span>
-                        <span>Configure Scene</span>
+                        <span>Configure</span>
                     </button>
                 </div>
                 <div class="control dropdown is-hoverable is-right">
@@ -327,17 +345,84 @@
 <sl-drawer placement="top" class="drawer-placement-top" bind:this={drawer}>
     <div slot="label"><h1 class="title"><i class="fa-light fa-square-kanban"></i> Configure Board</h1></div>
     
-    <div class="field is-grouped">
-        <div class="control">
-            <button class="button is-link is-light" on:click={deleteBoard}>
-                <span class="icon is-small"><input class="checkbox" type="checkbox" bind:checked={confirmDelete} on:click={(e)=>e.stopPropagation()}></span>
-                <span>Delete Board</span>
-            </button>
-        </div>
-    </div>
+    <sl-tab-group>
+        <sl-tab slot="nav" panel="general">General</sl-tab>
+        <sl-tab slot="nav" panel="columns">Columns</sl-tab>
+        <sl-tab slot="nav" panel="scenes">Scenes</sl-tab>
+        
+        <sl-tab-panel name="general">
+            <div class="field is-grouped">
+                <div class="control">
+                    <button class="button is-link is-light" on:click={deleteBoard}>
+                        <span class="icon is-small"><input class="checkbox" type="checkbox" bind:checked={confirmDelete} on:click={(e)=>e.stopPropagation()}></span>
+                        <span>Delete Board</span>
+                    </button>
+                </div>
+            </div>
+        </sl-tab-panel>
+        <sl-tab-panel name="columns">
+            <table class="table">
+                <thead><tr>
+                    <th>Column</th>
+                    <th>Vote</th>
+                    <th>Delete</th>
+                </tr></thead>
+                <tbody>
+                    {#each board.columns as column}
+                    <tr>
+                        <td>{column.title}</td>
+                        <td><input type="checkbox" class="checkbox"></td>
+                        <td>
+                            <button class="button is-small is-danger is-light" on:click={()=>delColumn(column.id)}>
+                                <span>Delete</span>
+                                <span class="icon is-small">
+                                    <i class="fas fa-times"></i>
+                                </span>
+                            </button>
+                        </td>
+                    </tr>
+                    {/each}
+                    <tr>
+                        <td><input type="text" class="input" bind:value={newColumnName} on:keypress={(e)=>{if(e.key == 'Enter')addColumn()}}></td>
+                        <td><input type="checkbox" class="checkbox" bind:checked={newColumnVote}></td>
+                        <td>
+                            <button class="button is-small is-success is-light" on:click={addColumn}>
+                                <span class="icon is-small">
+                                    <i class="fas fa-plus"></i>
+                                </span>
+                                <span>Add</span>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>            
+        </sl-tab-panel>
+        <sl-tab-panel name="scenes">
+            <table class="table">
+                <thead><tr>
+                    <th>Scene</th>
+                    <th>Add</th>
+                    <th>Reveal</th>
+                    <th>Rearrange</th>
+                    <th>Vote</th>
+                    <th>Comment</th>
+                </tr></thead>
+                <tbody>
+                    {#each board.scenes as scene}
+                    <tr>
+                        <td>{scene.title}</td>
+                        <td><input type="checkbox" class="checkbox"></td>
+                        <td><input type="checkbox" class="checkbox"></td>
+                        <td><input type="checkbox" class="checkbox"></td>
+                        <td><input type="checkbox" class="checkbox"></td>
+                        <td><input type="checkbox" class="checkbox"></td>
+                    </tr>
+                    {/each}
+                </tbody>
+            </table>
+        </sl-tab-panel>
+    </sl-tab-group>
     
-    <!-- svelte-ignore a11y-click-events-have-key-events -->
-    <sl-button slot="footer" variant="primary" on:click={()=>drawer.hide()}>Close</sl-button>
 </sl-drawer>
 
 
@@ -347,39 +432,10 @@
     <div class="timerbox" class:expanded={timerexpanded} >
         {#if timerexpanded}
         <div class="timerdetail" in:fade="{{delay: 1000}}" out:fade>
-            <div class="field has-addons">
-                <p class="control">
-                    <button class="button is-small is-rounded">
-                        <span class="icon is-small">
-                            <i class="fa-light fa-minus"></i>5
-                        </span>
-                    </button>
-                </p>
-                <p class="control">
-                    <button class="button is-small is-rounded">
-                        <span class="icon is-small">
-                            <i class="fa-light fa-minus"></i>1
-                        </span>
-                    </button>
-                </p>
-                <p class="control">
-                    <button class="button is-small is-rounded">
-                        <span class="icon is-small">
-                            <i class="fa-light fa-plus"></i>1
-                        </span>
-                    </button>
-                </p>
-                <p class="control">
-                    <button class="button is-small is-rounded">
-                        <span class="icon is-small">
-                            <i class="fa-light fa-plus"></i>5
-                        </span>
-                    </button>
-                </p>
-            </div>
+            Mysterious flyout!
         </div>
         {/if}
-        <!--Doughnut class="timerdial" data={timerdata} options={{animation: {animateRotate: false }}}  on:click={doTimerClick} /-->
+        
         <TimerDial bind:timeLimit bind:start={startTimer} bind:stop={stopTimer}/>
     </div>
 </div>
