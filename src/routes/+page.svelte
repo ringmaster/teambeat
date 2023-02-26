@@ -8,6 +8,30 @@
         expand: "users,facilitators"
     });
     
+    let newmodal = false;
+    let newBoardName = '';
+    
+    function createBoard(){
+        const data = {
+            "name": "test",
+            "users": [
+            $pbStore.authStore.model.id
+            ],
+            "facilitators": [
+            $pbStore.authStore.model.id
+            ]
+        };
+        $pbStore.collection('boards').create(data).then((newboard)=>{
+            const scenedata = {
+                "board": newboard.id,
+                "title": "default"
+            };
+            $pbStore.collection('scenes').create(scenedata).then((scene)=>{
+                location.href = "/board/" + newboard.id;
+            })
+        })
+    }
+    
 </script>
 
 <svelte:head>
@@ -60,6 +84,35 @@
             {/await}
         </tbody>
     </table>
+    
+    <div class="level">
+        <div class="level-right">
+            <buttom class="button" on:click={()=>newmodal=true}>New Board</buttom>
+        </div>
+    </div>
+    
+    <div class="modal" class:is-active={newmodal}>
+        <div class="modal-background"></div>
+        <div class="modal-card">
+            <header class="modal-card-head">
+                <p class="modal-card-title">Create New Board</p>
+            </header>
+            <section class="modal-card-body">
+                <form>
+                    <div class="field">
+                        <label class="label" for="boardname">Board Name</label>
+                        <div class="control">
+                            <input id="boardname" class="input" type="text" placeholder="Board Name" bind:value={newBoardName}>
+                        </div>
+                    </div>
+                </form>
+            </section>
+            <footer class="modal-card-foot">
+                <button class="button is-success" on:click={createBoard}>Create Board</button>
+                <button class="button" on:click={()=>newmodal=false}>Cancel</button>
+            </footer>
+        </div>
+    </div>
     {/if}
 </div>
 

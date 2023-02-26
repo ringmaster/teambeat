@@ -58,23 +58,27 @@
     }
     
     function makeColumns(columnData) {
-        columnData.map((item) => {
-            item.cards = [];
-            item.update = function(){
-                loadCards(item).then((cards) => {
-                    item.cards = cards;
-                    board = board;
-                })
-            }
-            item.disconnect = function(){
-                $pbStore.collection('cards').unsubscribe();
-            }
-            $pbStore.collection('cards').subscribe('*', function (e) {
+        if(columnData != undefined) {
+            columnData.map((item) => {
+                item.cards = [];
+                item.update = function(){
+                    loadCards(item).then((cards) => {
+                        item.cards = cards;
+                        board = board;
+                    })
+                }
+                item.disconnect = function(){
+                    $pbStore.collection('cards').unsubscribe();
+                }
+                $pbStore.collection('cards').subscribe('*', function (e) {
+                    item.update();
+                });
                 item.update();
-            });
-            item.update();
-            return item;
-        })
+                return item;
+            })
+        } else {
+            columnData = [];
+        }
         return columnData;
     }
     
