@@ -79,12 +79,12 @@
                     </div>
                     {:else}
                     <a href="/login" class="navbar-item">
-                    <span class="icon-text">
-                        <span class="icon">
-                            <i class="fa-light fa-right-to-bracket"></i>
+                        <span class="icon-text">
+                            <span class="icon">
+                                <i class="fa-light fa-right-to-bracket"></i>
+                            </span>
+                            <span>Log In</span>
                         </span>
-                        <span>Log In</span>
-                    </span>
                     </a>
                     {/if}
                 </div>
@@ -158,5 +158,8 @@
         margin-bottom: 0;
         margin-left: 2.5rem;
         position: relative;
+    }
+    .navbar {
+        margin-bottom: 5px;
     }
 </style>

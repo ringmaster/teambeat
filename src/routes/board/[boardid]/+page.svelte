@@ -2,6 +2,20 @@
     import { pbStore } from "svelte-pocketbase";
     import Card from "./Card.svelte";
     import {onDestroy} from "svelte"
+    import { fly, fade } from 'svelte/transition';
+    import { Doughnut } from 'svelte-chartjs';
+    import Color from "colorjs.io";
+    
+    import {
+        Chart as ChartJS,
+        Title,
+        Tooltip,
+        Legend,
+        ArcElement,
+        CategoryScale,
+    } from 'chart.js';
+    
+    ChartJS.register(Title, ArcElement, CategoryScale);
     
     export let data;
     
@@ -10,7 +24,21 @@
     let status = '';
     let dropped_in = false;
     let drawer;
-
+    let timer = false;
+    let timerexpanded = false;
+    let timeleft = 0;
+    let timerlength = 0;
+    let timerint;
+    
+    let timerdata = {
+        datasets: [
+        {
+            data: [60, 0],
+            backgroundColor: ['green', '#ffffff']
+        },
+        ],
+    };
+    
     onDestroy(()=>{
         board.columns.forEach((column) => {
             column.disconnect();
@@ -166,6 +194,46 @@
         $pbStore.collection('cards').create(data)
     }
     
+    function doTimer() {
+        if(!timer) {
+            timeleft = 60;
+            timerlength = 60;
+            timerdata = {
+                datasets: [
+                {
+                    data: [timeleft, timerlength-timeleft],
+                    backgroundColor: ['green', '#ffffff']
+                },
+                ],
+            };
+            timerint = window.setInterval(()=>{
+                timeleft = timeleft - 1;
+                let color = new Color("red");
+                let dorange = color.range("green", {
+                    space: "lch", 
+                    outputSpace: "srgb"
+                });
+                let timercol = dorange(timeleft/timerlength);
+                timerdata = {
+                    datasets: [
+                    {
+                        data: [timeleft, timerlength-timeleft],
+                        backgroundColor: [timercol, '#ffffff']
+                    },
+                    ],
+                };
+                console.log(timerdata);
+            }, 1000)
+        } else {
+            window.clearInterval(timerint);
+        }
+        timer = !timer;
+    }
+    
+    function doTimerClick() {
+        timerexpanded = !timerexpanded
+    }
+    
 </script>
 
 <svelte:head>
@@ -213,6 +281,14 @@
                         <span>Configure Scene</span>
                     </button>
                 </div>
+                <div class="control">
+                    <button class="button is-small is-rounded" on:click={doTimer}>
+                        <span class="icon is-small">
+                            <i class="fa-light fa-timer"></i>
+                        </span>
+                        <span>Timer</span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -250,10 +326,64 @@
 
 <sl-drawer placement="top" class="drawer-placement-top" bind:this={drawer}>
     <div slot="label"><h1 class="title"><i class="fa-light fa-square-kanban"></i> Configure Board</h1></div>
-    This drawer will show 
+    
+    <label class="checkbox">
+        <input type="checkbox" bind:checked={timer}>
+        Show Timer: {timer}
+    </label>
+    
+    <label class="checkbox">
+        <input type="checkbox" bind:checked={timerexpanded}>
+        Expand Timer: {timerexpanded}
+    </label>
+    
     <!-- svelte-ignore a11y-click-events-have-key-events -->
     <sl-button slot="footer" variant="primary" on:click={()=>drawer.hide()}>Close</sl-button>
 </sl-drawer>
+
+
+{#if timer}
+<div class="timer" in:fly="{{ y: 200, duration: 500 }}" out:fly="{{ y: 200, duration: 500 }}">
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <div class="timerbox" class:expanded={timerexpanded} >
+        {#if timerexpanded}
+        <div class="timerdetail" in:fade="{{delay: 1000}}" out:fade>
+            <div class="field has-addons">
+                <p class="control">
+                  <button class="button is-small is-rounded">
+                    <span class="icon is-small">
+                        <i class="fa-light fa-minus"></i>5
+                    </span>
+                  </button>
+                </p>
+                <p class="control">
+                  <button class="button is-small is-rounded">
+                    <span class="icon is-small">
+                        <i class="fa-light fa-minus"></i>1
+                    </span>
+                  </button>
+                </p>
+                <p class="control">
+                  <button class="button is-small is-rounded">
+                    <span class="icon is-small">
+                        <i class="fa-light fa-plus"></i>1
+                    </span>
+                  </button>
+                </p>
+                <p class="control">
+                  <button class="button is-small is-rounded">
+                    <span class="icon is-small">
+                        <i class="fa-light fa-plus"></i>5
+                    </span>
+                  </button>
+                </p>
+              </div>
+        </div>
+        {/if}
+        <Doughnut class="timerdial" data={timerdata} options={{animation: {animateRotate: false }}}  on:click={doTimerClick} />
+    </div>
+</div>
+{/if}
 
 <style lang="scss">
     .container {
@@ -268,12 +398,6 @@
         padding: 20px;
         min-height: 70vh;
     }
-    .row {
-        /* 
-        background: rgb(255,255,255);
-        background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(248,248,248,1) 13%); 
-        */
-    }
     .cardcolumn {
         min-width: 30rem;
     }
@@ -282,5 +406,31 @@
     }
     :global(.novis) {
         opacity: 0.0;
+    }
+    
+    .timer {
+        position: fixed;
+        bottom: 1rem;
+        right: 1rem;
+    }
+    .timer .timerbox {
+        width: 60px;
+        height: 60px;
+        border-radius: 30px;
+        border: 1px solid gray;
+        display: flex;
+        justify-content: right;
+        align-content: center;
+        flex-wrap: nowrap;
+        background-color: #fff;
+        transition: width 200ms 400ms;
+        box-shadow: 3px 3px 3px #ccc;
+    }
+    .timer .timerbox.expanded {
+        width: 300px;
+    }
+    .timerdetail {
+        margin-left: 30px;
+        width: 210px;
     }
 </style>
