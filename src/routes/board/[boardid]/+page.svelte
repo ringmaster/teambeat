@@ -1,8 +1,7 @@
 <script>
     import { pbStore } from "svelte-pocketbase";
     import Card from "./Card.svelte";
-    import notify from "../../../utils/notify.js";
-    import Drawer from "./Drawer.svelte";
+    import {onDestroy} from "svelte"
     
     export let data;
     
@@ -11,6 +10,12 @@
     let status = '';
     let dropped_in = false;
     let drawer;
+
+    onDestroy(()=>{
+        board.columns.forEach((column) => {
+            column.disconnect();
+        })
+    })
     
     function getBoard() {
         let boardData = $pbStore.collection('boards').getOne(data.params.boardid, {expand: "users,facilitators,scenes(board),columns(board)"});
@@ -32,6 +37,9 @@
                     item.cards = cards;
                     board = board;
                 })
+            }
+            item.disconnect = function(){
+                $pbStore.collection('cards').unsubscribe();
             }
             $pbStore.collection('cards').subscribe('*', function (e) {
                 item.update();
@@ -186,25 +194,25 @@
                 </h2>
             </div>
         </div>
-        <div class="level-right">
+        <div class="level-right is-flex is-justify-content-right is-align-content-center">
             <div class="field has-addons">
                 <!-- svelte-ignore a11y-click-events-have-key-events -->
-                <p class="control">
+                <div class="control">
                     <button class="button is-small is-rounded" on:click={configBoard}>
                         <span class="icon is-small">
                             <i class="fa-light fa-square-kanban"></i>
                         </span>
                         <span>Configure Board</span>
                     </button>
-                </p>
-                <p class="control">
+                </div>
+                <div class="control">
                     <button class="button is-small is-rounded" on:click={configBoard}>
                         <span class="icon is-small">
                             <i class="fa-light fa-clapperboard"></i>
                         </span>
                         <span>Configure Scene</span>
                     </button>
-                </p>
+                </div>
             </div>
         </div>
     </div>
@@ -269,17 +277,10 @@
     .cardcolumn {
         min-width: 30rem;
     }
-    .addcard {
-        width: 100%;
-        text-align: center;
-    }
     :global(.column-over) {
         background-color: #eee;
     }
     :global(.novis) {
         opacity: 0.0;
-    }
-    .breadcrumb::part(label) {
-        font-size: var(--sl-font-size-xlarge);
     }
 </style>

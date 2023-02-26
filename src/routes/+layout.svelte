@@ -29,35 +29,53 @@
 <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0/dist/shoelace.js"></script>
 </svelte:head>
 
-<nav class="navigation">
+<nav class="navbar has-shadow is-light" aria-label="main navigation">
     <div class="container">
-        <a href="/" class="navigation-title">
-            <i class="fa-sharp fa-solid fa-wave-pulse"></i>
-            <h1 class="title">Teambeat</h1>
-        </a>
-        <ul class="navigation-list float-right">
-            <li class="navigation-item">
-                {#if loggedIn}
-                <sl-dropdown>
-                    <sl-button slot="trigger" caret><i class="fa-solid fa-user"></i> {user.name}</sl-button>
-                    <sl-menu>
-                        <sl-menu-item><a href="/account">Account</a></sl-menu-item>
-                        <sl-divider></sl-divider>
-                        <!-- svelte-ignore a11y-click-events-have-key-events -->
-                        <sl-menu-item on:click="{doLogout}">
-                            Log Out
-                            <i class="fa-solid fa-right-from-bracket"></i>
-                        </sl-menu-item>
-                    </sl-menu>
-                </sl-dropdown>
-                {:else}
-                <a href="/login" class="navigation-link">
-                    <i class="fa-solid fa-user"></i>
-                    Log In
-                </a>        
-                {/if}
-            </li>
-        </ul>
+        <div class="navbar-brand">
+            <a href="/" class="navbar-item">
+                <i class="fa-sharp fa-solid fa-wave-pulse"></i>
+                <h1 class="title">Teambeat</h1>
+            </a>
+        </div>
+        
+        <div class="navbar-menu">
+            <div class="navbar-start">
+                <a class="navbar-item" href="/">Boards</a>
+                <a class="navbar-item" href="#docs">Documentation</a>
+            </div>
+            
+            <div class="navbar-end">
+                <div class="navbar-item">
+                    {#if loggedIn}
+                    <div class="navbar-item has-dropdown is-hoverable is-right">
+                        <a class="navbar-link" href="#more">
+                            <span class="icon-text">
+                                <span class="icon">
+                                    <i class="fa-solid fa-user"></i>
+                                </span>
+                                <span>{user.name}</span>
+                            </span>
+                        </a>
+                        
+                        <div class="navbar-dropdown">
+                            <a href="/account" class="navbar-item">Account</a>
+                            <hr class="navbar-divider">
+                            <a href="/logout" class="navbar-item">
+                                <span class="icon-text">
+                                    <span class="icon">
+                                        <i class="fa-solid fa-right-from-bracket"></i>
+                                    </span>
+                                    <span>Log Out</span>
+                                </span>
+                            </a>
+                        </div>
+                    </div>
+                    {:else}
+                    <a href="/login" class="navbar-item"><i class="fa-solid fa-user"></i> Log In</a>
+                    {/if}
+                </div>
+            </div>
+        </div>
     </div>
 </nav>
 
