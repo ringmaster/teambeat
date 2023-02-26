@@ -214,6 +214,10 @@
             };
             timerint = window.setInterval(()=>{
                 timeleft = timeleft - 1;
+                if(timeleft <= 0 ) {
+                    window.clearInterval(timerint);
+                    timer = false;
+                }
                 let color = new Color("red");
                 let dorange = color.range("green", {
                     space: "lch", 
