@@ -23,6 +23,7 @@
     let confirmDelete = false;
     let newColumnName = '';
     let newColumnVote = true;
+    let currentScene = {title: "", loaded: false};
     
     onDestroy(()=>{
         board.columns.forEach((column) => {
@@ -38,17 +39,18 @@
                 name: boardData.name,
                 columns: makeColumns(boardData.expand["columns(board)"]),
                 scenes: boardData.expand["scenes(board)"],
-                currentScene: null,
                 timerstart: boardData.timerstart,
                 timerlength: boardData.timerlength,
             }
             board.scenes.forEach((scene)=>{
                 if(scene.current) {
-                    board.currentScene = scene
+                    currentScene = scene
+                    currentScene.loaded = true;
                 }
             })
-            if(board.currentScene == null) {
-                board.currentScene = board.scenes[0];
+            if(!currentScene.loaded) {
+                currentScene = board.scenes[0];
+                currentScene.loaded = true;
             }
             checkTimer();
             
@@ -289,7 +291,7 @@
                 <div class="dropdown is-hoverable">
                     <div class="dropdown-trigger">
                         <button class="button is-small is-white" aria-haspopup="true" aria-controls="dropdown-menu">
-                            <span>{board.currentScene.title}</span>
+                            <span>{currentScene.title}</span>
                             <span class="icon is-small">
                                 <i class="fas fa-angle-down" aria-hidden="true"></i>
                             </span>
@@ -372,7 +374,7 @@
                 </div>
                 
                 {#each column.cards as card(card.id)}
-                <Card bind:card={card} on:dragstart={handleDragStart} on:dragend={handleDragEnd} />
+                <Card bind:card={card} bind:scene={currentScene} on:dragstart={handleDragStart} on:dragend={handleDragEnd} />
                 {/each}
                 
                 

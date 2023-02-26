@@ -10,10 +10,13 @@
     const dispatch = createEventDispatcher();
     
     export let card;
-    export let skeleton = false;
+    export let scene;
     
+    $: cardIsCurrentUsers = card.expand.user.id == $pbStore.authStore.model.id;
+    $: skeleton = !cardIsCurrentUsers;
     $: skeletontext = '<span>' + card.description.replace(/\S/g, 'X').replace(/\s+/g, '</span> <span>').replace(/<span><\/span>/g, '') + '</span>';
     
+
     let votes = [
     {"title": "Vote", "count": 0}
     ];
@@ -97,7 +100,7 @@
                 <i class="fa-solid fa-user"></i>
             </sl-tooltip>
             <!-- svelte-ignore a11y-click-events-have-key-events -->
-            {#if card.expand.user.id == $pbStore.authStore.model.id}
+            {#if cardIsCurrentUsers}
             <sl-tooltip content="Delete Card" on:click={handleDelete}>
                 <i class="fa-solid fa-trash"></i>
             </sl-tooltip>
