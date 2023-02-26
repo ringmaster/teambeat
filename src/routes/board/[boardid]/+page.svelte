@@ -68,6 +68,8 @@
                 timer = true;
                 tick().then(() => startTimer());
             }
+        } else {
+            timer = false;
         }
     }
     
@@ -215,16 +217,6 @@
             "timerlength": newlength
         };
         $pbStore.collection("boards").update(data.params.boardid, boardData)
-        
-        /*
-        if(timer) {
-            timeLimit += sec;
-        } else {
-            timeLimit = sec;
-            tick().then(() => startTimer());
-            timer = true;
-        }
-        */
     }
     
     function endTimer() {
