@@ -10,10 +10,15 @@
     
     let newmodal = false;
     let newBoardName = '';
+    let badBoard = '';
     
     function createBoard(){
+        if(newBoardName == '') {
+            badBoard = "Please supply a name for the new board.";
+            return;
+        }
         const data = {
-            "name": "test",
+            "name": newBoardName,
             "users": [
             $pbStore.authStore.model.id
             ],
@@ -101,9 +106,17 @@
                 <form>
                     <div class="field">
                         <label class="label" for="boardname">Board Name</label>
-                        <div class="control">
-                            <input id="boardname" class="input" type="text" placeholder="Board Name" bind:value={newBoardName}>
+                        <div class="control" class:has-icons-right={badBoard!=''}>
+                            <input id="boardname" class:is-danger={badBoard!=''} class="input" type="text" placeholder="Board Name" bind:value={newBoardName}>
+                            {#if badBoard != ''}
+                            <span class="icon is-small is-right">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </span>
+                            {/if}
                         </div>
+                        {#if badBoard != ''}
+                        <p class="help is-danger">{badBoard}</p>
+                        {/if}
                     </div>
                 </form>
             </section>

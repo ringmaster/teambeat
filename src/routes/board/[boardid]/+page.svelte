@@ -5,6 +5,7 @@
     import { fly, fade } from 'svelte/transition';
     import { Doughnut } from 'svelte-chartjs';
     import Color from "colorjs.io";
+    import notify from "../../../utils/notify";
     
     import {
         Chart as ChartJS,
@@ -29,6 +30,7 @@
     let timeleft = 0;
     let timerlength = 0;
     let timerint;
+    let confirmDelete = false;
     
     let timerdata = {
         datasets: [
@@ -238,6 +240,16 @@
         timerexpanded = !timerexpanded
     }
     
+    function deleteBoard(){
+        if(confirmDelete) {
+            $pbStore.collection('boards').delete(data.params.boardid).then(()=>{
+                location.href="/";
+            })
+        } else {
+            notify("Check the box to confirm the deletion of this board.", "warning", "exclamation-triangle")
+        }
+    }
+    
 </script>
 
 <svelte:head>
@@ -331,15 +343,14 @@
 <sl-drawer placement="top" class="drawer-placement-top" bind:this={drawer}>
     <div slot="label"><h1 class="title"><i class="fa-light fa-square-kanban"></i> Configure Board</h1></div>
     
-    <label class="checkbox">
-        <input type="checkbox" bind:checked={timer}>
-        Show Timer: {timer}
-    </label>
-    
-    <label class="checkbox">
-        <input type="checkbox" bind:checked={timerexpanded}>
-        Expand Timer: {timerexpanded}
-    </label>
+    <div class="field is-grouped">
+        <div class="control">
+            <button class="button is-link is-light" on:click={deleteBoard}>
+                <span class="icon is-small"><input class="checkbox" type="checkbox" bind:checked={confirmDelete} on:click={(e)=>e.stopPropagation()}></span>
+                <span>Delete Board</span>
+            </button>
+        </div>
+    </div>
     
     <!-- svelte-ignore a11y-click-events-have-key-events -->
     <sl-button slot="footer" variant="primary" on:click={()=>drawer.hide()}>Close</sl-button>
@@ -354,34 +365,34 @@
         <div class="timerdetail" in:fade="{{delay: 1000}}" out:fade>
             <div class="field has-addons">
                 <p class="control">
-                  <button class="button is-small is-rounded">
-                    <span class="icon is-small">
-                        <i class="fa-light fa-minus"></i>5
-                    </span>
-                  </button>
+                    <button class="button is-small is-rounded">
+                        <span class="icon is-small">
+                            <i class="fa-light fa-minus"></i>5
+                        </span>
+                    </button>
                 </p>
                 <p class="control">
-                  <button class="button is-small is-rounded">
-                    <span class="icon is-small">
-                        <i class="fa-light fa-minus"></i>1
-                    </span>
-                  </button>
+                    <button class="button is-small is-rounded">
+                        <span class="icon is-small">
+                            <i class="fa-light fa-minus"></i>1
+                        </span>
+                    </button>
                 </p>
                 <p class="control">
-                  <button class="button is-small is-rounded">
-                    <span class="icon is-small">
-                        <i class="fa-light fa-plus"></i>1
-                    </span>
-                  </button>
+                    <button class="button is-small is-rounded">
+                        <span class="icon is-small">
+                            <i class="fa-light fa-plus"></i>1
+                        </span>
+                    </button>
                 </p>
                 <p class="control">
-                  <button class="button is-small is-rounded">
-                    <span class="icon is-small">
-                        <i class="fa-light fa-plus"></i>5
-                    </span>
-                  </button>
+                    <button class="button is-small is-rounded">
+                        <span class="icon is-small">
+                            <i class="fa-light fa-plus"></i>5
+                        </span>
+                    </button>
                 </p>
-              </div>
+            </div>
         </div>
         {/if}
         <Doughnut class="timerdial" data={timerdata} options={{animation: {animateRotate: false }}}  on:click={doTimerClick} />
