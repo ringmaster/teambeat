@@ -17,8 +17,8 @@ const config = {
 			pages: 'build',
 			assets: 'build',
 			fallback: "200.html",
-			precompress: false,
-			strict: true,
+			precompress: true,
+			strict: false,
 			trailingSlash: 'always'
 		}),
 		prerender: {entries: ['*', '/board/[boardid]']}

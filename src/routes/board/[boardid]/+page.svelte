@@ -17,6 +17,7 @@
     let timer = false;
     let timerexpanded = false;
     let timeLimit = 0;
+    let timePassed = 0;
     let startTimer;
     let stopTimer;
     let confirmDelete = false;
@@ -32,12 +33,14 @@
     function getBoard() {
         let boardData = $pbStore.collection('boards').getOne(data.params.boardid, {expand: "users,facilitators,scenes(board),columns(board)"});
         
-        boardData.then((data) => {
+        boardData.then((boardData) => {
             board = {
-                name: data.name,
-                columns: makeColumns(data.expand["columns(board)"]),
-                scenes: data.expand["scenes(board)"],
-                currentScene: null
+                name: boardData.name,
+                columns: makeColumns(boardData.expand["columns(board)"]),
+                scenes: boardData.expand["scenes(board)"],
+                currentScene: null,
+                timerstart: boardData.timerstart,
+                timerlength: boardData.timerlength,
             }
             board.scenes.forEach((scene)=>{
                 if(scene.current) {
@@ -47,7 +50,25 @@
             if(board.currentScene == null) {
                 board.currentScene = board.scenes[0];
             }
+            checkTimer();
+            
+            $pbStore.collection('boards').subscribe(data.params.boardid, (b)=>{
+                board.timerstart = b.record.timerstart;
+                board.timerlength = b.record.timerlength;
+                checkTimer();
+            })
         })
+    }
+    
+    function checkTimer() {
+        if(board.timerlength != 0) {
+            if((board.timerstart + board.timerlength * 1000) > Date.now()) {
+                timeLimit = board.timerlength;
+                timePassed = (Date.now() - board.timerstart) / 1000;
+                timer = true;
+                tick().then(() => startTimer());
+            }
+        }
     }
     
     function makeColumns(columnData) {
@@ -177,6 +198,25 @@
     }
     
     function extendTimer(sec) {
+        let newstart = 0, newlength = 0;
+        // If the timer has expired
+        if(board.timerstart + board.timerlength * 1000 < Date.now()) {
+            newstart = Date.now();
+            newlength = sec;
+        } else {
+            newstart = board.timerstart;
+            newlength = board.timerlength + sec;
+        }
+        let boardData = {
+            "name": board.name,
+            "users": board.users,
+            "facilitators": board.facilitators,
+            "timerstart": newstart,
+            "timerlength": newlength
+        };
+        $pbStore.collection("boards").update(data.params.boardid, boardData)
+        
+        /*
         if(timer) {
             timeLimit += sec;
         } else {
@@ -184,10 +224,19 @@
             tick().then(() => startTimer());
             timer = true;
         }
+        */
     }
     
     function endTimer() {
-        stopTimer();
+        let boardData = {
+            "name": board.name,
+            "users": board.users,
+            "facilitators": board.facilitators,
+            "timerstart": 0,
+            "timerlength": 0
+        };
+        $pbStore.collection("boards").update(data.params.boardid, boardData)
+        if(typeof stopTimer == 'function') stopTimer();
         timer = false;
     }
     
@@ -217,7 +266,7 @@
             newColumnName = '';
         })
     }
-
+    
     function delColumn(id) {
         $pbStore.collection('columns').delete(id).then(()=>{
             getBoard();
@@ -264,6 +313,8 @@
                         </div>
                     </div>
                 </div>
+            </div>
+            <div class="level-item">
             </div>
         </div>
         <div class="level-right is-flex is-justify-content-right is-align-content-center">
@@ -436,7 +487,7 @@
         </div>
         {/if}
         
-        <TimerDial bind:timeLimit bind:start={startTimer} bind:stop={stopTimer}/>
+        <TimerDial bind:timeLimit bind:timePassed bind:start={startTimer} bind:stop={stopTimer}/>
     </div>
 </div>
 {/if}

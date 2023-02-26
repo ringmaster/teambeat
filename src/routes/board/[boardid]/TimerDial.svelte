@@ -38,7 +38,6 @@
     
     export function start() {
         clearInterval(timerInterval);
-        timePassed = 0;
         timerInterval = setInterval(() => {
             timePassed = timePassed += 1;
             
@@ -51,7 +50,7 @@
         }, 1000);
     }
 
-    $: timeLeft = Math.max(0, timeLimit - timePassed);
+    $: timeLeft = Math.floor(Math.max(0, timeLimit - timePassed));
     
     function formatTime(time) {
         const minutes = Math.floor(time / 60);
