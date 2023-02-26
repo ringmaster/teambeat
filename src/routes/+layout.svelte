@@ -58,7 +58,14 @@
                         </a>
                         
                         <div class="navbar-dropdown">
-                            <a href="/account" class="navbar-item">Account</a>
+                            <a href="/account" class="navbar-item">
+                                <span class="icon-text">
+                                    <span class="icon">
+                                        <i class="fa-light fa-file-user"></i>
+                                    </span>
+                                    <span>Account</span>
+                                </span>
+                            </a>
                             <hr class="navbar-divider">
                             <a href="/logout" class="navbar-item">
                                 <span class="icon-text">
@@ -71,7 +78,14 @@
                         </div>
                     </div>
                     {:else}
-                    <a href="/login" class="navbar-item"><i class="fa-solid fa-user"></i> Log In</a>
+                    <a href="/login" class="navbar-item">
+                    <span class="icon-text">
+                        <span class="icon">
+                            <i class="fa-light fa-right-to-bracket"></i>
+                        </span>
+                        <span>Log In</span>
+                    </span>
+                    </a>
                     {/if}
                 </div>
             </div>
