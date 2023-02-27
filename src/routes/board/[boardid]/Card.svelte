@@ -13,7 +13,7 @@
     export let scene;
     
     $: cardIsCurrentUsers = card.expand.user.id == $pbStore.authStore.model.id;
-    $: skeleton = !cardIsCurrentUsers;
+    $: skeleton = !cardIsCurrentUsers && !scene.doReveal;
     $: skeletontext = '<span>' + card.description.replace(/\S/g, 'X').replace(/\s+/g, '</span> <span>').replace(/<span><\/span>/g, '') + '</span>';
     
 
@@ -83,7 +83,7 @@
 </script>
 
 
-<sl-card class="card" id={card.id} draggable="{!editing}" on:dragstart={handleDragStart} on:dragend={handleDragEnd} >
+<sl-card class="card" id={card.id} draggable="{scene.doMove}" on:dragstart={handleDragStart} on:dragend={handleDragEnd} >
     <div class="cardcontent">
         
         {#if skeleton}

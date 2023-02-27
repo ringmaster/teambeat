@@ -21,6 +21,7 @@
     let startTimer;
     let stopTimer;
     let confirmDelete = false;
+    let newSceneName = '';
     let newColumnName = '';
     let newColumnVote = true;
     let currentScene = {title: "", loaded: false};
@@ -52,6 +53,7 @@
                 currentScene = board.scenes[0];
                 currentScene.loaded = true;
             }
+            $pbStore.collection('scenes').subscribe(currentScene.id, sceneSubUpdate)
             checkTimer();
             
             $pbStore.collection('boards').subscribe(data.params.boardid, (b)=>{
@@ -60,6 +62,17 @@
                 checkTimer();
             })
         })
+    }
+    
+    let dosTimer;
+    function updateSceneDos(e) {
+        clearTimeout(dosTimer);
+        dosTimer = setTimeout(() => {
+            board.scenes.forEach((scene)=>{
+                console.log(scene);
+                $pbStore.collection('scenes').update(scene.id, scene);
+            });
+        }, 750);
     }
     
     function checkTimer() {
@@ -259,6 +272,43 @@
             getBoard();
             newColumnName = '';
         })
+    }    
+    
+    function addScene() {
+        const maxseq = board.scenes.reduce((prev, cur)=>{return Math.max(prev,cur.seq)}, 0) + 1;
+        const sceneData = {
+            "title": newSceneName,
+            "seq": maxseq,
+            "board": data.params.boardid
+        }
+        $pbStore.collection('scenes').create(sceneData).then(()=>{
+            getBoard();
+            newSceneName = '';
+        })
+    }
+    
+    function setScene(scene) {
+        $pbStore.collection('scenes').unsubscribe(currentScene.id)
+
+        currentScene.current = false;
+        $pbStore.collection('scenes').update(currentScene.id, currentScene);
+        currentScene = scene;
+        currentScene.current = true;
+        $pbStore.collection('scenes').update(currentScene.id, currentScene);
+
+        $pbStore.collection('scenes').subscribe(currentScene.id, sceneSubUpdate)
+    }
+    
+    function sceneSubUpdate(s) {
+        currentScene = {...currentScene, ...s.record};
+        $pbStore.collection('scenes').getFullList(200, {
+            filter: `board="${currentScene.board}"`,
+            '$autoCancel': false
+        }).then((scenes)=>{
+            console.log("ALL SCENE UPDATE", scenes)
+            board.scenes = scenes;
+        })
+        console.log("SCENE UPDATE", currentScene, s)
     }
     
     function delColumn(id) {
@@ -300,7 +350,7 @@
                     <div class="dropdown-menu" id="dropdown-menu" role="menu">
                         <div class="dropdown-content">
                             {#each board.scenes as scene}
-                            <a href="#" class="dropdown-item">
+                            <a href="#" class="dropdown-item" on:click={()=>setScene(scene)}>
                                 {scene.title}
                             </a>
                             {/each}
@@ -363,6 +413,7 @@
             
             <div class="column cardcolumn content" on:dragenter={handleDragEnter} on:dragleave={handleDragLeave} on:dragover={handleDragOver} on:drop={handleDragDrop} id="{column.id}">
                 <h2 class="subtitle">{column.title}</h2>
+                {#if currentScene.doAdd}
                 <div class="field has-addons">
                     <!-- svelte-ignore a11y-click-events-have-key-events -->
                     <button class="button is-small is-rounded" on:click={()=>addCard(column)}>
@@ -372,6 +423,7 @@
                         <span>Add Card</span>
                     </button>
                 </div>
+                {/if}
                 
                 {#each column.cards as card(card.id)}
                 <Card bind:card={card} bind:scene={currentScene} on:dragstart={handleDragStart} on:dragend={handleDragEnd} />
@@ -406,7 +458,7 @@
             </div>
         </sl-tab-panel>
         <sl-tab-panel name="columns">
-            <table class="table">
+            <table class="table does">
                 <thead><tr>
                     <th>Column</th>
                     <th>Vote</th>
@@ -443,26 +495,43 @@
             </table>            
         </sl-tab-panel>
         <sl-tab-panel name="scenes">
-            <table class="table">
+            <table class="table does">
                 <thead><tr>
                     <th>Scene</th>
                     <th>Add</th>
+                    <th>Edit</th>
                     <th>Reveal</th>
-                    <th>Rearrange</th>
+                    <th>Move</th>
+                    <th>Show Votes</th>
                     <th>Vote</th>
+                    <th>Show Comments</th>
                     <th>Comment</th>
                 </tr></thead>
                 <tbody>
                     {#each board.scenes as scene}
                     <tr>
                         <td>{scene.title}</td>
-                        <td><input type="checkbox" class="checkbox"></td>
-                        <td><input type="checkbox" class="checkbox"></td>
-                        <td><input type="checkbox" class="checkbox"></td>
-                        <td><input type="checkbox" class="checkbox"></td>
-                        <td><input type="checkbox" class="checkbox"></td>
+                        <td><input type="checkbox" class="checkbox" on:click={updateSceneDos} bind:checked={scene.doAdd}></td>
+                        <td><input type="checkbox" class="checkbox" on:click={updateSceneDos} bind:checked={scene.doEdit}></td>
+                        <td><input type="checkbox" class="checkbox" on:click={updateSceneDos} bind:checked={scene.doReveal}></td>
+                        <td><input type="checkbox" class="checkbox" on:click={updateSceneDos} bind:checked={scene.doMove}></td>
+                        <td><input type="checkbox" class="checkbox" on:click={updateSceneDos} bind:checked={scene.doShowVotes}></td>
+                        <td><input type="checkbox" class="checkbox" on:click={updateSceneDos} bind:checked={scene.doVote}></td>
+                        <td><input type="checkbox" class="checkbox" on:click={updateSceneDos} bind:checked={scene.doShowComments}></td>
+                        <td><input type="checkbox" class="checkbox" on:click={updateSceneDos} bind:checked={scene.doComment}></td>
                     </tr>
                     {/each}
+                    <tr>
+                        <td><input type="text" class="input" bind:value={newSceneName} on:keypress={(e)=>{if(e.key == 'Enter')addScene()}}></td>
+                        <td colspan="5">
+                            <button class="button is-small is-success is-light" on:click={addScene}>
+                                <span class="icon is-small">
+                                    <i class="fas fa-plus"></i>
+                                </span>
+                                <span>Add</span>
+                            </button>
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </sl-tab-panel>
@@ -533,5 +602,11 @@
     .timerdetail {
         margin-left: 30px;
         width: 210px;
+    }
+    table.does th {
+        text-orientation: sideways;
+        writing-mode: vertical-rl;
+        padding: 0.25rem !important;
+
     }
 </style>

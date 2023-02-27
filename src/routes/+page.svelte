@@ -31,6 +31,7 @@
                 "board": newboard.id,
                 "title": "default",
                 "current": true,
+                "seq": 1
             };
             $pbStore.collection('scenes').create(scenedata).then((scene)=>{
                 location.href = "/board/" + newboard.id;

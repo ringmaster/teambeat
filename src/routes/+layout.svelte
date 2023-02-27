@@ -2,6 +2,8 @@
     import { pbStore } from 'svelte-pocketbase';
     import { env } from '$env/dynamic/public';
     import { onMount } from 'svelte';
+    import '@milkdown/theme-nord/style.css';
+
     //import "./milligram-mod.sass";
     
     pbStore.set(env.PUBLIC_POCKETBASE_URL);
@@ -24,7 +26,7 @@
 </script>
 
 <svelte:head>
-<script src="https://kit.fontawesome.com/7e2abaa70e.js" crossorigin="anonymous"></script>
+<script src="https://kit.fontawesome.com/7e2abaa70e.js" crossorigin="anonymous" data-observe-mutations></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0/dist/themes/light.css" />
 <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0/dist/shoelace.js"></script>
 </svelte:head>
