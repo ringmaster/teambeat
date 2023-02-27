@@ -16,7 +16,7 @@
     $: skeleton = !cardIsCurrentUsers && !scene.doReveal;
     $: skeletontext = '<span>' + card.description.replace(/\S/g, 'X').replace(/\s+/g, '</span> <span>').replace(/<span><\/span>/g, '') + '</span>';
     
-
+    
     let votes = [
     {"title": "Vote", "count": 0}
     ];
@@ -107,7 +107,7 @@
             {/if}
         </div>
     </div>
-    {#if card.expand["comments(card)"]}
+    {#if card.expand["comments(card)"] && scene.doShowComments}
     <div>
         {#each card.expand["comments(card)"] as comment}
         <sl-divider></sl-divider>
@@ -116,72 +116,78 @@
             <i class="{getEmoji(comment.emoji)}"></i>
             {:else}
             <i class="fa-regular fa-message-lines"></i>
-            {/if} {comment.body}</div>
+            {/if} {comment.body}
+        </div>
+        {/each}
+    </div>
+    {/if}
+    {#if scene.doShowVotes || scene.doShowComments}
+    <div slot="footer">
+        <div>
+            {#if scene.doShowVotes}
+            {#each votes as vote}
+            <sl-tooltip content="{vote.title}">
+                {vote.count} <i class="fa-regular fa-ballot-check"></i>
+            </sl-tooltip>                
             {/each}
+            {/if}
         </div>
-        {/if}
-        <div slot="footer">
-            <div>
-                {#each votes as vote}
-                <sl-tooltip content="{vote.title}">
-                    {vote.count} <i class="fa-regular fa-ballot-check"></i>
-                </sl-tooltip>                
-                {/each}
-            </div>
-            <div>
-                
-                <sl-button-group label="Comment Group">
-                    <sl-button ><i class="fa-regular fa-message-medical"></i></sl-button>
-                    <sl-dropdown placement="bottom-end">
-                        <sl-button slot="trigger" caret>
-                            <sl-visually-hidden>More comment options</sl-visually-hidden>
-                        </sl-button>
-                        <sl-menu>
-                            <sl-menu-item><i class="fa-regular fa-face-smile"></i></sl-menu-item>
-                            <sl-menu-item><i class="fa-regular fa-face-frown"></i></sl-menu-item>
-                        </sl-menu>
-                    </sl-dropdown>
-                </sl-button-group>
-            </div>
+        <div>
+            {#if scene.doShowComments}
+            <sl-button-group label="Comment Group">
+                <sl-button ><i class="fa-regular fa-message-medical"></i></sl-button>
+                <sl-dropdown placement="bottom-end">
+                    <sl-button slot="trigger" caret>
+                        <sl-visually-hidden>More comment options</sl-visually-hidden>
+                    </sl-button>
+                    <sl-menu>
+                        <sl-menu-item><i class="fa-regular fa-face-smile"></i></sl-menu-item>
+                        <sl-menu-item><i class="fa-regular fa-face-frown"></i></sl-menu-item>
+                    </sl-menu>
+                </sl-dropdown>
+            </sl-button-group>
+            {/if}
         </div>
-    </sl-card>
-    
-    <style>
-        .card {
-            border-width: 3px 1px 1px;
-            box-shadow: var(--sl-shadow-large);
-            margin-bottom: 1rem;
-            width: 100%;
-        }
-        .card [slot='footer'] {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .cardcontent {
-            display: flex;
-        }
-        .cardcontentdescription {
-            flex-grow: 1;
-        }
-        .cardcontentedit {
-            flex-grow: 0;
-            max-width: 16px;
-            padding-left: 1rem;
-        }
-        .comment {
-            font-size: smaller;
-            padding-left: 2rem;
-        }
-        :global(.skeleton-paragraphs span) {
-            margin: 0.2rem 0.25rem;
-            background-color: #efefef;
-            color: #efefef;
-            display: inline-block;
-            border-radius: 1rem;
-            min-width: 2rem;
-        }
-        .cardeditor:hover {
-            background-color: #efefef;
-        }
-    </style>
+    </div>
+    {/if}
+</sl-card>
+
+<style>
+    .card {
+        border-width: 3px 1px 1px;
+        box-shadow: var(--sl-shadow-large);
+        margin-bottom: 1rem;
+        width: 100%;
+    }
+    .card [slot='footer'] {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .cardcontent {
+        display: flex;
+    }
+    .cardcontentdescription {
+        flex-grow: 1;
+    }
+    .cardcontentedit {
+        flex-grow: 0;
+        max-width: 16px;
+        padding-left: 1rem;
+    }
+    .comment {
+        font-size: smaller;
+        padding-left: 2rem;
+    }
+    :global(.skeleton-paragraphs span) {
+        margin: 0.2rem 0.25rem;
+        background-color: #efefef;
+        color: #efefef;
+        display: inline-block;
+        border-radius: 1rem;
+        min-width: 2rem;
+    }
+    .cardeditor:hover {
+        background-color: #efefef;
+    }
+</style>
