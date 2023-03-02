@@ -20,7 +20,7 @@
     function doLogout() {
         $pbStore.authStore.clear()
         document.cookie = $pbStore.authStore.exportToCookie({ httpOnly: false, expires: 0 })
-        document.location = "/"
+        goto("/");
     }
     
 </script>
