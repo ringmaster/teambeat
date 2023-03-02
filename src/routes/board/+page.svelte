@@ -3,7 +3,7 @@
     import Card from "./Card.svelte";
     import {onDestroy, tick} from "svelte"
     import { fly, fade } from 'svelte/transition';
-    import notify from "../../../utils/notify";
+    import notify from "../../utils/notify";
     
     import TimerDial from "./TimerDial.svelte";
     
@@ -33,7 +33,7 @@
     })
     
     function getBoard() {
-        let boardData = $pbStore.collection('boards').getOne(data.params.boardid, {expand: "users,facilitators,scenes(board),columns(board)"});
+        let boardData = $pbStore.collection('boards').getOne(data.boardid, {expand: "users,facilitators,scenes(board),columns(board)"});
         
         boardData.then((boardData) => {
             board = {
@@ -56,7 +56,7 @@
             $pbStore.collection('scenes').subscribe(currentScene.id, sceneSubUpdate)
             checkTimer();
             
-            $pbStore.collection('boards').subscribe(data.params.boardid, (b)=>{
+            $pbStore.collection('boards').subscribe(data.boardid, (b)=>{
                 board.timerstart = b.record.timerstart;
                 board.timerlength = b.record.timerlength;
                 checkTimer();
@@ -231,7 +231,7 @@
             "timerstart": newstart,
             "timerlength": newlength
         };
-        $pbStore.collection("boards").update(data.params.boardid, boardData)
+        $pbStore.collection("boards").update(data.boardid, boardData)
     }
     
     function endTimer() {
@@ -242,7 +242,7 @@
             "timerstart": 0,
             "timerlength": 0
         };
-        $pbStore.collection("boards").update(data.params.boardid, boardData)
+        $pbStore.collection("boards").update(data.boardid, boardData)
         if(typeof stopTimer == 'function') stopTimer();
         timer = false;
     }
@@ -253,7 +253,7 @@
     
     function deleteBoard(){
         if(confirmDelete) {
-            $pbStore.collection('boards').delete(data.params.boardid).then(()=>{
+            $pbStore.collection('boards').delete(data.boardid).then(()=>{
                 location.href="/";
             })
         } else {
@@ -266,7 +266,7 @@
         const columnData = {
             "title": newColumnName,
             "seq": maxseq,
-            "board": data.params.boardid
+            "board": data.boardid
         }
         $pbStore.collection('columns').create(columnData).then(()=>{
             getBoard();
@@ -279,7 +279,7 @@
         const sceneData = {
             "title": newSceneName,
             "seq": maxseq,
-            "board": data.params.boardid
+            "board": data.boardid
         }
         $pbStore.collection('scenes').create(sceneData).then(()=>{
             getBoard();
@@ -289,13 +289,13 @@
     
     function setScene(scene) {
         $pbStore.collection('scenes').unsubscribe(currentScene.id)
-
+        
         currentScene.current = false;
         $pbStore.collection('scenes').update(currentScene.id, currentScene);
         currentScene = scene;
         currentScene.current = true;
         $pbStore.collection('scenes').update(currentScene.id, currentScene);
-
+        
         $pbStore.collection('scenes').subscribe(currentScene.id, sceneSubUpdate)
     }
     
@@ -326,7 +326,7 @@
 
 {#await board}
 <div class="container">
-    <h1>Loading Board {data.params.boardid}</h1>
+    <h1>Loading Board {data.boardid}</h1>
     <p>Loading...</p>
 </div>
 <div>Loading...</div>    
@@ -412,18 +412,26 @@
             {#each board.columns as column}
             
             <div class="column cardcolumn content" on:dragenter={handleDragEnter} on:dragleave={handleDragLeave} on:dragover={handleDragOver} on:drop={handleDragDrop} id="{column.id}">
-                <h2 class="subtitle">{column.title}</h2>
-                {#if currentScene.doAdd}
-                <div class="field has-addons">
-                    <!-- svelte-ignore a11y-click-events-have-key-events -->
-                    <button class="button is-small is-rounded" on:click={()=>addCard(column)}>
-                        <span class="icon is-small">
-                            <i class="fa-light fa-cards-blank"></i>
-                        </span>
-                        <span>Add Card</span>
-                    </button>
+                <div class="columnheader level">
+                    <div class="level-left">
+                        <div class="level-item">
+                            <h2 class="subtitle">{column.title}</h2>
+                        </div>
+                        {#if currentScene.doAdd}
+                        <div class="level-item">
+                            <div class="field has-addons">
+                                <!-- svelte-ignore a11y-click-events-have-key-events -->
+                                <button class="button is-small is-rounded" on:click={()=>addCard(column)}>
+                                    <span class="icon is-small">
+                                        <i class="fa-light fa-cards-blank"></i>
+                                    </span>
+                                    <span>Add Card</span>
+                                </button>
+                            </div>
+                        </div>
+                        {/if}
+                    </div>
                 </div>
-                {/if}
                 
                 {#each column.cards as card(card.id)}
                 <Card bind:card={card} bind:scene={currentScene} on:dragstart={handleDragStart} on:dragend={handleDragEnd} />
@@ -560,8 +568,8 @@
         padding-bottom: 0;
     }
     .boardscroll {
-        overflow-x:scroll;
-        
+        overflow:scroll;
+        height: calc(100vh - 124px)
     }
     .board {
         // margin: 0 calc((100% - 80rem)/2) 3rem;
@@ -607,6 +615,16 @@
         text-orientation: sideways;
         writing-mode: vertical-rl;
         padding: 0.25rem !important;
-
+        
+    }
+    .columnheader{
+        position: sticky;
+        z-index: 100;
+        top: 0px;
+        background: rgb(255,255,255);
+        background: linear-gradient(0deg, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 25%);
+    }
+    .dropdown-menu {
+        z-index: 200;
     }
 </style>

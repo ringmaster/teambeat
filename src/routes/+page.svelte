@@ -68,7 +68,7 @@
             {:then boards} 
             {#each boards as board}
             <tr>
-                <td><a href="/board/{board.id}">{board.name}</a></td>
+                <td><a href="/board?boardid={board.id}">{board.name}</a></td>
                 <td>
                     {#each board.expand.facilitators as facilitator}
                     <div>{facilitator.name}</div>
