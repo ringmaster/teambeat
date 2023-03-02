@@ -1,7 +1,7 @@
 <script>
     import { pbStore } from 'svelte-pocketbase';
     import { env } from '$env/dynamic/public';
-    import { onMount } from 'svelte';
+    import { goto } from '$app/navigation';
     import '@milkdown/theme-nord/style.css';
 
     //import "./milligram-mod.sass";
@@ -10,7 +10,7 @@
     
     if(!$pbStore.authStore.isValid) {
         if (["/", "/login"].indexOf(location.href) === false) {
-            location.href = "/";
+            goto("/");
         }
     }
     

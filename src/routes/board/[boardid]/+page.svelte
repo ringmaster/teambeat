@@ -3,7 +3,8 @@
     import Card from "./Card.svelte";
     import {onDestroy, tick} from "svelte"
     import { fly, fade } from 'svelte/transition';
-    import notify from "../../utils/notify";
+    import { goto } from '$app/navigation';
+    import notify from "../../../utils/notify";
     
     import TimerDial from "./TimerDial.svelte";
     
@@ -254,7 +255,7 @@
     function deleteBoard(){
         if(confirmDelete) {
             $pbStore.collection('boards').delete(data.boardid).then(()=>{
-                location.href="/";
+                goto("/");
             })
         } else {
             notify("Check the box to confirm the deletion of this board.", "warning", "exclamation-triangle")
@@ -406,6 +407,7 @@
         </div>
     </div>
 </div>
+{#if board.columns.length > 0}
 <div class="boardscroll">
     <div class="board">
         <div class="row columns">
@@ -444,6 +446,19 @@
         </div>
     </div>
 </div>
+{:else}
+<div class="hero content">
+    <div class="container">
+        <h2>This is a new board</h2>
+        <p>You will need to do a few things to make this board viable:</p>
+        <ol>
+            <li>Click the Confiure button, above.</li>
+            <li>Switch to the <code>Columns</code> tab to add new columns</li>
+            <li>Swtich to the <code>Scenes</code> tab to add new scenes with specific capabilities.</li>
+        </ol>
+    </div>
+</div>
+{/if}
 
 {/await}
 

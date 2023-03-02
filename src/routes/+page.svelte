@@ -1,4 +1,6 @@
 <script>
+    import { key } from '@milkdown/plugin-listener';
+    import { goto } from '$app/navigation';
     import { pbStore } from 'svelte-pocketbase';
     
     $: loggedIn = $pbStore.authStore.isValid
@@ -34,7 +36,7 @@
                 "seq": 1
             };
             $pbStore.collection('scenes').create(scenedata).then((scene)=>{
-                location.href = "/board/" + newboard.id;
+                goto( "/board/" + newboard.id );
             })
         })
     }
@@ -68,7 +70,7 @@
             {:then boards} 
             {#each boards as board}
             <tr>
-                <td><a href="/board?boardid={board.id}">{board.name}</a></td>
+                <td><a href="/board/{board.id}">{board.name}</a></td>
                 <td>
                     {#each board.expand.facilitators as facilitator}
                     <div>{facilitator.name}</div>
@@ -109,7 +111,7 @@
                     <div class="field">
                         <label class="label" for="boardname">Board Name</label>
                         <div class="control" class:has-icons-right={badBoard!=''}>
-                            <input id="boardname" class:is-danger={badBoard!=''} class="input" type="text" placeholder="Board Name" bind:value={newBoardName}>
+                            <input id="boardname" class:is-danger={badBoard!=''} class="input" type="text" placeholder="Board Name" bind:value={newBoardName} on:keypress={(e)=>{if(e.key=="Enter") createBoard()}}>
                             {#if badBoard != ''}
                             <span class="icon is-small is-right">
                                 <i class="fas fa-exclamation-triangle"></i>

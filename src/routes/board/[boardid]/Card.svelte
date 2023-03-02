@@ -187,7 +187,12 @@
         border-radius: 1rem;
         min-width: 2rem;
     }
-    .cardeditor:hover {
-        background-color: #efefef;
+    :global(.ProseMirror:hover) {
+        outline: none;
+        background: #f0f0f0;
+    }
+    :global(.ProseMirror:focus-visible) {
+        outline: none;
+        background: #f8f8f8;
     }
 </style>
