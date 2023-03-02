@@ -1,0 +1,446 @@
+[
+    {
+        "id": "_pb_users_auth_",
+        "name": "users",
+        "type": "auth",
+        "system": false,
+        "schema": [
+            {
+                "id": "4mabr3ft",
+                "name": "name",
+                "type": "text",
+                "system": false,
+                "required": false,
+                "unique": false,
+                "options": {
+                    "min": null,
+                    "max": null,
+                    "pattern": ""
+                }
+            }
+        ],
+        "listRule": "",
+        "viewRule": "",
+        "createRule": "",
+        "updateRule": "id = @request.auth.id",
+        "deleteRule": "id = @request.auth.id",
+        "options": {
+            "allowEmailAuth": true,
+            "allowOAuth2Auth": true,
+            "allowUsernameAuth": true,
+            "exceptEmailDomains": null,
+            "manageRule": null,
+            "minPasswordLength": 8,
+            "onlyEmailDomains": null,
+            "requireEmail": false
+        }
+    },
+    {
+        "id": "a5ckunr0hfgn4uv",
+        "name": "cards",
+        "type": "base",
+        "system": false,
+        "schema": [
+            {
+                "id": "jzc1rrsp",
+                "name": "user",
+                "type": "relation",
+                "system": false,
+                "required": true,
+                "unique": false,
+                "options": {
+                    "maxSelect": 1,
+                    "collectionId": "_pb_users_auth_",
+                    "cascadeDelete": false
+                }
+            },
+            {
+                "id": "fqtalxpa",
+                "name": "type",
+                "type": "select",
+                "system": false,
+                "required": true,
+                "unique": false,
+                "options": {
+                    "maxSelect": 1,
+                    "values": [
+                        "default",
+                        "rating",
+                        "vote"
+                    ]
+                }
+            },
+            {
+                "id": "xcicwoel",
+                "name": "description",
+                "type": "text",
+                "system": false,
+                "required": false,
+                "unique": false,
+                "options": {
+                    "min": null,
+                    "max": null,
+                    "pattern": ""
+                }
+            },
+            {
+                "id": "dqexoons",
+                "name": "options",
+                "type": "json",
+                "system": false,
+                "required": false,
+                "unique": false,
+                "options": {}
+            },
+            {
+                "id": "55jq47e8",
+                "name": "column",
+                "type": "relation",
+                "system": false,
+                "required": true,
+                "unique": false,
+                "options": {
+                    "maxSelect": 1,
+                    "collectionId": "0m5589a5c6zbh1x",
+                    "cascadeDelete": true
+                }
+            }
+        ],
+        "listRule": "",
+        "viewRule": "",
+        "createRule": "",
+        "updateRule": "",
+        "deleteRule": "",
+        "options": {}
+    },
+    {
+        "id": "okipigcv64f5rtw",
+        "name": "boards",
+        "type": "base",
+        "system": false,
+        "schema": [
+            {
+                "id": "uslyii8k",
+                "name": "name",
+                "type": "text",
+                "system": false,
+                "required": true,
+                "unique": false,
+                "options": {
+                    "min": null,
+                    "max": null,
+                    "pattern": ""
+                }
+            },
+            {
+                "id": "qcodij7m",
+                "name": "users",
+                "type": "relation",
+                "system": false,
+                "required": false,
+                "unique": false,
+                "options": {
+                    "maxSelect": null,
+                    "collectionId": "_pb_users_auth_",
+                    "cascadeDelete": false
+                }
+            },
+            {
+                "id": "egdfduag",
+                "name": "facilitators",
+                "type": "relation",
+                "system": false,
+                "required": true,
+                "unique": false,
+                "options": {
+                    "maxSelect": null,
+                    "collectionId": "_pb_users_auth_",
+                    "cascadeDelete": false
+                }
+            },
+            {
+                "id": "dwyzkdv1",
+                "name": "timerlength",
+                "type": "number",
+                "system": false,
+                "required": false,
+                "unique": false,
+                "options": {
+                    "min": null,
+                    "max": null
+                }
+            },
+            {
+                "id": "i0bzknnx",
+                "name": "timerstart",
+                "type": "number",
+                "system": false,
+                "required": false,
+                "unique": false,
+                "options": {
+                    "min": null,
+                    "max": null
+                }
+            }
+        ],
+        "listRule": "",
+        "viewRule": "",
+        "createRule": "",
+        "updateRule": "",
+        "deleteRule": "",
+        "options": {}
+    },
+    {
+        "id": "0m5589a5c6zbh1x",
+        "name": "columns",
+        "type": "base",
+        "system": false,
+        "schema": [
+            {
+                "id": "d38nndoc",
+                "name": "title",
+                "type": "text",
+                "system": false,
+                "required": true,
+                "unique": false,
+                "options": {
+                    "min": null,
+                    "max": null,
+                    "pattern": ""
+                }
+            },
+            {
+                "id": "nj9ipi4f",
+                "name": "seq",
+                "type": "number",
+                "system": false,
+                "required": true,
+                "unique": false,
+                "options": {
+                    "min": null,
+                    "max": null
+                }
+            },
+            {
+                "id": "9ut77p7t",
+                "name": "board",
+                "type": "relation",
+                "system": false,
+                "required": true,
+                "unique": false,
+                "options": {
+                    "maxSelect": 1,
+                    "collectionId": "okipigcv64f5rtw",
+                    "cascadeDelete": true
+                }
+            }
+        ],
+        "listRule": "",
+        "viewRule": "",
+        "createRule": "",
+        "updateRule": "",
+        "deleteRule": "",
+        "options": {}
+    },
+    {
+        "id": "efppfy05u535lzs",
+        "name": "scenes",
+        "type": "base",
+        "system": false,
+        "schema": [
+            {
+                "id": "kxlgys1s",
+                "name": "board",
+                "type": "relation",
+                "system": false,
+                "required": true,
+                "unique": false,
+                "options": {
+                    "maxSelect": 1,
+                    "collectionId": "okipigcv64f5rtw",
+                    "cascadeDelete": true
+                }
+            },
+            {
+                "id": "mufgngza",
+                "name": "title",
+                "type": "text",
+                "system": false,
+                "required": true,
+                "unique": false,
+                "options": {
+                    "min": null,
+                    "max": null,
+                    "pattern": ""
+                }
+            },
+            {
+                "id": "p0zpwxll",
+                "name": "current",
+                "type": "bool",
+                "system": false,
+                "required": false,
+                "unique": false,
+                "options": {}
+            },
+            {
+                "id": "lybf5mfw",
+                "name": "doAdd",
+                "type": "bool",
+                "system": false,
+                "required": false,
+                "unique": false,
+                "options": {}
+            },
+            {
+                "id": "0itg9gel",
+                "name": "doReveal",
+                "type": "bool",
+                "system": false,
+                "required": false,
+                "unique": false,
+                "options": {}
+            },
+            {
+                "id": "boao8qsx",
+                "name": "doMove",
+                "type": "bool",
+                "system": false,
+                "required": false,
+                "unique": false,
+                "options": {}
+            },
+            {
+                "id": "06ankjdh",
+                "name": "doVote",
+                "type": "bool",
+                "system": false,
+                "required": false,
+                "unique": false,
+                "options": {}
+            },
+            {
+                "id": "qcqzfdgp",
+                "name": "doComment",
+                "type": "bool",
+                "system": false,
+                "required": false,
+                "unique": false,
+                "options": {}
+            },
+            {
+                "id": "hs70bhru",
+                "name": "seq",
+                "type": "number",
+                "system": false,
+                "required": true,
+                "unique": false,
+                "options": {
+                    "min": null,
+                    "max": null
+                }
+            },
+            {
+                "id": "4xuudadg",
+                "name": "doEdit",
+                "type": "bool",
+                "system": false,
+                "required": false,
+                "unique": false,
+                "options": {}
+            },
+            {
+                "id": "fj8usrm5",
+                "name": "doShowVotes",
+                "type": "bool",
+                "system": false,
+                "required": false,
+                "unique": false,
+                "options": {}
+            },
+            {
+                "id": "piujocmo",
+                "name": "doShowComments",
+                "type": "bool",
+                "system": false,
+                "required": false,
+                "unique": false,
+                "options": {}
+            }
+        ],
+        "listRule": "",
+        "viewRule": "",
+        "createRule": "",
+        "updateRule": "",
+        "deleteRule": "",
+        "options": {}
+    },
+    {
+        "id": "7xb7yhra6jm7gug",
+        "name": "comments",
+        "type": "base",
+        "system": false,
+        "schema": [
+            {
+                "id": "jzzlljx8",
+                "name": "body",
+                "type": "text",
+                "system": false,
+                "required": false,
+                "unique": false,
+                "options": {
+                    "min": null,
+                    "max": null,
+                    "pattern": ""
+                }
+            },
+            {
+                "id": "dixe9kwn",
+                "name": "user",
+                "type": "relation",
+                "system": false,
+                "required": true,
+                "unique": false,
+                "options": {
+                    "maxSelect": 1,
+                    "collectionId": "_pb_users_auth_",
+                    "cascadeDelete": false
+                }
+            },
+            {
+                "id": "pivwuh2j",
+                "name": "emoji",
+                "type": "select",
+                "system": false,
+                "required": false,
+                "unique": false,
+                "options": {
+                    "maxSelect": 1,
+                    "values": [
+                        "+1",
+                        "-1"
+                    ]
+                }
+            },
+            {
+                "id": "z6bojzcm",
+                "name": "card",
+                "type": "relation",
+                "system": false,
+                "required": true,
+                "unique": false,
+                "options": {
+                    "maxSelect": 1,
+                    "collectionId": "a5ckunr0hfgn4uv",
+                    "cascadeDelete": true
+                }
+            }
+        ],
+        "listRule": "",
+        "viewRule": "",
+        "createRule": "",
+        "updateRule": "",
+        "deleteRule": "",
+        "options": {}
+    }
+]

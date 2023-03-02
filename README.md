@@ -1,38 +1,40 @@
-# create-svelte
+# TeamBeat
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/master/packages/create-svelte).
+*What is this?*
 
-## Creating a project
+TeamBeat is a tool to enable teams to easily facilitate remote retrospectives.
 
-If you're seeing this, you've probably already done this step. Congrats!
+# How to run the application
 
-```bash
-# create a new project in the current directory
-npm create svelte@latest
+1. Clone the repo
+2. `npm install`
+3. `npm run dockerbuild`
+4. `npm run dockerrun`
 
-# create a new project in my-app
-npm create svelte@latest my-app
-```
+# How to run the application in dev mode
 
-## Developing
+1. Clone the repo
+2. `npm install`
+3. In one terminal window, run `npm run pocketbase`
+4. In another termainl window, run `npm run dev`
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+# After the application is started in production or dev mode:
 
-```bash
-npm run dev
+1. Open the admin interface on port 8080 of the docker instance at (for example): http://localhost:8080:/_/
+2. Create an admin account and import the schema.json file from the repo into the form at: http://localhost:8080/_/#/settings/import-collections
+3. Go to the root URL and create and account to begin using the application
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
+This procedure should only be necessary once if the /pb/ directory is preserved between runs.
 
-## Building
-
-To create a production version of your app:
-
-```bash
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+# To Do
+1. ~Add the schema export to the repo~
+2. Provide a way for the application to bootstrap the schema from the static directory
+3. Use websockets to monitor the board list for updates on the main page
+4. Use websockets to montior the current scene on the board page
+5. Add voting
+6. Add Commenting
+7. Add presentation mode
+8. Add voting card type
+9. Restrict facilitation controls to facilitators
+10. Restrict data modification via API based on auth rules
+11. Ability to send board URLs that allow login-free (but user-tracked) access
