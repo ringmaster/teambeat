@@ -28,15 +28,17 @@
     let currentScene = {title: "", loaded: false};
     let boardData;
     let board = {columns: [], scenes: [], facilitators: [], currentScene: {title: ''}};
-
+    
     $: isFacilitator = board?.facilitators?.indexOf(user.id) !== -1;
-
+    $: totalCards = board?.columns?.reduce((prev, column)=>{return prev + column.cards.length}, 0)
+    $: pureVoteCount = Math.ceil(Math.sqrt(totalCards))
+    
     if($pbStore.authStore.isValid) {
         getBoard();
     } else {
         goto("/");
     }
-
+    
     onDestroy(()=>{
         board.columns.forEach((column) => {
             column.disconnect();
@@ -134,7 +136,7 @@
     function configBoard() {
         drawer.show();
     }
-        
+    
     // https://svelte.dev/repl/adf5a97b91164c239cc1e6d0c76c2abe?version=3.14.1
     // https://www.javascripttutorial.net/web-apis/javascript-drag-and-drop/
     
@@ -364,19 +366,75 @@
             </div>
             {/if}
             <div class="level-item">
+                {totalCards}
             </div>
         </div>
         {#if isFacilitator}
         <div class="level-right is-flex is-justify-content-right is-align-content-center">
             <div class="field has-addons">
                 <!-- svelte-ignore a11y-click-events-have-key-events -->
-                <div class="control">
-                    <button class="button is-small is-rounded" on:click={configBoard}>
+                <div class="control dropdown is-hoverable is-right">
+                    <button class="button is-small is-rounded">
                         <span class="icon is-small">
-                            <i class="fa-light fa-square-kanban"></i>
+                            <i class="fa-regular fa-ballot-check"></i>
                         </span>
-                        <span>Configure</span>
+                        <span>Votes</span>
+                        <span class="icon is-small">
+                            <i class="fas fa-angle-down" aria-hidden="true"></i>
+                        </span>
                     </button>
+                    <div class="dropdown-menu" id="dropdown-menu" role="menu">
+                        <div class="dropdown-content">
+                            <a href="#" class="dropdown-item">
+                                <i class="fa-light fa-square-root"></i>
+                                <i class="fa-light fa-cards-blank"></i>
+                                Add {pureVoteCount} votes
+                            </a>
+                            <a href="#" class="dropdown-item">
+                                Add 3 votes
+                            </a>
+                            <a href="#" class="dropdown-item">
+                                Add 1 vote
+                            </a>
+                            <hr class="dropdown-divider">
+                            <a href="#" class="dropdown-item">
+                                Clear votes
+                            </a>
+                            <!-- hr class="dropdown-divider">
+                            <div class="dropdown-item">
+                                <div class="field has-addons">
+                                    <p class="control">
+                                        <button class="button is-small is-inverted">
+                                            <span class="icon is-small">
+                                                <i class="fa-sharp fa-regular fa-circle-dot"></i>
+                                            </span>
+                                        </button>
+                                    </p>
+                                    <p class="control">
+                                        <button class="button is-small is-inverted is-info">
+                                            <span class="icon is-small">
+                                                <i class="fa-sharp fa-regular fa-circle-dot"></i>
+                                            </span>
+                                        </button>
+                                    </p>
+                                    <p class="control">
+                                        <button class="button is-small is-inverted">
+                                            <span class="icon is-small">
+                                                <i class="fa-sharp fa-regular fa-circle-dot"></i>
+                                            </span>
+                                        </button>
+                                    </p>
+                                    <p class="control">
+                                        <button class="button is-small is-inverted">
+                                            <span class="icon is-small">
+                                                <i class="fa-sharp fa-regular fa-circle-dot"></i>
+                                            </span>
+                                        </button>
+                                    </p>
+                                </div>
+                            </div -->
+                        </div>
+                    </div>
                 </div>
                 <div class="control dropdown is-hoverable is-right">
                     <button class="button is-small is-rounded">
@@ -405,9 +463,15 @@
                             </a>
                         </div>
                     </div>
-                    
                 </div>
-                
+                <div class="control">
+                    <button class="button is-small is-rounded" on:click={configBoard}>
+                        <span class="icon is-small">
+                            <i class="fa-light fa-square-kanban"></i>
+                        </span>
+                        <span>Configure</span>
+                    </button>
+                </div>                
             </div>
         </div>
         {/if}

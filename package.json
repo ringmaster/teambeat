@@ -28,6 +28,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@creativebulma/bulma-tooltip": "^1.2.0",
 		"@milkdown/core": "^7.0.0",
 		"@milkdown/ctx": "^7.0.0",
 		"@milkdown/plugin-listener": "^7.0.0",
@@ -38,6 +39,7 @@
 		"@neodrag/svelte": "^2.0.3",
 		"@shoelace-style/shoelace": "^2.0.0",
 		"@zerodevx/svelte-toast": "1.0.0-rc.1",
+		"bulma": "^0.9.4",
 		"chart.js": "^4.2.1",
 		"colorjs.io": "^0.4.3",
 		"milligram": "^1.4.1",

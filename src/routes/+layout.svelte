@@ -3,8 +3,8 @@
     import { env } from '$env/dynamic/public';
     import { goto } from '$app/navigation';
     import '@milkdown/theme-nord/style.css';
-
-    //import "./milligram-mod.sass";
+    import '../app.scss';
+    //import '@creativebulma/bulma-tooltip/src/sass/index.sass';
     
     pbStore.set(env.PUBLIC_POCKETBASE_URL);
     
@@ -99,7 +99,7 @@
 
 <style lang="scss">
     /* @import "../../node_modules/milligram/dist/milligram.min.css"; */
-    @import "https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css";
+    /* @import "https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"; */
     
     :root {
         --sl-font-size-medium: 1.6rem;

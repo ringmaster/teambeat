@@ -6,7 +6,7 @@
     import { commonmark } from '@milkdown/preset-commonmark';
     import { nord } from '@milkdown/theme-nord';
     import { listener, listenerCtx } from '@milkdown/plugin-listener';
-
+    
     const dispatch = createEventDispatcher();
     
     export let card;
@@ -83,8 +83,8 @@
 </script>
 
 
-<sl-card class="card" id={card.id} draggable="{scene.doMove}" on:dragstart={handleDragStart} on:dragend={handleDragEnd} >
-    <div class="cardcontent">
+<div class="card" id={card.id} draggable="{scene.doMove}" on:dragstart={handleDragStart} on:dragend={handleDragEnd} >
+    <div class="card-content cardcontent">
         
         {#if skeleton}
         <div class="cardcontentdescription skeleton-paragraphs">
@@ -96,19 +96,19 @@
         {/if}
         
         <div class="cardcontentedit">
-            <sl-tooltip content="Author: {card.expand.user.name}">
+            <span class="has-tooltip-arrow" data-tooltip="Author: {card.expand.user.name}">
                 <i class="fa-solid fa-user"></i>
-            </sl-tooltip>
+            </span>
             <!-- svelte-ignore a11y-click-events-have-key-events -->
             {#if cardIsCurrentUsers}
-            <sl-tooltip content="Delete Card" on:click={handleDelete}>
+            <span class="has-tooltip-arrow" data-tooltip="Delete Card" on:click={handleDelete}>
                 <i class="fa-solid fa-trash"></i>
-            </sl-tooltip>
+            </span>
             {/if}
         </div>
     </div>
     {#if card.expand["comments(card)"] && scene.doShowComments}
-    <div>
+    <div class="card-content">
         {#each card.expand["comments(card)"] as comment}
         <sl-divider></sl-divider>
         <div class="comment">
@@ -122,35 +122,57 @@
     </div>
     {/if}
     {#if scene.doShowVotes || scene.doShowComments}
-    <div slot="footer">
-        <div>
-            {#if scene.doShowVotes}
-            {#each votes as vote}
-            <sl-tooltip content="{vote.title}">
-                {vote.count} <i class="fa-regular fa-ballot-check"></i>
-            </sl-tooltip>                
-            {/each}
-            {/if}
-        </div>
-        <div>
+    <div class="card-footer level">
+            <div class="level-left">
+                <div class="level-item">
+                    <div class="field has-addons">
+                        <span class="control">
+                            <button class="button is-small is-rounded">
+                                <span class="icon is-small">
+                                    <i class="fa-light fa-minus"></i>
+                                </span>
+                            </button>
+                        </span>
+                        <span class="control">
+                            <button class="button is-small is-rounded">
+                                <span class="icon is-small">
+                                    <i class="fa-light fa-plus"></i>
+                                </span>
+                            </button>
+                        </span>
+                    </div>
+                </div>
+                <div class="level-item">
+                    {#if scene.doShowVotes}
+                    {#each votes as vote}
+                    <span class="has-tooltip-arrow" data-tooltip="{vote.title}">
+                        {vote.count} <i class="fa-regular fa-ballot-check"></i>
+                    </span>
+                    {/each}
+                    {/if}
+                </div>
+            </div>
             {#if scene.doShowComments}
-            <sl-button-group label="Comment Group">
-                <sl-button ><i class="fa-regular fa-message-medical"></i></sl-button>
-                <sl-dropdown placement="bottom-end">
-                    <sl-button slot="trigger" caret>
-                        <sl-visually-hidden>More comment options</sl-visually-hidden>
-                    </sl-button>
-                    <sl-menu>
-                        <sl-menu-item><i class="fa-regular fa-face-smile"></i></sl-menu-item>
-                        <sl-menu-item><i class="fa-regular fa-face-frown"></i></sl-menu-item>
-                    </sl-menu>
-                </sl-dropdown>
-            </sl-button-group>
+            <div class="level-right">
+                <div class="level-item">
+                    <sl-button-group label="Comment Group">
+                        <sl-button ><i class="fa-regular fa-message-medical"></i></sl-button>
+                        <sl-dropdown placement="bottom-end">
+                            <sl-button slot="trigger" caret>
+                                <sl-visually-hidden>More comment options</sl-visually-hidden>
+                            </sl-button>
+                            <sl-menu>
+                                <sl-menu-item><i class="fa-regular fa-face-smile"></i></sl-menu-item>
+                                <sl-menu-item><i class="fa-regular fa-face-frown"></i></sl-menu-item>
+                            </sl-menu>
+                        </sl-dropdown>
+                    </sl-button-group>
+                </div>
+            </div>
             {/if}
-        </div>
     </div>
     {/if}
-</sl-card>
+</div>
 
 <style>
     .card {
@@ -159,10 +181,11 @@
         margin-bottom: 1rem;
         width: 100%;
     }
-    .card [slot='footer'] {
-        display: flex;
+    .card-footer {
+        /* display: flex;
         justify-content: space-between;
-        align-items: center;
+        align-items: center; */
+        padding: 3px 1rem;
     }
     .cardcontent {
         display: flex;
