@@ -6,7 +6,7 @@
     import { commonmark } from '@milkdown/preset-commonmark';
     import { nord } from '@milkdown/theme-nord';
     import { listener, listenerCtx } from '@milkdown/plugin-listener';
-    
+
     const dispatch = createEventDispatcher();
     
     export let card;

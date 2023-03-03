@@ -29,7 +29,7 @@
     ).then((authData) => {
         result = JSON.stringify(authData, null, 2);
         document.cookie = $pbStore.authStore.exportToCookie({ httpOnly: false, secure: false })
-        document.location = "/"
+        goto("/");
     }).catch((err) => {
         result = "Failed to exchange code.\n" + err;
     });
@@ -37,5 +37,5 @@
 </script>
 
 <div class="container">
-<p>{result}</p>
+<pre>{result}</pre>
 </div>

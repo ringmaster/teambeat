@@ -133,33 +133,8 @@
         position: relative;
         width: 100%;
     }
-    .navigation .navigation-link, .navigation .navigation-title, .navigation .title {
-        display: inline;
-        font-size: 1.6rem;
-        line-height: 5.2rem;
-        padding: 0;
-        text-decoration: none;
-    }
-    
-    .navigation .navigation-title, .navigation .title {
-        color: #606c76;
-        font-family: Gotham Rounded A,Gotham Rounded B,Helvetica Neue,Arial,sans-serif;
-        position: relative;
-    }
     .float-right {
         float: right;
-    }
-    .navigation .navigation-list {
-        list-style: none;
-        margin-bottom: 0;
-        margin-right: 5rem;
-    }
-    
-    .navigation .navigation-item {
-        float: left;
-        margin-bottom: 0;
-        margin-left: 2.5rem;
-        position: relative;
     }
     .navbar {
         margin-bottom: 5px;

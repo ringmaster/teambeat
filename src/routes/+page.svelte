@@ -10,6 +10,13 @@
         expand: "users,facilitators"
     });
     
+    $pbStore.collection('boards').subscribe("*", ()=>{
+        getboards = $pbStore.collection('boards').getFullList(10, {
+            sort: '-created',
+            expand: "users,facilitators"
+        });
+    })
+    
     let newmodal = false;
     let newBoardName = '';
     let badBoard = '';

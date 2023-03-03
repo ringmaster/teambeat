@@ -29,8 +29,8 @@ This procedure should only be necessary once if the /pb/ directory is preserved 
 # To Do
 1. ~Add the schema export to the repo~
 2. Provide a way for the application to bootstrap the schema from the static directory
-3. Use websockets to monitor the board list for updates on the main page
-4. Use websockets to montior the current scene on the board page
+3. ~Use websockets to monitor the board list for updates on the main page~
+4. ~Use websockets to montior the current scene on the board page~
 5. Add voting
 6. Add Commenting
 7. Add presentation mode

@@ -26,7 +26,17 @@
     let newColumnName = '';
     let newColumnVote = true;
     let currentScene = {title: "", loaded: false};
-    
+    let boardData;
+    let board = {columns: [], scenes: [], facilitators: [], currentScene: {title: ''}};
+
+    $: isFacilitator = board?.facilitators?.indexOf(user.id) !== -1;
+
+    if($pbStore.authStore.isValid) {
+        getBoard();
+    } else {
+        goto("/");
+    }
+
     onDestroy(()=>{
         board.columns.forEach((column) => {
             column.disconnect();
@@ -34,7 +44,9 @@
     })
     
     function getBoard() {
-        let boardData = $pbStore.collection('boards').getOne(data.boardid, {expand: "users,facilitators,scenes(board),columns(board)"});
+        if($pbStore.authStore.isValid) {
+            boardData = $pbStore.collection('boards').getOne(data.boardid, {expand: "users,facilitators,scenes(board),columns(board)"});
+        }
         
         boardData.then((boardData) => {
             board = {
@@ -43,18 +55,16 @@
                 scenes: boardData.expand["scenes(board)"],
                 timerstart: boardData.timerstart,
                 timerlength: boardData.timerlength,
+                facilitators: boardData.facilitators,
+                users: boardData.users
             }
-            board.scenes.forEach((scene)=>{
-                if(scene.current) {
-                    currentScene = scene
-                    currentScene.loaded = true;
+            currentScene = board.scenes.reduce((prev, cur) => {
+                if(cur.current) {
+                    return cur
                 }
-            })
-            if(!currentScene.loaded) {
-                currentScene = board.scenes[0];
-                currentScene.loaded = true;
-            }
-            $pbStore.collection('scenes').subscribe(currentScene.id, sceneSubUpdate)
+                return prev
+            }, board.scenes[0])
+            $pbStore.collection('scenes').subscribe('*', sceneSubUpdate)
             checkTimer();
             
             $pbStore.collection('boards').subscribe(data.boardid, (b)=>{
@@ -67,13 +77,10 @@
     
     let dosTimer;
     function updateSceneDos(e) {
-        clearTimeout(dosTimer);
-        dosTimer = setTimeout(() => {
-            board.scenes.forEach((scene)=>{
-                console.log(scene);
-                $pbStore.collection('scenes').update(scene.id, scene);
-            });
-        }, 750);
+        board.scenes.forEach((scene)=>{
+            console.log(scene);
+            $pbStore.collection('scenes').update(scene.id, scene);
+        });
     }
     
     function checkTimer() {
@@ -127,10 +134,7 @@
     function configBoard() {
         drawer.show();
     }
-    
-    let board = {columns: [], scenes: [], currentScene: {title: ''}};
-    getBoard();
-    
+        
     // https://svelte.dev/repl/adf5a97b91164c239cc1e6d0c76c2abe?version=3.14.1
     // https://www.javascripttutorial.net/web-apis/javascript-drag-and-drop/
     
@@ -146,7 +150,6 @@
         e.preventDefault();
         if (dropped_in == false) {
             window.setTimeout(()=>e.detail.target.classList.remove('novis'), 0);
-            console.log(e);
             status = "You let the " + e.detail.target.getAttribute('id') + " go.";
         }
         dropped_in = false;
@@ -189,8 +192,6 @@
         document.getElementById(element_id).classList.remove('novis');
         dropped_in = true;
         status = "You droped " + element_id + " into drop zone " + e.target.closest('.column').id;
-        
-        console.log("BOARD", board);
         
         // Load the initial card data
         let record = await $pbStore.collection('cards').getOne(element_id);
@@ -289,27 +290,28 @@
     }
     
     function setScene(scene) {
-        $pbStore.collection('scenes').unsubscribe(currentScene.id)
-        
         currentScene.current = false;
         $pbStore.collection('scenes').update(currentScene.id, currentScene);
         currentScene = scene;
         currentScene.current = true;
         $pbStore.collection('scenes').update(currentScene.id, currentScene);
-        
-        $pbStore.collection('scenes').subscribe(currentScene.id, sceneSubUpdate)
     }
     
     function sceneSubUpdate(s) {
-        currentScene = {...currentScene, ...s.record};
+        if(s.board != board.id) return;
+        //currentScene = {...currentScene, ...s.record};
         $pbStore.collection('scenes').getFullList(200, {
             filter: `board="${currentScene.board}"`,
             '$autoCancel': false
         }).then((scenes)=>{
-            console.log("ALL SCENE UPDATE", scenes)
             board.scenes = scenes;
+            currentScene = board.scenes.reduce((prev, cur) => {
+                if(cur.current) {
+                    return cur
+                }
+                return prev
+            }, board.scenes[0])
         })
-        console.log("SCENE UPDATE", currentScene, s)
     }
     
     function delColumn(id) {
@@ -325,19 +327,20 @@
 </svelte:head>
 
 
-{#await board}
+{#await boardData}
 <div class="container">
     <h1>Loading Board {data.boardid}</h1>
     <p>Loading...</p>
 </div>
-<div>Loading...</div>    
-{:then board} 
+<div>Loading...</div>
+{:then foo} 
 <div class="container content">
     <div class="level">
         <div class="level-left">
             <div class="level-item">
                 <h1 class="title">{board.name}</h1>
             </div>
+            {#if isFacilitator}
             <div class="level-item">
                 <div class="dropdown is-hoverable">
                     <div class="dropdown-trigger">
@@ -359,9 +362,11 @@
                     </div>
                 </div>
             </div>
+            {/if}
             <div class="level-item">
             </div>
         </div>
+        {#if isFacilitator}
         <div class="level-right is-flex is-justify-content-right is-align-content-center">
             <div class="field has-addons">
                 <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -405,8 +410,10 @@
                 
             </div>
         </div>
+        {/if}
     </div>
 </div>
+
 {#if board.columns.length > 0}
 <div class="boardscroll">
     <div class="board">
@@ -462,7 +469,7 @@
 
 {/await}
 
-<sl-drawer placement="top" class="drawer-placement-top" bind:this={drawer}>
+<sl-drawer placement="top" class="drawer-placement-top" bind:this={drawer} on:sl-request-close={updateSceneDos}>
     <div slot="label"><h1 class="title"><i class="fa-light fa-square-kanban"></i> Configure Board</h1></div>
     
     <sl-tab-group>
@@ -534,14 +541,14 @@
                     {#each board.scenes as scene}
                     <tr>
                         <td>{scene.title}</td>
-                        <td><input type="checkbox" class="checkbox" on:click={updateSceneDos} bind:checked={scene.doAdd}></td>
-                        <td><input type="checkbox" class="checkbox" on:click={updateSceneDos} bind:checked={scene.doEdit}></td>
-                        <td><input type="checkbox" class="checkbox" on:click={updateSceneDos} bind:checked={scene.doReveal}></td>
-                        <td><input type="checkbox" class="checkbox" on:click={updateSceneDos} bind:checked={scene.doMove}></td>
-                        <td><input type="checkbox" class="checkbox" on:click={updateSceneDos} bind:checked={scene.doShowVotes}></td>
-                        <td><input type="checkbox" class="checkbox" on:click={updateSceneDos} bind:checked={scene.doVote}></td>
-                        <td><input type="checkbox" class="checkbox" on:click={updateSceneDos} bind:checked={scene.doShowComments}></td>
-                        <td><input type="checkbox" class="checkbox" on:click={updateSceneDos} bind:checked={scene.doComment}></td>
+                        <td><input type="checkbox" class="checkbox" bind:checked={scene.doAdd}></td>
+                        <td><input type="checkbox" class="checkbox" bind:checked={scene.doEdit}></td>
+                        <td><input type="checkbox" class="checkbox" bind:checked={scene.doReveal}></td>
+                        <td><input type="checkbox" class="checkbox" bind:checked={scene.doMove}></td>
+                        <td><input type="checkbox" class="checkbox" bind:checked={scene.doShowVotes}></td>
+                        <td><input type="checkbox" class="checkbox" bind:checked={scene.doVote}></td>
+                        <td><input type="checkbox" class="checkbox" bind:checked={scene.doShowComments}></td>
+                        <td><input type="checkbox" class="checkbox" bind:checked={scene.doComment}></td>
                     </tr>
                     {/each}
                     <tr>

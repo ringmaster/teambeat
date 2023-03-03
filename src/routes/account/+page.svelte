@@ -1,45 +1,55 @@
 <script>
   import { pbStore } from 'svelte-pocketbase';
+  import notify from '../../utils/notify';
   
-  $: user = $pbStore.authStore.model
+  let user = $pbStore.authStore.model
+  let loading = false;
+
+  function updateUser() {
+    loading = true;
+    $pbStore.collection('users').update(user.id, user).then(()=>{
+      loading = false;
+      notify("Updated user record successfully.", "info")
+    })
+  }
 </script>
 
 <div class="container">
   
-  <h1 class="title">Account - {user.name}</h1>
+  <h1 class="title">Account - {user.id}</h1>
   
-  <form>
+  <form on:submit="{updateUser}">
     <div class="field">
       <label class="label" for="name">Name</label>
       <div class="control">
-        <input class="input" type="text" placeholder="name" id="name" value="{user.name}">
+        <input class="input" type="text" placeholder="name" id="name" bind:value="{user.name}">
       </div>
     </div>
     
     <div class="field">
       <label class="label" for="email">Email</label>
       <div class="control">
-        <input class="input" type="text" placeholder="name" id="email" value="{user.email}">
+        <input class="input" type="text" placeholder="name" id="email" bind:value="{user.email}">
       </div>
     </div>
     
     <div class="field">
       <label class="label" for="username">Username</label>
       <div class="control">
-        <input class="input" type="text" placeholder="username" id="username" value="{user.username}">
+        <input class="input" type="text" placeholder="username" id="username" bind:value="{user.username}">
       </div>
     </div>
     
     <div class="field">
       <label class="label" for="password">Password</label>
       <div class="control">
-        <input class="input" type="password" placeholder="password" id="password" value="{user.password}">
+        <input class="input" type="password" placeholder="password" id="password" bind:value="{user.password}">
       </div>
     </div>
     
     <div class="field is-grouped">
       <div class="control">
-        <input class="button is-primary" type="submit" value="Update">
+        <input class="button is-primary" class:is-loading={loading} type="submit" value="Update">
       </div>
     </div>
     
