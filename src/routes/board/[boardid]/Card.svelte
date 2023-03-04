@@ -27,7 +27,6 @@
     
     $pbStore.collection('votes').subscribe("*", (vote)=>{
         if(vote.record.card != card.id) {
-            console.log('skipped?');
             return
         }
         // votes on this card was updated, get new vote count
@@ -164,24 +163,28 @@
         <div class="level-left">
             {#if scene.doShowVotes || scene.doVote}
             {#each board.votetypes as votetype}
+            {#if votetype.amount > 0}
             <div class="level-item votewidget">
                 {#if scene.doVote}
                 <button class="downvote udvote button is-small" class:is-disabled={votes[votetype.typename]?.yours<=0} on:click={()=>voteDel(votetype)}><i class="fa-solid fa-minus"></i></button>
+                {/if}
+                {#if scene.doVote}
                 <span>{votes[votetype.typename]?.yours}</span>
                 {/if}
                 {#if scene.doShowVotes && scene.doVote}
-                /
+                <span>/</span>
                 {/if}
                 {#if scene.doShowVotes }
-                {votes[votetype.typename]?.total}
+                <span>{votes[votetype.typename]?.total}</span>
                 {/if}
-                <span class="icon">
+                <span class="icon" class:is-voted={votes[votetype.typename]?.yours>0}>
                     <i class="fak fa-vote"></i>
                 </span>
                 {#if scene.doVote}
-                <button class="upvote udvote button is-small" on:click={()=>voteAdd(votetype)}><i class="fa-solid fa-plus"></i></button>
+                <button class="upvote udvote button is-small" class:is-disabled={board.votecounts[votetype.typename]>=votetype.amount} on:click={()=>voteAdd(votetype)}><i class="fa-solid fa-plus"></i></button>
                 {/if}
             </div>
+            {/if}
             {/each}
             {/if}
         </div>
@@ -277,5 +280,11 @@
         width: 1.5rem; 
         height: 1.5rem; 
     }
-    
+    .is-voted {
+        border: 1px solid #999;
+        border-radius: 1rem;
+        margin-left: 0.2rem;
+        background: #999;
+        color: white;
+    }
 </style>
