@@ -25,9 +25,10 @@
     let newSceneName = '';
     let newColumnName = '';
     let newColumnVote = true;
+    let newVoteType = '';
     let currentScene = {title: "", loaded: false};
     let boardData;
-    let board = {columns: [], scenes: [], facilitators: [], currentScene: {title: ''}};
+    let board = {columns: [], scenes: [], facilitators: [], currentScene: {title: ''}, votetypes: []};
     
     $: isFacilitator = board?.facilitators?.indexOf(user.id) !== -1;
     $: totalCards = board?.columns?.reduce((prev, column)=>{return prev + column.cards.length}, 0)
@@ -47,7 +48,7 @@
     
     function getBoard() {
         if($pbStore.authStore.isValid) {
-            boardData = $pbStore.collection('boards').getOne(data.boardid, {expand: "users,facilitators,scenes(board),columns(board)"});
+            boardData = $pbStore.collection('boards').getOne(data.boardid, {expand: "users,facilitators,scenes(board),columns(board),votetypes(board)"});
         }
         
         boardData.then((boardData) => {
@@ -58,8 +59,11 @@
                 timerstart: boardData.timerstart,
                 timerlength: boardData.timerlength,
                 facilitators: boardData.facilitators,
-                users: boardData.users
+                users: boardData.users,
+                votetypes: boardData.expand["votetypes(board)"]
             }
+            console.log(boardData, board)
+
             currentScene = board.scenes.reduce((prev, cur) => {
                 if(cur.current) {
                     return cur
@@ -127,7 +131,7 @@
         let cardData = await $pbStore.collection('cards').getFullList(10, {
             sort: "-created",
             filter: 'column = "' + column.id + '"',
-            expand: 'user,comments(card)',
+            expand: 'user,comments(card),votes(card)',
             '$cancelKey': column.id // Wihtout this, the client cancels separate column requests as non-unique
         })
         return cardData;
@@ -288,6 +292,24 @@
         $pbStore.collection('scenes').create(sceneData).then(()=>{
             getBoard();
             newSceneName = '';
+        })
+    }
+
+    function addVoteType() {
+        const voteTypeData = {
+            "typename": newVoteType,
+            "amount": 0,
+            "board": data.boardid
+        }
+        $pbStore.collection('votetypes').create(voteTypeData).then(()=>{
+            getBoard();
+            newVoteType = '';
+        })
+    }
+
+    function delVoteType(id) {
+        $pbStore.collection('votetypes').delete(id).then(()=>{
+            getBoard();
         })
     }
     
@@ -507,7 +529,7 @@
                 </div>
                 
                 {#each column.cards as card(card.id)}
-                <Card bind:card={card} bind:scene={currentScene} on:dragstart={handleDragStart} on:dragend={handleDragEnd} />
+                <Card bind:card={card} bind:scene={currentScene} bind:board={board} on:dragstart={handleDragStart} on:dragend={handleDragEnd} />
                 {/each}
                 
                 
@@ -537,11 +559,19 @@
     <div slot="label"><h1 class="title"><i class="fa-light fa-square-kanban"></i> Configure Board</h1></div>
     
     <sl-tab-group>
-        <sl-tab slot="nav" panel="general">General</sl-tab>
         <sl-tab slot="nav" panel="columns">Columns</sl-tab>
         <sl-tab slot="nav" panel="scenes">Scenes</sl-tab>
+        <sl-tab slot="nav" panel="voting">Voting</sl-tab>
+        <sl-tab slot="nav" panel="general">General</sl-tab>
         
         <sl-tab-panel name="general">
+            <div class="content">
+                <h3 class="subtitle">Other things that should be here...</h3>
+                <ul>
+                    <li>List of facilitators</li>
+                    <li>Users active on this board?</li>
+                </ul>
+            </div>
             <div class="field is-grouped">
                 <div class="control">
                     <button class="button is-link is-light" on:click={deleteBoard}>
@@ -619,6 +649,46 @@
                         <td><input type="text" class="input" bind:value={newSceneName} on:keypress={(e)=>{if(e.key == 'Enter')addScene()}}></td>
                         <td colspan="5">
                             <button class="button is-small is-success is-light" on:click={addScene}>
+                                <span class="icon is-small">
+                                    <i class="fas fa-plus"></i>
+                                </span>
+                                <span>Add</span>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </sl-tab-panel>
+        <sl-tab-panel name="voting">
+            <table class="table">
+                <thead><tr>
+                    <th>Vote Type</th>
+                    <th>Available</th>
+                    <th>Color</th>
+                    <th>Icon</th>
+                    <th>Delete</th>
+                </tr></thead>
+                <tbody>
+                    {#each board.votetypes as votetype}
+                    <tr>
+                        <td>{votetype.typename}</td>
+                        <td>{votetype.amount}</td>
+                        <td>black</td>
+                        <td>default</td>
+                        <td>
+                            <button class="button is-small is-danger is-light" on:click={()=>delVoteType(votetype.id)} disabled={votetype.typename == 'vote'} class:is-disabled={votetype.typename == 'vote'}>
+                                <span>Delete</span>
+                                <span class="icon is-small">
+                                    <i class="fas fa-times"></i>
+                                </span>
+                            </button>
+                        </td>
+                    </tr>
+                    {/each}
+                    <tr>
+                        <td><input type="text" class="input" bind:value={newVoteType} on:keypress={(e)=>{if(e.key == 'Enter')addVoteType()}}></td>
+                        <td colspan="5">
+                            <button class="button is-small is-success is-light" on:click={addVoteType}>
                                 <span class="icon is-small">
                                     <i class="fas fa-plus"></i>
                                 </span>

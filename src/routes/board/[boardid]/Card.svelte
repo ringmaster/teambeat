@@ -1,7 +1,7 @@
 <script>
     import { createEventDispatcher } from 'svelte';
     import { pbStore } from 'svelte-pocketbase';
-    import {tick} from "svelte"
+    import { afterUpdate, onMount } from "svelte"
     import { Editor, rootCtx, defaultValueCtx } from '@milkdown/core';
     import { commonmark } from '@milkdown/preset-commonmark';
     import { nord } from '@milkdown/theme-nord';
@@ -11,19 +11,49 @@
     
     export let card;
     export let scene;
+    export let board;
     
     $: cardIsCurrentUsers = card.expand.user.id == $pbStore.authStore.model.id;
     $: skeleton = !cardIsCurrentUsers && !scene.doReveal;
     $: skeletontext = '<span>' + card.description.replace(/\S/g, 'X').replace(/\s+/g, '</span> <span>').replace(/<span><\/span>/g, '') + '</span>';
     
     
-    let votes = [
-    {"title": "Vote", "count": 0}
-    ];
+    let votes = {
+        "vote": {"yours": 0, "total": 0}
+    };
     
-    let descriptionEl;
+    afterUpdate(() => {
+    });
     
-    let editing = false;
+    $pbStore.collection('votes').subscribe("*", (vote)=>{
+        if(vote.record.card != card.id) {
+            console.log('skipped?');
+            return
+        }
+        // votes on this card was updated, get new vote count
+        updateVotes();
+    });
+    
+    onMount(()=>{
+        updateVotes();
+    })
+    
+    function updateVotes() {
+        $pbStore.collection('votes').getFullList(200, {filter:`card="${card.id}"`, expand:'votetype', '$autoCancel': false}).then((results)=>{
+            votes = {};
+            board.votetypes.forEach((votetype)=>{
+                votes[votetype.typename] = {yours: 0, total: 0}
+            });
+            results.forEach((vote)=>{
+                const votetype = vote.expand.votetype.typename;
+                
+                if(vote.user == $pbStore.authStore.model.id) {
+                    votes[votetype].yours++;
+                }
+                votes[votetype].total++;
+            })
+        })
+    }
     
     function handleDragStart(e) {
         dispatch("dragstart", e)
@@ -31,13 +61,6 @@
     
     function handleDragEnd(e) {
         dispatch("dragend", e)
-    }
-    
-    function handleEdit(e) {
-        editing = true;
-        tick().then(()=>{
-            descriptionEl.focus();
-        })
     }
     
     function handleDelete(e){
@@ -78,6 +101,21 @@
         .use(commonmark)
         .use(listener)
         .create();
+    }
+    
+    function voteAdd(votetype) {
+        const vote = {
+            votetype: votetype.id,
+            user: $pbStore.authStore.model.id,
+            card: card.id
+        };
+        $pbStore.collection('votes').create(vote);
+    }
+    
+    function voteDel(votetype) {
+        $pbStore.collection('votes').getFirstListItem(`user="${$pbStore.authStore.model.id}" && card="${card.id}" && votetype="${votetype.id}"`, {'$autoCancel': false}).then((vote)=>{
+            $pbStore.collection('votes').delete(vote.id);
+        })
     }
     
 </script>
@@ -121,55 +159,50 @@
         {/each}
     </div>
     {/if}
-    {#if scene.doShowVotes || scene.doShowComments}
+    {#if scene.doShowVotes || scene.doVote || scene.doShowComments}
     <div class="card-footer level">
-            <div class="level-left">
-                <div class="level-item">
-                    <div class="field has-addons">
-                        <span class="control">
-                            <button class="button is-small is-rounded">
-                                <span class="icon is-small">
-                                    <i class="fa-light fa-minus"></i>
-                                </span>
-                            </button>
-                        </span>
-                        <span class="control">
-                            <button class="button is-small is-rounded">
-                                <span class="icon is-small">
-                                    <i class="fa-light fa-plus"></i>
-                                </span>
-                            </button>
-                        </span>
-                    </div>
-                </div>
-                <div class="level-item">
-                    {#if scene.doShowVotes}
-                    {#each votes as vote}
-                    <span class="has-tooltip-arrow" data-tooltip="{vote.title}">
-                        {vote.count} <i class="fa-regular fa-ballot-check"></i>
-                    </span>
-                    {/each}
-                    {/if}
-                </div>
+        <div class="level-left">
+            {#if scene.doShowVotes || scene.doVote}
+            {#each board.votetypes as votetype}
+            <div class="level-item votewidget">
+                {#if scene.doVote}
+                <button class="downvote udvote button is-small" class:is-disabled={votes[votetype.typename]?.yours<=0} on:click={()=>voteDel(votetype)}><i class="fa-solid fa-minus"></i></button>
+                <span>{votes[votetype.typename]?.yours}</span>
+                {/if}
+                {#if scene.doShowVotes && scene.doVote}
+                /
+                {/if}
+                {#if scene.doShowVotes }
+                {votes[votetype.typename]?.total}
+                {/if}
+                <span class="icon">
+                    <i class="fak fa-vote"></i>
+                </span>
+                {#if scene.doVote}
+                <button class="upvote udvote button is-small" on:click={()=>voteAdd(votetype)}><i class="fa-solid fa-plus"></i></button>
+                {/if}
             </div>
-            {#if scene.doShowComments}
-            <div class="level-right">
-                <div class="level-item">
-                    <sl-button-group label="Comment Group">
-                        <sl-button ><i class="fa-regular fa-message-medical"></i></sl-button>
-                        <sl-dropdown placement="bottom-end">
-                            <sl-button slot="trigger" caret>
-                                <sl-visually-hidden>More comment options</sl-visually-hidden>
-                            </sl-button>
-                            <sl-menu>
-                                <sl-menu-item><i class="fa-regular fa-face-smile"></i></sl-menu-item>
-                                <sl-menu-item><i class="fa-regular fa-face-frown"></i></sl-menu-item>
-                            </sl-menu>
-                        </sl-dropdown>
-                    </sl-button-group>
-                </div>
-            </div>
+            {/each}
             {/if}
+        </div>
+        {#if scene.doShowComments}
+        <div class="level-right">
+            <div class="level-item">
+                <sl-button-group label="Comment Group">
+                    <sl-button ><i class="fa-regular fa-message-medical"></i></sl-button>
+                    <sl-dropdown placement="bottom-end">
+                        <sl-button slot="trigger" caret>
+                            <sl-visually-hidden>More comment options</sl-visually-hidden>
+                        </sl-button>
+                        <sl-menu>
+                            <sl-menu-item><i class="fa-regular fa-face-smile"></i></sl-menu-item>
+                            <sl-menu-item><i class="fa-regular fa-face-frown"></i></sl-menu-item>
+                        </sl-menu>
+                    </sl-dropdown>
+                </sl-button-group>
+            </div>
+        </div>
+        {/if}
     </div>
     {/if}
 </div>
@@ -218,4 +251,31 @@
         outline: none;
         background: #f8f8f8;
     }
+    .votecontrols {
+        display: inline;
+    }
+    .votewidget .downvote, .votewidget .upvote {
+        visibility: hidden;
+    }
+    .votewidget:hover .downvote, .votewidget:hover .upvote {
+        visibility: visible;
+    }
+    .votewidget:hover .udvote.is-disabled {
+        visibility: hidden;
+    }
+    .downvote:hover {
+        background-color: rgb(255, 219, 219);
+    }
+    .upvote:hover {
+        background-color: rgb(155, 234, 197);
+    }
+    .udvote {
+        border: none;
+    }
+    .udvote {
+        border-radius: 1rem; 
+        width: 1.5rem; 
+        height: 1.5rem; 
+    }
+    
 </style>

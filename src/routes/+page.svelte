@@ -82,15 +82,13 @@
                     {#each board.expand.facilitators as facilitator}
                     <div>{facilitator.name}</div>
                     {/each}
-                    
                 </td>
                 <td>
                     {#each board.expand.users as user}
-                    <sl-tooltip content="Author: {user.name}">
+                    <span class="has-tooltip-arrow" data-tooltip="{user.name}">
                         <i class="fa-solid fa-user"></i>
-                    </sl-tooltip>
+                    </span>
                     {/each}
-                    
                 </td>
                 <td>{board.created}</td>
             </tr>

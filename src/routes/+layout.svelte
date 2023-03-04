@@ -7,6 +7,7 @@
     //import '@creativebulma/bulma-tooltip/src/sass/index.sass';
     
     pbStore.set(env.PUBLIC_POCKETBASE_URL);
+    $pbStore.autoCancellation(false);
     
     if(!$pbStore.authStore.isValid) {
         if (["/", "/login"].indexOf(location.href) === false) {
@@ -138,5 +139,8 @@
     }
     .navbar {
         margin-bottom: 5px;
+    }
+    .navbar-dropdown {
+        z-index: 300;
     }
 </style>

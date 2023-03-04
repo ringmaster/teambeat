@@ -42,6 +42,7 @@
 		"bulma": "^0.9.4",
 		"chart.js": "^4.2.1",
 		"colorjs.io": "^0.4.3",
+		"lodash": "^4.17.21",
 		"milligram": "^1.4.1",
 		"svelte-chartjs": "^3.1.2",
 		"svelte-cookie": "^1.0.1",
