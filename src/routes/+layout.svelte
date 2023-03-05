@@ -4,7 +4,6 @@
     import { goto } from '$app/navigation';
     import '@milkdown/theme-nord/style.css';
     import '../app.scss';
-    //import '@creativebulma/bulma-tooltip/src/sass/index.sass';
     
     pbStore.set(env.PUBLIC_POCKETBASE_URL);
     $pbStore.autoCancellation(false);
@@ -99,25 +98,8 @@
 <slot/>
 
 <style lang="scss">
-    /* @import "../../node_modules/milligram/dist/milligram.min.css"; */
-    /* @import "https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"; */
-    
     :root {
         --sl-font-size-medium: 1.6rem;
-    }
-    
-    .navigation {
-        background: #f4f5f6;
-        border-bottom: 0.1rem solid #d1d1d1;
-        display: block;
-        height: 5.2rem;
-        left: 0;
-        max-width: 100%;
-        position: fixed;
-        right: 0;
-        top: 0;
-        width: 100%;
-        z-index: 2;
     }
     
     :global(body) {
@@ -133,9 +115,6 @@
         padding: 0 2rem;
         position: relative;
         width: 100%;
-    }
-    .float-right {
-        float: right;
     }
     .navbar {
         margin-bottom: 5px;

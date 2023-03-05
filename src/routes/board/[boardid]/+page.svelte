@@ -343,6 +343,18 @@
         currentScene.mode = newMode;
         $pbStore.collection('scenes').update(currentScene.id, currentScene);
     }
+    
+    function shareLink() {
+        if (!navigator.clipboard) {
+            notify("Your browser does not support this feature.", "error");
+            return;
+        }
+        navigator.clipboard.writeText('THE URL').then(function() {
+            notify("Share link has been copied to the clipboard.", "info");
+        }, function(err) {
+            notify("There was a problem copying the share link to the clipboard.", "error");
+        });
+    }
 </script>
 
 <svelte:head>
@@ -430,10 +442,10 @@
         <div class="level-right is-flex is-justify-content-right is-align-content-center">
             <div class="field has-addons">
                 <!-- svelte-ignore a11y-click-events-have-key-events -->
-                <div class="control dropdown is-hoverable is-right">
-                    <button class="button is-small is-rounded">
+                <div class="control dropdown is-right" class:is-hoverable={currentScene.doVote}>
+                    <button class="button is-small is-rounded" disabled="{!currentScene.doVote}">
                         <span class="icon is-small">
-                            <i class="fa-regular fa-ballot-check"></i>
+                            <i class="fak fa-vote"></i>
                         </span>
                         <span>Votes</span>
                         <span class="icon is-small">
@@ -491,11 +503,17 @@
                     </div>
                 </div>
                 <div class="control">
+                    <button class="button is-small is-rounded" on:click={shareLink}>
+                        <span class="icon is-small">
+                            <i class="fa-light fa-share"></i>
+                        </span>
+                    </button>
+                </div>                
+                <div class="control">
                     <button class="button is-small is-rounded" on:click={configBoard}>
                         <span class="icon is-small">
-                            <i class="fa-light fa-square-kanban"></i>
+                            <i class="fa-light fa-gear"></i>
                         </span>
-                        <span>Configure</span>
                     </button>
                 </div>                
             </div>

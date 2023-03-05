@@ -152,7 +152,7 @@
                     <h2>This board has no columns</h2>
                     <p><b>Maybe this is intentional?</b> If not, you have two options:</p>
                     <ol>
-                        <li>Configure the columns and scenes for this board manually using the <code>Configure</code> button, above.</li>
+                        <li>Configure the columns and scenes for this board manually using the <code><i class="fa-light fa-gear"></i></code> Configure button, at the top right.</li>
                         <li>Choose one of the preset board configurations to the right.</li>
                     </ol>
                 </div>
