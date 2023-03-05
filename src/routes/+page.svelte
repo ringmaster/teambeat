@@ -36,13 +36,22 @@
             ]
         };
         $pbStore.collection('boards').create(data).then((newboard)=>{
-            const scenedata = {
+            let promises = [];
+            const scenedatas = [
+            {"board": newboard.id, "title": "collect", "current": true, "seq": 1, "doAdd": true, "doEdit": true, "doMove": true },
+            {"board": newboard.id, "title": "group", "current": false, "seq": 2, "doAdd": false, "doEdit": false, "doMove": true, "doReveal": true },
+            {"board": newboard.id, "title": "vote", "current": false, "seq": 3, "doAdd": false, "doEdit": false, "doMove": false, "doReveal": true, "doVote": true },
+            ];
+            scenedatas.forEach((scenedata)=>{
+                promises.push($pbStore.collection('scenes').create(scenedata));
+            });
+            const votetypesdata = {
                 "board": newboard.id,
-                "title": "default",
-                "current": true,
-                "seq": 1
-            };
-            $pbStore.collection('scenes').create(scenedata).then((scene)=>{
+                "typename": "votes",
+                "amount": 0
+            }
+            promises.push($pbStore.collection('votetypes').create(votetypesdata));
+            Promise.all(promises).then(()=>{
                 goto( "/board/" + newboard.id );
             })
         })

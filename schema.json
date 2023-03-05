@@ -49,9 +49,11 @@
                 "required": true,
                 "unique": false,
                 "options": {
-                    "maxSelect": 1,
                     "collectionId": "_pb_users_auth_",
-                    "cascadeDelete": false
+                    "cascadeDelete": false,
+                    "minSelect": null,
+                    "maxSelect": 1,
+                    "displayFields": null
                 }
             },
             {
@@ -100,9 +102,11 @@
                 "required": true,
                 "unique": false,
                 "options": {
-                    "maxSelect": 1,
                     "collectionId": "0m5589a5c6zbh1x",
-                    "cascadeDelete": true
+                    "cascadeDelete": true,
+                    "minSelect": null,
+                    "maxSelect": 1,
+                    "displayFields": null
                 }
             }
         ],
@@ -140,9 +144,11 @@
                 "required": false,
                 "unique": false,
                 "options": {
-                    "maxSelect": null,
                     "collectionId": "_pb_users_auth_",
-                    "cascadeDelete": false
+                    "cascadeDelete": false,
+                    "minSelect": null,
+                    "maxSelect": null,
+                    "displayFields": null
                 }
             },
             {
@@ -153,9 +159,11 @@
                 "required": true,
                 "unique": false,
                 "options": {
-                    "maxSelect": null,
                     "collectionId": "_pb_users_auth_",
-                    "cascadeDelete": false
+                    "cascadeDelete": false,
+                    "minSelect": null,
+                    "maxSelect": null,
+                    "displayFields": null
                 }
             },
             {
@@ -181,6 +189,15 @@
                     "min": null,
                     "max": null
                 }
+            },
+            {
+                "id": "owkljuly",
+                "name": "votes",
+                "type": "json",
+                "system": false,
+                "required": false,
+                "unique": false,
+                "options": {}
             }
         ],
         "listRule": "",
@@ -229,9 +246,11 @@
                 "required": true,
                 "unique": false,
                 "options": {
-                    "maxSelect": 1,
                     "collectionId": "okipigcv64f5rtw",
-                    "cascadeDelete": true
+                    "cascadeDelete": true,
+                    "minSelect": null,
+                    "maxSelect": 1,
+                    "displayFields": null
                 }
             }
         ],
@@ -256,9 +275,11 @@
                 "required": true,
                 "unique": false,
                 "options": {
-                    "maxSelect": 1,
                     "collectionId": "okipigcv64f5rtw",
-                    "cascadeDelete": true
+                    "cascadeDelete": true,
+                    "minSelect": null,
+                    "maxSelect": 1,
+                    "displayFields": null
                 }
             },
             {
@@ -366,6 +387,38 @@
                 "required": false,
                 "unique": false,
                 "options": {}
+            },
+            {
+                "id": "1wqgbdea",
+                "name": "mode",
+                "type": "select",
+                "system": false,
+                "required": false,
+                "unique": false,
+                "options": {
+                    "maxSelect": 1,
+                    "values": [
+                        "columns",
+                        "present"
+                    ]
+                }
+            },
+            {
+                "id": "ji3wm4zh",
+                "name": "presenting",
+                "type": "relation",
+                "system": false,
+                "required": false,
+                "unique": false,
+                "options": {
+                    "collectionId": "a5ckunr0hfgn4uv",
+                    "cascadeDelete": false,
+                    "minSelect": null,
+                    "maxSelect": 1,
+                    "displayFields": [
+                        "description"
+                    ]
+                }
             }
         ],
         "listRule": "",
@@ -402,9 +455,11 @@
                 "required": true,
                 "unique": false,
                 "options": {
-                    "maxSelect": 1,
                     "collectionId": "_pb_users_auth_",
-                    "cascadeDelete": false
+                    "cascadeDelete": false,
+                    "minSelect": null,
+                    "maxSelect": 1,
+                    "displayFields": null
                 }
             },
             {
@@ -430,9 +485,132 @@
                 "required": true,
                 "unique": false,
                 "options": {
-                    "maxSelect": 1,
                     "collectionId": "a5ckunr0hfgn4uv",
-                    "cascadeDelete": true
+                    "cascadeDelete": true,
+                    "minSelect": null,
+                    "maxSelect": 1,
+                    "displayFields": null
+                }
+            }
+        ],
+        "listRule": "",
+        "viewRule": "",
+        "createRule": "",
+        "updateRule": "",
+        "deleteRule": "",
+        "options": {}
+    },
+    {
+        "id": "qiukekktwoh7kb7",
+        "name": "votes",
+        "type": "base",
+        "system": false,
+        "schema": [
+            {
+                "id": "0oyhdo1g",
+                "name": "card",
+                "type": "relation",
+                "system": false,
+                "required": false,
+                "unique": false,
+                "options": {
+                    "collectionId": "a5ckunr0hfgn4uv",
+                    "cascadeDelete": true,
+                    "minSelect": null,
+                    "maxSelect": 1,
+                    "displayFields": [
+                        "description"
+                    ]
+                }
+            },
+            {
+                "id": "khhtf2os",
+                "name": "user",
+                "type": "relation",
+                "system": false,
+                "required": false,
+                "unique": false,
+                "options": {
+                    "collectionId": "_pb_users_auth_",
+                    "cascadeDelete": true,
+                    "minSelect": null,
+                    "maxSelect": 1,
+                    "displayFields": [
+                        "email"
+                    ]
+                }
+            },
+            {
+                "id": "ptx1cd48",
+                "name": "votetype",
+                "type": "relation",
+                "system": false,
+                "required": false,
+                "unique": false,
+                "options": {
+                    "collectionId": "hn3w1shsrrwkwgs",
+                    "cascadeDelete": true,
+                    "minSelect": null,
+                    "maxSelect": 1,
+                    "displayFields": [
+                        "typename"
+                    ]
+                }
+            }
+        ],
+        "listRule": "",
+        "viewRule": "",
+        "createRule": "",
+        "updateRule": "",
+        "deleteRule": "",
+        "options": {}
+    },
+    {
+        "id": "hn3w1shsrrwkwgs",
+        "name": "votetypes",
+        "type": "base",
+        "system": false,
+        "schema": [
+            {
+                "id": "obbyplar",
+                "name": "typename",
+                "type": "text",
+                "system": false,
+                "required": false,
+                "unique": false,
+                "options": {
+                    "min": null,
+                    "max": null,
+                    "pattern": ""
+                }
+            },
+            {
+                "id": "i0niciuq",
+                "name": "board",
+                "type": "relation",
+                "system": false,
+                "required": false,
+                "unique": false,
+                "options": {
+                    "collectionId": "okipigcv64f5rtw",
+                    "cascadeDelete": true,
+                    "minSelect": null,
+                    "maxSelect": 1,
+                    "displayFields": [
+                        "name"
+                    ]
+                }
+            },
+            {
+                "id": "5ilizf5q",
+                "name": "amount",
+                "type": "number",
+                "system": false,
+                "required": false,
+                "unique": false,
+                "options": {
+                    "min": 0,
+                    "max": null
                 }
             }
         ],
