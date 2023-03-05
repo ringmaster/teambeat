@@ -245,9 +245,9 @@
         currentScene.current = true;
         $pbStore.collection('scenes').update(currentScene.id, currentScene);
     }
-
+    
     function sceneSubUpdate(s) {
-        if(s.board != board.id) return;
+        if(s.record.board != board.id) return;
         //currentScene = {...currentScene, ...s.record};
         $pbStore.collection('scenes').getFullList(200, {
             filter: `board="${currentScene.board}"`,
@@ -272,7 +272,7 @@
             board.votetypes = votetypes;
         })
     }
-
+    
     function columnsSubUpdate(column) {
         if(column.record.board != data.boardid) return;
         $pbStore.collection('columns').getFullList(200, {filter: `board = "${data.boardid}"`, sort: "+seq"}).then((columnData)=>{
@@ -339,6 +339,10 @@
         notify(`Increased ${votetype.typename} amount to ${votetype.amount}.`, "info", 'info')
     }
     
+    function setMode(newMode) {
+        currentScene.mode = newMode;
+        $pbStore.collection('scenes').update(currentScene.id, currentScene);
+    }
 </script>
 
 <svelte:head>
@@ -381,9 +385,45 @@
                     </div>
                 </div>
             </div>
+            <div class="level-item">
+                <div class="dropdown is-hoverable">
+                    <div class="dropdown-trigger">
+                        <button class="button is-small is-white" aria-haspopup="true" aria-controls="dropdown-menu">
+                            {#if currentScene.mode == 'present'}
+                            <span class="icon is-small">
+                                <i class="fa-light fa-presentation-screen"></i>
+                            </span>
+                            {:else}
+                            <span class="icon is-small">
+                                <i class="fa-light fa-square-kanban"></i>
+                            </span>
+                            {/if}
+                            <span class="icon is-small">
+                                <i class="fas fa-angle-down" aria-hidden="true"></i>
+                            </span>
+                        </button>
+                    </div>
+                    <div class="dropdown-menu" id="dropdown-menu" role="menu">
+                        <div class="dropdown-content">
+                            <a href="#" class="dropdown-item" on:click={()=>{setMode('columns')}}>
+                                <span class="icon is-small">
+                                    <i class="fa-light fa-square-kanban"></i>
+                                </span>
+                                <span>Board</span>
+                            </a>
+                            <a href="#" class="dropdown-item" on:click={()=>{setMode('present')}}>
+                                <span class="icon is-small">
+                                    <i class="fa-light fa-presentation-screen"></i>
+                                </span>
+                                <span>Present</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
             {/if}
             <div class="level-item">
-                {board.votecounts.vote}
+                
             </div>
         </div>
         {#if isFacilitator}
@@ -464,8 +504,11 @@
     </div>
 </div>
 
-
+{#if currentScene.mode == 'present'}
+<h2>Presentation mode goes here</h2>
+{:else}
 <Columns bind:board bind:currentScene />
+{/if}
 
 {/await}
 
