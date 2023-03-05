@@ -20,15 +20,15 @@
         })
     }
     
-    afterUpdate(()=>{
+    function updateScene() {
         clearTimeout(updateTimer);
         updateTimer = setTimeout(()=>{
             board.scenes.forEach((scene)=>{
                 console.log("AFTER UPDATE", scene);
-                //$pbStore.collection('scenes').update(scene.id, scene);
+                $pbStore.collection('scenes').update(scene.id, scene);
             });
         }, 750);
-    })
+    }
     
 </script>
 
@@ -49,14 +49,14 @@
         {#each board.scenes as scene}
         <tr>
             <td>{scene.title}</td>
-            <td><input type="checkbox" class="checkbox" bind:checked={scene.doAdd}></td>
-            <td><input type="checkbox" class="checkbox" bind:checked={scene.doEdit}></td>
-            <td><input type="checkbox" class="checkbox" bind:checked={scene.doReveal}></td>
-            <td><input type="checkbox" class="checkbox" bind:checked={scene.doMove}></td>
-            <td><input type="checkbox" class="checkbox" bind:checked={scene.doShowVotes}></td>
-            <td><input type="checkbox" class="checkbox" bind:checked={scene.doVote}></td>
-            <td><input type="checkbox" class="checkbox" bind:checked={scene.doShowComments}></td>
-            <td><input type="checkbox" class="checkbox" bind:checked={scene.doComment}></td>
+            <td><input type="checkbox" class="checkbox" on:click={updateScene} bind:checked={scene.doAdd}></td>
+            <td><input type="checkbox" class="checkbox" on:click={updateScene} bind:checked={scene.doEdit}></td>
+            <td><input type="checkbox" class="checkbox" on:click={updateScene} bind:checked={scene.doReveal}></td>
+            <td><input type="checkbox" class="checkbox" on:click={updateScene} bind:checked={scene.doMove}></td>
+            <td><input type="checkbox" class="checkbox" on:click={updateScene} bind:checked={scene.doShowVotes}></td>
+            <td><input type="checkbox" class="checkbox" on:click={updateScene} bind:checked={scene.doVote}></td>
+            <td><input type="checkbox" class="checkbox" on:click={updateScene} bind:checked={scene.doShowComments}></td>
+            <td><input type="checkbox" class="checkbox" on:click={updateScene} bind:checked={scene.doComment}></td>
         </tr>
         {/each}
         <tr>

@@ -72,6 +72,7 @@
         height: 0;
         overflow: hidden;
         transition: height 0.25s cubic-bezier(0.165, 0.84, 0.44, 1);
+        box-shadow: 0px 1px 20px #333;
     }
     .drawer.is-visible {
         height: 20rem;
@@ -97,5 +98,6 @@
     }
     .drawercontent {
         overflow-y: scroll;
+        height: calc(20rem - 32px - 1rem);
     }
 </style>
