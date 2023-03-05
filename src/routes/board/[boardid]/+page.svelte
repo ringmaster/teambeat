@@ -7,23 +7,19 @@
     import notify from "../../../utils/notify";
     
     import TimerDial from "./TimerDial.svelte";
+	import Drawer from "./Drawer.svelte";
     
     export let data;
     
     $: user = $pbStore.authStore.model
     
-    let drawer;
+    let showDrawer = false;
     let timer = false;
     let timerexpanded = false;
     let timeLimit = 0;
     let startedAt = 0;
     let startTimer;
     let stopTimer;
-    let confirmDelete = false;
-    let newSceneName = '';
-    let newColumnName = '';
-    let newColumnVote = true;
-    let newVoteType = '';
     let currentScene = {title: "", loaded: false};
     let audioFile = [new Audio("/alarmding2.mp3"), new Audio("/alarmding1.mp3")];
     let boardData;
@@ -87,13 +83,6 @@
         })
     }
     
-    function updateSceneDos(e) {
-        board.scenes.forEach((scene)=>{
-            console.log(scene);
-            $pbStore.collection('scenes').update(scene.id, scene);
-        });
-    }
-    
     function checkTimer() {
         if(board.timerlength != 0) {
             if((board.timerstart + board.timerlength * 1000) > Date.now()) {
@@ -143,9 +132,8 @@
     }
     
     function configBoard() {
-        drawer.show();
+        showDrawer = true;
     }
-    
     
     function extendTimer(sec) {
         let newstart = 0, newlength = 0;
@@ -183,61 +171,7 @@
     function doTimerClick() {
         timerexpanded = !timerexpanded
     }
-    
-    function deleteBoard(){
-        if(confirmDelete) {
-            $pbStore.collection('boards').delete(data.boardid).then(()=>{
-                goto("/");
-            })
-        } else {
-            notify("Check the box to confirm the deletion of this board.", "warning", "exclamation-triangle")
-        }
-    }
-    
-    function addColumn() {
-        const maxseq = board.columns.reduce((prev, cur)=>{return Math.max(prev,cur.seq)}, 0) + 1;
-        const columnData = {
-            "title": newColumnName,
-            "seq": maxseq,
-            "board": data.boardid
-        }
-        $pbStore.collection('columns').create(columnData).then(()=>{
-            getBoard();
-            newColumnName = '';
-        })
-    }    
-    
-    function addScene() {
-        const maxseq = board.scenes.reduce((prev, cur)=>{return Math.max(prev,cur.seq)}, 0) + 1;
-        const sceneData = {
-            "title": newSceneName,
-            "seq": maxseq,
-            "board": data.boardid
-        }
-        $pbStore.collection('scenes').create(sceneData).then(()=>{
-            getBoard();
-            newSceneName = '';
-        })
-    }
-    
-    function addVoteType() {
-        const voteTypeData = {
-            "typename": newVoteType,
-            "amount": 0,
-            "board": data.boardid
-        }
-        $pbStore.collection('votetypes').create(voteTypeData).then(()=>{
-            getBoard();
-            newVoteType = '';
-        })
-    }
-    
-    function delVoteType(id) {
-        $pbStore.collection('votetypes').delete(id).then(()=>{
-            getBoard();
-        })
-    }
-    
+
     function setScene(scene) {
         currentScene.current = false;
         $pbStore.collection('scenes').update(currentScene.id, currentScene);
@@ -248,7 +182,6 @@
     
     function sceneSubUpdate(s) {
         if(s.record.board != board.id) return;
-        //currentScene = {...currentScene, ...s.record};
         $pbStore.collection('scenes').getFullList(200, {
             filter: `board="${currentScene.board}"`,
             sort: '+seq',
@@ -301,12 +234,6 @@
                 }
             })
             board.votecounts = votes;
-        })
-    }
-    
-    function delColumn(id) {
-        $pbStore.collection('columns').delete(id).then(()=>{
-            getBoard();
         })
     }
     
@@ -530,154 +457,7 @@
 
 {/await}
 
-<sl-drawer placement="top" class="drawer-placement-top" bind:this={drawer} on:sl-request-close={updateSceneDos}>
-    <div slot="label"><h1 class="title"><i class="fa-light fa-square-kanban"></i> Configure Board</h1></div>
-    
-    <sl-tab-group>
-        <sl-tab slot="nav" panel="columns">Columns</sl-tab>
-        <sl-tab slot="nav" panel="scenes">Scenes</sl-tab>
-        <sl-tab slot="nav" panel="voting">Voting</sl-tab>
-        <sl-tab slot="nav" panel="general">General</sl-tab>
-        
-        <sl-tab-panel name="general">
-            <div class="content">
-                <h3 class="subtitle">Other things that should be here...</h3>
-                <ul>
-                    <li>List of facilitators</li>
-                    <li>Users active on this board?</li>
-                </ul>
-            </div>
-            <div class="field is-grouped">
-                <div class="control">
-                    <button class="button is-link is-light" on:click={deleteBoard}>
-                        <span class="icon is-small"><input class="checkbox" type="checkbox" bind:checked={confirmDelete} on:click={(e)=>e.stopPropagation()}></span>
-                        <span>Delete Board</span>
-                    </button>
-                </div>
-            </div>
-        </sl-tab-panel>
-        <sl-tab-panel name="columns">
-            <table class="table does">
-                <thead><tr>
-                    <th>Column</th>
-                    <th>Vote</th>
-                    <th>Delete</th>
-                </tr></thead>
-                <tbody>
-                    {#each board.columns as column}
-                    <tr>
-                        <td>{column.title}</td>
-                        <td><input type="checkbox" class="checkbox"></td>
-                        <td>
-                            <button class="button is-small is-danger is-light" on:click={()=>delColumn(column.id)}>
-                                <span>Delete</span>
-                                <span class="icon is-small">
-                                    <i class="fas fa-times"></i>
-                                </span>
-                            </button>
-                        </td>
-                    </tr>
-                    {/each}
-                    <tr>
-                        <td><input type="text" class="input" bind:value={newColumnName} on:keypress={(e)=>{if(e.key == 'Enter')addColumn()}}></td>
-                        <td><input type="checkbox" class="checkbox" bind:checked={newColumnVote}></td>
-                        <td>
-                            <button class="button is-small is-success is-light" on:click={addColumn}>
-                                <span class="icon is-small">
-                                    <i class="fas fa-plus"></i>
-                                </span>
-                                <span>Add</span>
-                            </button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>            
-        </sl-tab-panel>
-        <sl-tab-panel name="scenes">
-            <table class="table does">
-                <thead><tr>
-                    <th>Scene</th>
-                    <th>Add</th>
-                    <th>Edit</th>
-                    <th>Reveal</th>
-                    <th>Move</th>
-                    <th>Show Votes</th>
-                    <th>Vote</th>
-                    <th>Show Comments</th>
-                    <th>Comment</th>
-                </tr></thead>
-                <tbody>
-                    {#each board.scenes as scene}
-                    <tr>
-                        <td>{scene.title}</td>
-                        <td><input type="checkbox" class="checkbox" bind:checked={scene.doAdd}></td>
-                        <td><input type="checkbox" class="checkbox" bind:checked={scene.doEdit}></td>
-                        <td><input type="checkbox" class="checkbox" bind:checked={scene.doReveal}></td>
-                        <td><input type="checkbox" class="checkbox" bind:checked={scene.doMove}></td>
-                        <td><input type="checkbox" class="checkbox" bind:checked={scene.doShowVotes}></td>
-                        <td><input type="checkbox" class="checkbox" bind:checked={scene.doVote}></td>
-                        <td><input type="checkbox" class="checkbox" bind:checked={scene.doShowComments}></td>
-                        <td><input type="checkbox" class="checkbox" bind:checked={scene.doComment}></td>
-                    </tr>
-                    {/each}
-                    <tr>
-                        <td><input type="text" class="input" bind:value={newSceneName} on:keypress={(e)=>{if(e.key == 'Enter')addScene()}}></td>
-                        <td colspan="5">
-                            <button class="button is-small is-success is-light" on:click={addScene}>
-                                <span class="icon is-small">
-                                    <i class="fas fa-plus"></i>
-                                </span>
-                                <span>Add</span>
-                            </button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </sl-tab-panel>
-        <sl-tab-panel name="voting">
-            <table class="table">
-                <thead><tr>
-                    <th>Vote Type</th>
-                    <th>Available</th>
-                    <th>Color</th>
-                    <th>Icon</th>
-                    <th>Delete</th>
-                </tr></thead>
-                <tbody>
-                    {#each board.votetypes as votetype}
-                    <tr>
-                        <td>{votetype.typename}</td>
-                        <td>{votetype.amount}</td>
-                        <td>black</td>
-                        <td>default</td>
-                        <td>
-                            <button class="button is-small is-danger is-light" on:click={()=>delVoteType(votetype.id)} disabled={votetype.typename == 'votes'} class:is-disabled={votetype.typename == 'votes'}>
-                                <span>Delete</span>
-                                <span class="icon is-small">
-                                    <i class="fas fa-times"></i>
-                                </span>
-                            </button>
-                        </td>
-                    </tr>
-                    {/each}
-                    <tr>
-                        <td><input type="text" class="input" bind:value={newVoteType} on:keypress={(e)=>{if(e.key == 'Enter')addVoteType()}}></td>
-                        <td colspan="5">
-                            <button class="button is-small is-success is-light" on:click={addVoteType}>
-                                <span class="icon is-small">
-                                    <i class="fas fa-plus"></i>
-                                </span>
-                                <span>Add</span>
-                            </button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </sl-tab-panel>
-    </sl-tab-group>
-    
-</sl-drawer>
-
+<Drawer bind:board bind:visible={showDrawer} />
 
 {#if timer}
 <div class="timer" in:fly="{{ y: 200, duration: 500 }}" out:fly="{{ y: 200, duration: 500 }}">
