@@ -19,7 +19,7 @@
     
     
     let votes = {
-        "vote": {"yours": 0, "total": 0}
+        "votes": {"yours": 0, "total": 0}
     };
     
     afterUpdate(() => {
@@ -178,7 +178,15 @@
                 <span>{votes[votetype.typename]?.total}</span>
                 {/if}
                 <span class="icon" class:is-voted={votes[votetype.typename]?.yours>0}>
+                    {#if votetype.typename == 'gems'}
+                    <i class="fa-light fa-gem"></i>
+                    {:else if votetype.typename == 'bananas'}
+                    <i class="fa-light fa-banana"></i>
+                    {:else if votetype.typename == 'award'}
+                    <i class="fa-light fa-award"></i>
+                    {:else}
                     <i class="fak fa-vote"></i>
+                    {/if}
                 </span>
                 {#if scene.doVote}
                 <button class="upvote udvote button is-small" class:is-disabled={board.votecounts[votetype.typename]>=votetype.amount} on:click={()=>voteAdd(votetype)}><i class="fa-solid fa-plus"></i></button>

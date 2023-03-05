@@ -73,7 +73,8 @@
                 }
                 return prev
             }, board.scenes[0])
-            $pbStore.collection('scenes').subscribe('*', sceneSubUpdate)
+            $pbStore.collection('scenes').subscribe('*', sceneSubUpdate);
+            $pbStore.collection('votetypes').subscribe('*', votetypesSubUpdate);
             checkTimer();
             
             $pbStore.collection('boards').subscribe(data.boardid, (b)=>{
@@ -343,6 +344,15 @@
             }, board.scenes[0])
         })
     }
+
+    function votetypesSubUpdate(votetype) {
+        if(votetype.record.board != data.boardid) return;
+        $pbStore.collection('votetypes').getFullList(200, {
+            filter: `board = "${data.boardid}"`
+        }).then((votetypes)=>{
+            board.votetypes = votetypes;
+        })
+    }
     
     function getVoteCounts() {
         let votes = {}
@@ -381,6 +391,26 @@
         else {
             audioFile[1].play();
         }
+    }
+
+    function clearVotes() {
+        $pbStore.collection('votetypes').getFullList('200', {filter: `board="${data.boardid}"`}).then((votetypes)=>{
+            votetypes.forEach((votetype)=>{
+                votetype.amount = 0;
+                $pbStore.collection('votetypes').update(votetype.id, votetype);
+            })
+        })
+        $pbStore.collection('votes').getFullList('1000', {filter: `card.column.board="${data.boardid}"`}).then((votes)=>{
+            votes.forEach((vote) => {
+                $pbStore.collection('votes').delete(vote.id);
+            })
+        })
+    }
+
+    function addVotes(votetype, amount) {
+        votetype.amount += amount;
+        $pbStore.collection('votetypes').update(votetype.id, votetype);
+        notify(`Increased ${votetype.typename} amount to ${votetype.amount}.`, "info", 'info')
     }
     
 </script>
@@ -446,19 +476,18 @@
                     </button>
                     <div class="dropdown-menu" id="dropdown-menu" role="menu">
                         <div class="dropdown-content">
-                            <a href="#" class="dropdown-item">
-                                <i class="fa-light fa-square-root"></i>
-                                <i class="fa-light fa-cards-blank"></i>
-                                Add {pureVoteCount} votes
-                            </a>
-                            <a href="#" class="dropdown-item">
-                                Add 3 votes
-                            </a>
-                            <a href="#" class="dropdown-item">
-                                Add 1 vote
-                            </a>
+                            {#each board.votetypes as votetype}
+                            <div class="dropdown-item">
+                                <div>Add {votetype.typename}</div>
+                                <div>
+                                    <button class="button is-small is-white" on:click={()=>addVotes(votetype, 1)}>+1</button>
+                                    <button class="button is-small is-white" on:click={()=>addVotes(votetype, 5)}>+5</button>
+                                    <button class="button is-small is-white" on:click={()=>addVotes(votetype, pureVoteCount)}>+{pureVoteCount}</button>
+                                </div>
+                            </div>
+                            {/each}
                             <hr class="dropdown-divider">
-                            <a href="#" class="dropdown-item">
+                            <a href="#" class="dropdown-item" on:click={clearVotes}>
                                 Clear votes
                             </a>
                             <!-- hr class="dropdown-divider">
@@ -718,7 +747,7 @@
                             <td>black</td>
                             <td>default</td>
                             <td>
-                                <button class="button is-small is-danger is-light" on:click={()=>delVoteType(votetype.id)} disabled={votetype.typename == 'vote'} class:is-disabled={votetype.typename == 'vote'}>
+                                <button class="button is-small is-danger is-light" on:click={()=>delVoteType(votetype.id)} disabled={votetype.typename == 'votes'} class:is-disabled={votetype.typename == 'votes'}>
                                     <span>Delete</span>
                                     <span class="icon is-small">
                                         <i class="fas fa-times"></i>

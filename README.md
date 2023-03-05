@@ -27,14 +27,15 @@ TeamBeat is a tool to enable teams to easily facilitate remote retrospectives.
 This procedure should only be necessary once if the /pb/ directory is preserved between runs.
 
 # To Do
-1. ~Add the schema export to the repo~
-2. Provide a way for the application to bootstrap the schema from the static directory
-3. ~Use websockets to monitor the board list for updates on the main page~
-4. ~Use websockets to montior the current scene on the board page~
-5. Add voting
-6. Add Commenting
-7. Add presentation mode
-8. Add voting card type
-9. Restrict facilitation controls to facilitators
-10. Restrict data modification via API based on auth rules
-11. Ability to send board URLs that allow login-free (but user-tracked) access
+1. Provide a way for the application to bootstrap the schema from the static directory
+1. ~~Add voting~~
+    1. Allow scenes to sort by vote count
+    2. Figure out why sometimes votes don't sync
+    1. Show remaning votes
+    1. Allow people to mark themselves as done for the scene
+1. Add Commenting
+1. Add presentation mode
+1. Add voting card type
+1. ~~Restrict facilitation controls to facilitators~~
+1. Restrict data modification via API based on auth rules
+1. Ability to send board URLs that allow login-free (but user-tracked) access
