@@ -21,7 +21,7 @@ const config = {
 			strict: false,
 			trailingSlash: 'always'
 		}),
-		prerender: {entries: ['*', '/board/[boardid]']},
+		prerender: {entries: ['*', '/board/[boardid]', '/share/[boardid]']},
 		paths: {
 			base: "",
 		}
