@@ -17,7 +17,7 @@ const config = {
 			pages: 'build',
 			assets: 'build',
 			fallback: "200.html",
-			precompress: true,
+			precompress: false,
 			strict: false,
 			trailingSlash: 'always'
 		}),

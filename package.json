@@ -48,6 +48,7 @@
 		"svelte-cookie": "^1.0.1",
 		"svelte-drag-and-drop-actions": "^1.0.0",
 		"svelte-markdown": "^0.2.3",
-		"svelte-pocketbase": "^0.0.4"
+		"svelte-pocketbase": "^0.0.4",
+		"uuid": "^9.0.0"
 	}
 }

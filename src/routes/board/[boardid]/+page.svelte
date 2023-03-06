@@ -32,7 +32,7 @@
     if($pbStore.authStore.isValid) {
         getBoard();
     } else {
-        goto("/");
+        goto("/share/" + data.boardid);
     }
     
     onDestroy(()=>{

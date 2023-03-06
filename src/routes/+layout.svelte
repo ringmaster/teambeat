@@ -118,8 +118,6 @@
     }
     .navbar {
         margin-bottom: 5px;
-    }
-    .navbar-dropdown {
-        z-index: 300;
+        z-index: 150;
     }
 </style>
