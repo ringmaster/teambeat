@@ -1,6 +1,7 @@
 <script>
   import { pbStore } from 'svelte-pocketbase';
   import notify from "../../utils/notify";
+  import { goto } from '$app/navigation';
   
   $: loggedIn = $pbStore.authStore.isValid
   $: user = $pbStore.authStore.model
@@ -18,7 +19,7 @@
     $pbStore.collection('users').authWithPassword(username, password)
     .then((authData)=>{
       document.cookie = $pbStore.authStore.exportToCookie({ httpOnly: false, secure: false })
-      document.location = "/"
+      goto("/");
     })
     .catch((error)=>{
       notify("There was a problem authenticating.  Please check your credentials and try again.", "error", "error");
@@ -29,7 +30,7 @@
   function doLogout() {
     $pbStore.authStore.clear()
     document.cookie = $pbStore.authStore.exportToCookie({ httpOnly: false, expires: 0, secure: false })
-    document.location = "/"
+    goto("/");
   }
   
   function setProvider(provider) {

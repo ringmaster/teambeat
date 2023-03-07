@@ -98,6 +98,7 @@
     
     function makeColumns(columnData) {
         if(columnData != undefined) {
+            columnData.sort((a,b)=>a.seq-b.seq)
             columnData.map((item) => {
                 item.cards = [];
                 item.update = function(){
@@ -276,7 +277,7 @@
             notify("Your browser does not support this feature.", "error");
             return;
         }
-        navigator.clipboard.writeText('THE URL').then(function() {
+        navigator.clipboard.writeText(location.origin + "/share/" + board.id).then(function() {
             notify("Share link has been copied to the clipboard.", "info");
         }, function(err) {
             notify("There was a problem copying the share link to the clipboard.", "error");
@@ -307,6 +308,7 @@
                 <div class="dropdown is-hoverable">
                     <div class="dropdown-trigger">
                         <button class="button is-small is-white" aria-haspopup="true" aria-controls="dropdown-menu">
+                            <span class="icon"><i class="fa-light fa-clapperboard"></i></span>
                             <span>{currentScene.title}</span>
                             <span class="icon is-small">
                                 <i class="fas fa-angle-down" aria-hidden="true"></i>
@@ -316,7 +318,7 @@
                     <div class="dropdown-menu" id="dropdown-menu" role="menu">
                         <div class="dropdown-content">
                             {#each board.scenes as scene}
-                            <a href="#" class="dropdown-item" on:click={()=>setScene(scene)}>
+                            <a href="#" class="dropdown-item" on:click={()=>setScene(scene)} class:is-active={scene == currentScene}>
                                 {scene.title}
                             </a>
                             {/each}
@@ -344,13 +346,13 @@
                     </div>
                     <div class="dropdown-menu" id="dropdown-menu" role="menu">
                         <div class="dropdown-content">
-                            <a href="#" class="dropdown-item" on:click={()=>{setMode('columns')}}>
+                            <a href="#" class="dropdown-item" on:click={()=>{setMode('columns')}} class:is-active={currentScene.mode == 'columns'}>
                                 <span class="icon is-small">
                                     <i class="fa-light fa-square-kanban"></i>
                                 </span>
                                 <span>Board</span>
                             </a>
-                            <a href="#" class="dropdown-item" on:click={()=>{setMode('present')}}>
+                            <a href="#" class="dropdown-item" on:click={()=>{setMode('present')}} class:is-active={currentScene.mode == 'present'}>
                                 <span class="icon is-small">
                                     <i class="fa-light fa-presentation-screen"></i>
                                 </span>

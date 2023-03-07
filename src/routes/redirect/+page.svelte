@@ -1,5 +1,6 @@
 <script>
     import { pbStore } from 'svelte-pocketbase';
+    import { goto } from '$app/navigation';
     
     const redirectUrl = location.protocol + '//' + location.host + "/redirect"
     

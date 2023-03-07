@@ -17,6 +17,8 @@
     }
 </script>
 
+<div class="columns">
+    <div class="column">
 <div class="content">
     <h3 class="subtitle">Other things that should be here...</h3>
     <ul>
@@ -30,5 +32,10 @@
             <span class="icon is-small"><input class="checkbox" type="checkbox" bind:checked={confirmDelete} on:click={(e)=>e.stopPropagation()}></span>
             <span>Delete Board</span>
         </button>
+    </div>
+</div>
+    </div>
+    <div class="column">
+        <textarea class="textarea">{JSON.stringify(board)}</textarea>
     </div>
 </div>
