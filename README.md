@@ -31,7 +31,8 @@ This procedure should only be necessary once if the /pb/ directory is preserved 
 1. ~~Add voting~~
     1. Allow scenes to sort by vote count
     2. Figure out why sometimes votes don't sync
-    1. Show remaning votes
+    1. ~~Show remaning votes~~
+    1. Show outstanding votes to facilitator
     1. Allow people to mark themselves as done for the scene
 1. Add Commenting
 1. Add presentation mode

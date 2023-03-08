@@ -1,7 +1,8 @@
 <script>
     import { createEventDispatcher } from 'svelte';
     import { pbStore } from 'svelte-pocketbase';
-    import { afterUpdate, onMount } from "svelte"
+    import { votes as votedata } from "$stores/votes.js";
+    import { afterUpdate, onMount, onDestroy } from "svelte"
     import { slide } from 'svelte/transition';
     
     const dispatch = createEventDispatcher();
@@ -16,42 +17,21 @@
     $: skeleton = !cardIsCurrentUsers && !scene.doReveal;
     $: skeletontext = '<span>' + card.description.replace(/\S/g, 'X').replace(/\s+/g, '</span> <span>').replace(/<span><\/span>/g, '') + '</span>';
     
-    
-    let votes = {
-        "votes": {"yours": 0, "total": 0}
-    };
-    
-    afterUpdate(() => {
-    });
-    
-    $pbStore.collection('votes').subscribe("*", (vote)=>{
-        if(vote.record.card != card.id) {
-            return
-        }
-        // votes on this card was updated, get new vote count
-        updateVotes();
-    });
-    
-    onMount(()=>{
-        updateVotes();
-    })
-    
-    function updateVotes() {
-        $pbStore.collection('votes').getFullList(200, {filter:`card="${card.id}"`, expand:'votetype', '$autoCancel': false}).then((results)=>{
-            votes = {};
-            board.votetypes.forEach((votetype)=>{
-                votes[votetype.typename] = {yours: 0, total: 0}
-            });
-            results.forEach((vote)=>{
-                const votetype = vote.expand.votetype.typename;
-                
-                if(vote.user == $pbStore.authStore.model.id) {
-                    votes[votetype].yours++;
-                }
-                votes[votetype].total++;
-            })
+    function getVoteData(data, id) {
+        let neovotes = {}
+        board.votetypes.forEach((type) => {
+            neovotes[type.typename] = {yours: 0, total: 0}
         })
+
+        if(data.cards[id]) {
+            Object.keys(data.cards[id]).forEach((key) => {
+                neovotes[key] = data.cards[id][key]
+            })
+        }
+        return neovotes;
     }
+
+    $: cardvotes = getVoteData($votedata, card.id)
     
     function handleDragStart(e) {
         dispatch("dragstart", e)
@@ -132,6 +112,12 @@
                 <i class="fa-solid fa-trash"></i>
             </span>
             {/if}
+
+
+
+            { cardvotes.votes.total }
+
+
         </div>
     </div>
     {#if card.expand["comments(card)"] && scene.doShowComments}
@@ -156,18 +142,18 @@
             {#if votetype.amount > 0}
             <div class="level-item votewidget">
                 {#if scene.doVote}
-                <button class="downvote udvote button is-small" class:is-disabled={votes[votetype.typename]?.yours<=0} on:click={()=>voteDel(votetype)}><i class="fa-solid fa-minus"></i></button>
+                <button class="downvote udvote button is-small" class:is-disabled={cardvotes[votetype.typename].yours<=0} on:click={()=>voteDel(votetype)}><i class="fa-solid fa-minus"></i></button>
                 {/if}
                 {#if scene.doVote}
-                <span>{votes[votetype.typename]?.yours}</span>
+                <span>{cardvotes[votetype.typename].yours}</span>
                 {/if}
                 {#if scene.doShowVotes && scene.doVote}
                 <span>/</span>
                 {/if}
                 {#if scene.doShowVotes }
-                <span>{votes[votetype.typename]?.total}</span>
+                <span>{cardvotes[votetype.typename].total}</span>
                 {/if}
-                <span class="icon" class:is-voted={votes[votetype.typename]?.yours>0}>
+                <span class="icon" class:is-voted={cardvotes[votetype.typename].yours>0}>
                     {#if votetype.typename == 'gems'}
                     <i class="fa-light fa-gem"></i>
                     {:else if votetype.typename == 'bananas'}
@@ -179,7 +165,7 @@
                     {/if}
                 </span>
                 {#if scene.doVote}
-                <button class="upvote udvote button is-small" class:is-disabled={board.votecounts[votetype.typename]>=votetype.amount} on:click={()=>voteAdd(votetype)}><i class="fa-solid fa-plus"></i></button>
+                <button class="upvote udvote button is-small" class:is-disabled={$votedata.yours[votetype.typename]>=votetype.amount} on:click={()=>voteAdd(votetype)}><i class="fa-solid fa-plus"></i></button>
                 {/if}
             </div>
             {/if}

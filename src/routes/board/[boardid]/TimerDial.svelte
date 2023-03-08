@@ -126,11 +126,18 @@
     <span id="base-timer-label" class="base-timer__label">{label}</span>
 </div>
 
-<style>
+<style lang="scss">
     .base-timer {
+        /*
         position: relative;
         width: 100%;
         height: 100%;
+        */
+        
+        position: relative;
+        // bottom: 17px;
+        width: 58px;
+        height: 58px;
     }
     
     .base-timer__svg {

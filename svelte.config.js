@@ -1,5 +1,6 @@
 import adapter from '@sveltejs/adapter-static';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
+import path from 'path';
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
@@ -24,6 +25,10 @@ const config = {
 		prerender: {entries: ['*', '/board/[boardid]', '/share/[boardid]']},
 		paths: {
 			base: "",
+		},
+		alias: {
+			$utils: path.resolve('./src/utils'),
+			$stores: path.resolve('./src/stores'),
 		}
 	}
 };

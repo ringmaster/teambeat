@@ -1,5 +1,6 @@
 <script>
     import { pbStore } from "svelte-pocketbase";
+    import { votes } from "$stores/votes.js";
     import Columns from "./Columns.svelte";
     import {onDestroy, tick} from "svelte"
     import { fly, fade } from 'svelte/transition';
@@ -70,6 +71,7 @@
             $pbStore.collection('scenes').subscribe('*', sceneSubUpdate);
             $pbStore.collection('votetypes').subscribe('*', votetypesSubUpdate);
             $pbStore.collection('columns').subscribe('*', columnsSubUpdate);
+            votes.setBoard(board.id);
             checkTimer();
             
             $pbStore.collection('boards').subscribe(data.boardid, (b)=>{
@@ -369,10 +371,10 @@
             <span><b>Votes Left:</b></span>
             {#each board.votetypes as votetype}
             <span>
-            {#if board.votetypes.length > 1}
-            {votetype.typename} -    
-            {/if}
-            {votetype.amount - board.votecounts[votetype.typename]}
+                {#if board.votetypes.length > 1}
+                {votetype.typename} -    
+                {/if}
+                {votetype.amount - board.votecounts[votetype.typename]}
             </span>
             {/each}
         </div>
@@ -477,7 +479,12 @@
     <div class="timerbox" class:expanded={timerexpanded} >
         {#if timerexpanded}
         <div class="timerdetail" in:fade="{{delay: 1000}}" out:fade>
-            Mysterious flyout!
+            <button class="button">
+                Continue Discussion
+            </button>
+            <button class="button">
+                Move On
+            </button>
         </div>
         {/if}
         
@@ -498,12 +505,12 @@
     }
     .timer .timerbox {
         width: 60px;
-        height: 60px;
         border-radius: 30px;
         border: 1px solid gray;
         display: flex;
         justify-content: right;
         align-content: center;
+        align-items: flex-end;
         flex-wrap: nowrap;
         background-color: #fff;
         transition: width 200ms 400ms;
@@ -515,17 +522,17 @@
     .timerdetail {
         margin-left: 30px;
         width: 210px;
-    }
-    table.does th {
-        text-orientation: sideways;
-        writing-mode: vertical-rl;
-        padding: 0.25rem !important;
-        
+        min-height: 58px;
     }
     .dropdown-menu {
         z-index: 200;
     }
     .votesleft span {
         margin-right: 0.5rem;
+    }
+    .timerdetail .button {
+        width: 95%;
+        justify-content: left;
+        margin: 3px 0px;
     }
 </style>
