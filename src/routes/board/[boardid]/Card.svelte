@@ -112,12 +112,6 @@
                 <i class="fa-solid fa-trash"></i>
             </span>
             {/if}
-
-
-
-            { cardvotes.votes.total }
-
-
         </div>
     </div>
     {#if card.expand["comments(card)"] && scene.doShowComments}
