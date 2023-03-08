@@ -1,20 +1,27 @@
 <script>
-    import { key } from '@milkdown/plugin-listener';
     import { goto } from '$app/navigation';
     import { pbStore } from 'svelte-pocketbase';
+    import { onMount } from 'svelte';
     
     $: loggedIn = $pbStore.authStore.isValid
     
-    $: getboards = $pbStore.collection('boards').getFullList(10, {
-        sort: '-created',
-        expand: "users,facilitators"
-    });
+    $: user = $pbStore.authStore.model
     
-    $pbStore.collection('boards').subscribe("*", ()=>{
-        getboards = $pbStore.collection('boards').getFullList(10, {
+    let boards = [];
+    
+    function getBoards() {
+        $pbStore.collection('boards').getFullList(10, {
+            filter: `users.id ?= "${user?.id}" || facilitators.id ?= "${user?.id}"`,
             sort: '-created',
             expand: "users,facilitators"
-        });
+        }).then((result)=>{
+            boards = result;
+        })
+    }
+    
+    onMount(()=>{
+        $pbStore.collection('boards').subscribe("*", getBoards);
+        getBoards();
     })
     
     let newmodal = false;
@@ -81,9 +88,6 @@
             </tr>
         </thead>
         <tbody>
-            {#await getboards}
-            <tr><td colspan="4"><div class="centered">Loading...</div></td></tr>
-            {:then boards} 
             {#each boards as board}
             <tr>
                 <td><a href="/board/{board.id}">{board.name}</a></td>
@@ -102,9 +106,6 @@
                 <td>{board.created}</td>
             </tr>
             {/each}         
-            {:catch error}
-            <tr><td colspan="4" style="color: red">{error.message}</td></tr>       
-            {/await}
         </tbody>
     </table>
     
@@ -149,7 +150,5 @@
 
 
 <style>
-    .centered {
-        text-align: center;
-    }
+    
 </style>

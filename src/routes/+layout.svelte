@@ -7,21 +7,20 @@
     
     pbStore.set(env.PUBLIC_POCKETBASE_URL);
     $pbStore.autoCancellation(false);
+
+    let user = $pbStore.authStore.model
+    let isValid = $pbStore.authStore.isValid
     
     if(!$pbStore.authStore.isValid) {
         if (["/", "/login"].indexOf(location.href) === false) {
             goto("/");
         }
     }
-    
-    $: loggedIn = $pbStore.authStore.isValid
-    $: user = $pbStore.authStore.model
-    
-    function doLogout() {
-        $pbStore.authStore.clear()
-        document.cookie = $pbStore.authStore.exportToCookie({ httpOnly: false, expires: 0 })
-        goto("/");
-    }
+
+    $pbStore.authStore.onChange((token, model) => {
+        user = model;
+        console.log(token, model);
+    });
     
 </script>
 
@@ -48,7 +47,7 @@
             
             <div class="navbar-end">
                 <div class="navbar-item">
-                    {#if loggedIn}
+                    {#if $pbStore.authStore.isValid}
                     <div class="navbar-item has-dropdown is-hoverable is-right">
                         <a class="navbar-link" href="#more">
                             <span class="icon-text">

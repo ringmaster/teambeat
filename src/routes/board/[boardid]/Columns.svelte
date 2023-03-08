@@ -3,9 +3,21 @@
     import { pbStore } from "svelte-pocketbase";
     import boarddefaults from "./boarddefaults";
     
+    import { Editor, rootCtx, defaultValueCtx } from '@milkdown/core';
+    import { commonmark } from '@milkdown/preset-commonmark';
+    import { nord } from '@milkdown/theme-nord';
+    import { listener, listenerCtx } from '@milkdown/plugin-listener';
+    
+    //import simplemde from "simplemde/src/js/simplemde.js";
+    import { onMount } from "svelte";
+    import notify from "../../../utils/notify";
+    
     
     export let board
     export let currentScene
+    
+    let newContent = '';
+    let newEditor;
     
     let selectedPreset;
     $: user = $pbStore.authStore.model
@@ -83,15 +95,23 @@
     }
     
     function addCard(column) {
-        const data = {
-            "user": user.id,
-            "type": "default",
-            "description": "",
-            "options": "{}",
-            "column": column.id
-        };
-        
-        $pbStore.collection('cards').create(data)
+        console.log("ADD CARD");
+        if(!column.editor.textContent.match(/\s/)) {
+            notify('The card you add must have content.', "warning");
+        }
+        else {
+            const data = {
+                "user": user.id,
+                "type": "default",
+                "description": column.editor.textContent,
+                "options": "{}",
+                "column": column.id
+            };
+            
+            $pbStore.collection('cards').create(data).then(()=>{
+                column.editor.innerHTML = "";
+            })
+        }
     }
     
     function addPreset() {
@@ -102,6 +122,20 @@
         })
         Promise.all(promises).then(()=>{})
     }
+    
+    function focusEditor(column) {
+        column.editor.focus();
+    }
+    
+    function editorKeypress(e, column) {
+        if(e.key == 'Enter') {
+            addCard(column);
+        }
+    }
+    
+    onMount(()=>{
+        // simplemde = new SimpleMDE({ element: newEditor });
+    });
 </script>
 
 {#if board.columns.length > 0}
@@ -118,19 +152,28 @@
                         </div>
                         {#if currentScene.doAdd}
                         <div class="level-item">
-                            <div class="field has-addons">
-                                <!-- svelte-ignore a11y-click-events-have-key-events -->
-                                <button class="button is-small is-rounded" on:click={()=>addCard(column)}>
-                                    <span class="icon is-small">
-                                        <i class="fa-light fa-cards-blank"></i>
-                                    </span>
-                                    <span>Add Card</span>
-                                </button>
-                            </div>
                         </div>
                         {/if}
                     </div>
                 </div>
+                {#if currentScene.doAdd}
+                <!-- svelte-ignore a11y-click-events-have-key-events -->
+                <div class="card" on:click={()=>{focusEditor(column)}}>
+                    <div class="card-content cardcontent">
+                        
+                        <!-- THE EDITOR IS HERE-->
+                        <div class="cardcontentdescription cardeditor">
+                            <div class="editor" bind:this={column.editor} contenteditable="true" on:keypress={(e)=>editorKeypress(e,column)}></div>
+                        </div>
+                        
+                        <div class="cardcontentedit">
+                            <span class="has-tooltip-arrow" data-tooltip="Add This Card" on:click={()=>addCard(column)}>
+                                <i class="fa-solid fa-plus"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                {/if}
                 
                 {#each column.cards as card(card.id)}
                 <Card bind:card={card} bind:scene={currentScene} bind:board={board} on:dragstart={handleDragStart} on:dragend={handleDragEnd} />
@@ -206,5 +249,26 @@
         top: 0px;
         background: rgb(255,255,255);
         background: linear-gradient(0deg, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 25%);
+    }
+    
+    .card {
+        border-width: 3px 1px 1px;
+        box-shadow: var(--sl-shadow-large);
+        margin-bottom: 1rem;
+        width: 100%;
+    }
+    .cardcontent {
+        display: flex;
+    }
+    .cardcontentdescription {
+        flex-grow: 1;
+    }
+    .cardcontentedit {
+        flex-grow: 0;
+        max-width: 16px;
+        padding-left: 1rem;
+    }
+    .editor {
+        outline: none;
     }
 </style>

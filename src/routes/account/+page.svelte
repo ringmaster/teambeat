@@ -2,7 +2,9 @@
   import { pbStore } from 'svelte-pocketbase';
   import notify from '../../utils/notify';
   
-  let user = $pbStore.authStore.model
+  $pbStore.collection('users').authRefresh();
+
+  let user = $pbStore.authStore.model;
   let loading = false;
 
   function updateUser() {
