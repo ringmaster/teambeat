@@ -7,7 +7,7 @@
     import notify from "../../../utils/notify";
     
     import TimerDial from "./TimerDial.svelte";
-	import Drawer from "./Drawer.svelte";
+    import Drawer from "./Drawer.svelte";
     
     export let data;
     
@@ -172,7 +172,7 @@
     function doTimerClick() {
         timerexpanded = !timerexpanded
     }
-
+    
     function setScene(scene) {
         currentScene.current = false;
         $pbStore.collection('scenes').update(currentScene.id, currentScene);
@@ -363,10 +363,20 @@
                 </div>
             </div>
             {/if}
-            <div class="level-item">
-                
-            </div>
         </div>
+        {#if currentScene.doVote}
+        <div class="level-item votesleft">
+            <span><b>Votes Left:</b></span>
+            {#each board.votetypes as votetype}
+            <span>
+            {#if board.votetypes.length > 1}
+            {votetype.typename} -    
+            {/if}
+            {votetype.amount - board.votecounts[votetype.typename]}
+            </span>
+            {/each}
+        </div>
+        {/if}
         {#if isFacilitator}
         <div class="level-right is-flex is-justify-content-right is-align-content-center">
             <div class="field has-addons">
@@ -514,5 +524,8 @@
     }
     .dropdown-menu {
         z-index: 200;
+    }
+    .votesleft span {
+        margin-right: 0.5rem;
     }
 </style>
