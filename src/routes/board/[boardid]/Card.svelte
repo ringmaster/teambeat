@@ -109,12 +109,12 @@
         {/if}
         
         <div class="cardcontentedit">
-            <span class="has-tooltip-arrow" data-tooltip="Author: {card.expand.user.name}">
+            <span class="has-tooltip-arrow" class:has-tooltip-left={scene.mode == 'present'} data-tooltip="Author: {card.expand.user.name}">
                 <i class="fa-solid fa-user"></i>
             </span>
             <!-- svelte-ignore a11y-click-events-have-key-events -->
             {#if (cardIsCurrentUsers && scene.doAdd) || isFacilitator }
-            <span class="has-tooltip-arrow" data-tooltip="Delete Card" on:click={handleDelete}>
+            <span class="has-tooltip-arrow" class:has-tooltip-left={scene.mode == 'present'} data-tooltip="Delete Card" on:click={handleDelete}>
                 <i class="fa-solid fa-trash"></i>
             </span>
             {/if}

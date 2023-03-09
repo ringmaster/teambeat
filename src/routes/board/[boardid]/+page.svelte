@@ -2,6 +2,7 @@
     import { pbStore } from "svelte-pocketbase";
     import { votes } from "$stores/votes.js";
     import Columns from "./Columns.svelte";
+    import Present from "./Present.svelte";
     import {onDestroy, tick} from "svelte"
     import { fly, fade } from 'svelte/transition';
     import { goto } from '$app/navigation';
@@ -464,7 +465,7 @@
 </div>
 
 {#if currentScene.mode == 'present'}
-<h2>Presentation mode goes here</h2>
+<Present bind:board bind:currentScene />
 {:else}
 <Columns bind:board bind:currentScene />
 {/if}

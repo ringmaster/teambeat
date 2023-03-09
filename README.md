@@ -29,8 +29,8 @@ This procedure should only be necessary once if the /pb/ directory is preserved 
 # To Do
 1. Provide a way for the application to bootstrap the schema from the static directory
 1. ~~Add voting~~
-    1. Allow scenes to sort by vote count
-    2. Figure out why sometimes votes don't sync
+    1. ~~Allow scenes to sort by vote count~~
+    2. ~~Figure out why sometimes votes don't sync~~
     1. ~~Show remaning votes~~
     1. Show outstanding votes to facilitator
     1. Allow people to mark themselves as done for the scene
@@ -39,4 +39,5 @@ This procedure should only be necessary once if the /pb/ directory is preserved 
 1. Add voting card type
 1. ~~Restrict facilitation controls to facilitators~~
 1. Restrict data modification via API based on auth rules
-1. Ability to send board URLs that allow login-free (but user-tracked) access
+    1. Connect voting store to authstore to use unified authentication
+1. ~~Ability to send board URLs that allow login-free (but user-tracked) access~~
