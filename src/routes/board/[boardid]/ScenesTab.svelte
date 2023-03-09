@@ -12,10 +12,9 @@
         const sceneData = {
             "title": newSceneName,
             "seq": maxseq,
-            "board": data.boardid
+            "board": board.id
         }
         $pbStore.collection('scenes').create(sceneData).then(()=>{
-            getBoard();
             newSceneName = '';
         })
     }
