@@ -2,6 +2,7 @@
     import Card from "./Card.svelte";
     import { pbStore } from "svelte-pocketbase";
     import boarddefaults from "./boarddefaults";
+    import { votes as votedata } from "$stores/votes.js";
     
     import { Editor, rootCtx, defaultValueCtx } from '@milkdown/core';
     import { commonmark } from '@milkdown/preset-commonmark';
@@ -133,9 +134,17 @@
         }
     }
     
-    onMount(()=>{
-        // simplemde = new SimpleMDE({ element: newEditor });
-    });
+    function maybeSort(cards, dosort) {
+        if(dosort) {
+            cards.sort((a, b) => {
+                let aval = $votedata.cards[a.id] ? $votedata.cards[a.id].votes.total : 0;
+                let bval = $votedata.cards[b.id] ? $votedata.cards[b.id].votes.total : 0;
+                return bval - aval;
+            })
+            //console.log(cards.map((e)=>`${$votedata.cards[e.id]?.votes?.total} = ${e.description}`))
+        }
+        return cards;
+    }
 </script>
 
 {#if board.columns.length > 0}
@@ -175,7 +184,7 @@
                 </div>
                 {/if}
                 
-                {#each column.cards as card(card.id)}
+                {#each maybeSort([...column.cards], currentScene.doShowVotes) as card(card.id)}
                 <Card bind:card={card} bind:scene={currentScene} bind:board={board} on:dragstart={handleDragStart} on:dragend={handleDragEnd} />
                 {/each}
                 

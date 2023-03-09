@@ -2,7 +2,6 @@
     import { createEventDispatcher } from 'svelte';
     import { pbStore } from 'svelte-pocketbase';
     import { votes as votedata } from "$stores/votes.js";
-    import { afterUpdate, onMount, onDestroy } from "svelte"
     import { slide } from 'svelte/transition';
     
     const dispatch = createEventDispatcher();
@@ -13,16 +12,18 @@
     
     let editorEl;
     
+    $: user = $pbStore.authStore.model
     $: cardIsCurrentUsers = card.expand.user.id == $pbStore.authStore.model.id;
     $: skeleton = !cardIsCurrentUsers && !scene.doReveal;
     $: skeletontext = '<span>' + card.description.replace(/\S/g, 'X').replace(/\s+/g, '</span> <span>').replace(/<span><\/span>/g, '') + '</span>';
-    
+    $: isFacilitator = board?.facilitators?.indexOf(user.id) !== -1;
+
     function getVoteData(data, id) {
         let neovotes = {}
         board.votetypes.forEach((type) => {
             neovotes[type.typename] = {yours: 0, total: 0}
         })
-
+        
         if(data.cards[id]) {
             Object.keys(data.cards[id]).forEach((key) => {
                 neovotes[key] = data.cards[id][key]
@@ -30,7 +31,7 @@
         }
         return neovotes;
     }
-
+    
     $: cardvotes = getVoteData($votedata, card.id)
     
     function handleDragStart(e) {
@@ -64,7 +65,7 @@
             })
         }, 750);
     }
-
+    
     function focusCard() {
         if(editorEl != undefined) {
             editorEl.focus();
@@ -91,6 +92,7 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div class="card" id={card.id} draggable="{scene.doMove}" on:dragstart={handleDragStart} on:dragend={handleDragEnd} transition:slide|local>
+    {#key scene}
     <div class="card-content cardcontent" on:click={focusCard}>
         
         {#if skeleton}
@@ -99,7 +101,11 @@
         </div>
         {:else}
         <!-- THE EDITOR IS HERE-->
+        {#if (cardIsCurrentUsers && scene.doAdd) || isFacilitator}
         <div class="cardcontentdescription cardeditor" contenteditable="true" bind:this={editorEl} on:keypress={updateCard} bind:innerHTML={card.description}></div>
+        {:else}
+        <div class="cardcontentdescription cardeditor">{@html card.description}</div>
+        {/if}
         {/if}
         
         <div class="cardcontentedit">
@@ -107,7 +113,7 @@
                 <i class="fa-solid fa-user"></i>
             </span>
             <!-- svelte-ignore a11y-click-events-have-key-events -->
-            {#if cardIsCurrentUsers}
+            {#if (cardIsCurrentUsers && scene.doAdd) || isFacilitator }
             <span class="has-tooltip-arrow" data-tooltip="Delete Card" on:click={handleDelete}>
                 <i class="fa-solid fa-trash"></i>
             </span>
@@ -186,6 +192,7 @@
         {/if}
     </div>
     {/if}
+    {/key}
 </div>
 
 <style>
