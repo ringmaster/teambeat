@@ -3,6 +3,7 @@
     import { pbStore } from 'svelte-pocketbase';
     import { votes as votedata } from "$stores/votes.js";
     import { slide } from 'svelte/transition';
+    import InkMde from 'ink-mde/svelte'
     
     const dispatch = createEventDispatcher();
     
@@ -56,9 +57,10 @@
     let timer;
     let dirty = false;
     
-    const updateCard = () => {
+    const updateCard = (doc) => {
         clearTimeout(timer);
         dirty = true;
+        card.description = doc;
         timer = setTimeout(() => {
             $pbStore.collection("cards").update(card.id, card).then(()=>{
                 dirty = false;
@@ -102,7 +104,19 @@
         {:else}
         <!-- THE EDITOR IS HERE-->
         {#if (cardIsCurrentUsers && scene.doAdd) || isFacilitator}
-        <div class="cardcontentdescription cardeditor" contenteditable="true" bind:this={editorEl} on:keypress={updateCard} bind:innerHTML={card.description}></div>
+        <div class="cardcontentdescription cardeditor"><InkMde bind:value={card.description} options={{
+            doc: '',
+            hooks: {
+                afterUpdate: updateCard,
+            },
+            interface: {
+              appearance: 'light',
+              attribution: false,
+              lists: true,
+              images: true,
+            }
+          }}/></div>
+        <!--div class="cardcontentdescription cardeditor" contenteditable="true" bind:this={editorEl} on:keypress={updateCard} bind:innerHTML={card.description}></div-->
         {:else}
         <div class="cardcontentdescription cardeditor">{@html card.description}</div>
         {/if}
@@ -274,5 +288,11 @@
     }
     .cardeditor {
         outline: none;
+    }
+    :global(.card .ink-mde .ink-mde-editor) {
+        padding: 0px;
+    }
+    :global(.card .ink-mde) {
+        border: none;
     }
 </style>
