@@ -6,9 +6,9 @@
     import notify from '../../../utils/notify';
     
     export let data;
-
+    
     let loading = false;
-
+    
     if($pbStore.authStore.isValid) {
         goto(`/board/${data.boardid}`);
     }
@@ -27,17 +27,29 @@
             "anonymous": true,
         };
         
-        $pbStore.collection('users').create(userdata).then((user)=>{
-            $pbStore.collection('users').authWithPassword(user.username, password).then(()=>{
-                document.cookie = $pbStore.authStore.exportToCookie({ httpOnly: false, secure: false });
-                goto("/board/" + data.boardid);
+        $pbStore.collection("boards").getFirstListItem(`id = "${data.boardid}"`).then((board)=>{
+            $pbStore.collection('users').create(userdata).then((user)=>{
+                $pbStore.collection('users').authWithPassword(user.username, password).then((user)=>{
+                    document.cookie = $pbStore.authStore.exportToCookie({ httpOnly: false, secure: false });
+                    // associate anonymous user with board!
+                    board.users.push(user.record.id);
+                    $pbStore.collection("boards").update(board.id, board).then(()=>{
+                        goto("/board/" + data.boardid);
+                    }).catch(()=>{
+                        loading = false;
+                        notify("There was a problem adding your anonymous user to the board.", "error");
+                    })
+                }).catch(()=>{
+                    loading = false;
+                    notify("There was a problem authenticating the anonymous user record.", "error");
+                })
             }).catch(()=>{
                 loading = false;
-                notify("There was a problem authenticating the anonymous user record.", "error");
+                notify("There was a problem creating the anonymous user record.", "error");
             })
         }).catch(()=>{
             loading = false;
-            notify("There was a problem creating the anonymous user record.", "error");
+            notify("There was a problem fetching the requested board.", "error");
         })
     }
     

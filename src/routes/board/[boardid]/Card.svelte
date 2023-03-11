@@ -18,7 +18,7 @@
     $: skeleton = !cardIsCurrentUsers && !scene.do("doReveal");
     $: skeletontext = '<span>' + card.description.replace(/\S/g, 'X').replace(/\s+/g, '</span> <span>').replace(/<span><\/span>/g, '') + '</span>';
     $: isFacilitator = board?.facilitators?.indexOf(user.id) !== -1;
-
+    
     function getVoteData(data, id) {
         let neovotes = {}
         board.votetypes.forEach((type) => {
@@ -93,33 +93,30 @@
 
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<div class="card" id={card.id} draggable="{scene.do("doMove")}" on:dragstart={handleDragStart} on:dragend={handleDragEnd} transition:slide|local>
+<div class="card" id={card.id} draggable="{scene.do("doMove") && (cardIsCurrentUsers || isFacilitator)}" on:dragstart={handleDragStart} on:dragend={handleDragEnd} transition:slide|local>
     {#key scene}
     <div class="card-content cardcontent" on:click={focusCard}>
-        
         {#if skeleton}
         <div class="cardcontentdescription skeleton-paragraphs">
             {@html skeletontext}
         </div>
         {:else}
         <!-- THE EDITOR IS HERE-->
-        {#if (cardIsCurrentUsers && scene.do("doAdd")) || isFacilitator}
+        
         <div class="cardcontentdescription cardeditor"><InkMde bind:value={card.description} options={{
             doc: '',
             hooks: {
                 afterUpdate: updateCard,
             },
             interface: {
-              appearance: 'light',
-              attribution: false,
-              lists: true,
-              images: true,
+                appearance: 'light',
+                attribution: false,
+                lists: true,
+                images: true,
+                readonly: !((cardIsCurrentUsers || isFacilitator) && scene.do("doEdit")),
             }
-          }}/></div>
-        <!--div class="cardcontentdescription cardeditor" contenteditable="true" bind:this={editorEl} on:keypress={updateCard} bind:innerHTML={card.description}></div-->
-        {:else}
-        <div class="cardcontentdescription cardeditor">{@html card.description}</div>
-        {/if}
+        }}/></div>
+        
         {/if}
         
         <div class="cardcontentedit">
