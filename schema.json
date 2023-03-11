@@ -17,6 +17,15 @@
                     "max": null,
                     "pattern": ""
                 }
+            },
+            {
+                "id": "7uyqicoq",
+                "name": "anonymous",
+                "type": "bool",
+                "system": false,
+                "required": false,
+                "unique": false,
+                "options": {}
             }
         ],
         "listRule": "",
@@ -305,51 +314,6 @@
                 "options": {}
             },
             {
-                "id": "lybf5mfw",
-                "name": "doAdd",
-                "type": "bool",
-                "system": false,
-                "required": false,
-                "unique": false,
-                "options": {}
-            },
-            {
-                "id": "0itg9gel",
-                "name": "doReveal",
-                "type": "bool",
-                "system": false,
-                "required": false,
-                "unique": false,
-                "options": {}
-            },
-            {
-                "id": "boao8qsx",
-                "name": "doMove",
-                "type": "bool",
-                "system": false,
-                "required": false,
-                "unique": false,
-                "options": {}
-            },
-            {
-                "id": "06ankjdh",
-                "name": "doVote",
-                "type": "bool",
-                "system": false,
-                "required": false,
-                "unique": false,
-                "options": {}
-            },
-            {
-                "id": "qcqzfdgp",
-                "name": "doComment",
-                "type": "bool",
-                "system": false,
-                "required": false,
-                "unique": false,
-                "options": {}
-            },
-            {
                 "id": "hs70bhru",
                 "name": "seq",
                 "type": "number",
@@ -360,33 +324,6 @@
                     "min": null,
                     "max": null
                 }
-            },
-            {
-                "id": "4xuudadg",
-                "name": "doEdit",
-                "type": "bool",
-                "system": false,
-                "required": false,
-                "unique": false,
-                "options": {}
-            },
-            {
-                "id": "fj8usrm5",
-                "name": "doShowVotes",
-                "type": "bool",
-                "system": false,
-                "required": false,
-                "unique": false,
-                "options": {}
-            },
-            {
-                "id": "piujocmo",
-                "name": "doShowComments",
-                "type": "bool",
-                "system": false,
-                "required": false,
-                "unique": false,
-                "options": {}
             },
             {
                 "id": "1wqgbdea",
@@ -419,6 +356,15 @@
                         "description"
                     ]
                 }
+            },
+            {
+                "id": "sn0izto5",
+                "name": "options",
+                "type": "json",
+                "system": false,
+                "required": false,
+                "unique": false,
+                "options": {}
             }
         ],
         "listRule": "",
