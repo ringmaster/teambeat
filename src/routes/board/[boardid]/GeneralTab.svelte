@@ -36,6 +36,6 @@
 </div>
     </div>
     <div class="column">
-        <textarea class="textarea">{JSON.stringify(board)}</textarea>
+        
     </div>
 </div>

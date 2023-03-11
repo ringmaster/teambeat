@@ -2,7 +2,6 @@
     import { pbStore } from 'svelte-pocketbase';
     import { env } from '$env/dynamic/public';
     import { goto } from '$app/navigation';
-    import '@milkdown/theme-nord/style.css';
     import '../app.scss';
     
     pbStore.set(env.PUBLIC_POCKETBASE_URL);
