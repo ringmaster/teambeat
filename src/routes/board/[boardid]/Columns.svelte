@@ -3,13 +3,16 @@
     import { pbStore } from "svelte-pocketbase";
     import boarddefaults from "./boarddefaults";
     import { votes as votedata } from "$stores/votes.js";
-    import InkMde from 'ink-mde/svelte'
     
+    //import simplemde from "simplemde/src/js/simplemde.js";
     import notify from "../../../utils/notify";
     
     
     export let board
     export let currentScene
+    
+    let newContent = '';
+    let newEditor;
     
     let selectedPreset;
     $: user = $pbStore.authStore.model
@@ -86,22 +89,22 @@
         record = await $pbStore.collection('cards').update(element_id, record);
     }
     
-    function addCard(doc, column) {
+    function addCard(column) {
         console.log("ADD CARD");
-        if(!doc.match(/\S/)) {
+        if(!column.editor.textContent.match(/\S/)) {
             notify('The card you add must have content.', "warning");
         }
         else {
             const data = {
                 "user": user.id,
                 "type": "default",
-                "description": doc,
+                "description": column.editor.textContent,
                 "options": "{}",
                 "column": column.id
             };
             
             $pbStore.collection('cards').create(data).then(()=>{
-                column.editor = '';
+                column.editor.innerHTML = "";
             })
         }
     }
@@ -116,13 +119,12 @@
     }
     
     function focusEditor(column) {
-        //column.editor.focus();
+        column.editor.focus();
     }
     
-    function editorKeypress(doc, column) {
-        console.log("editorKeypress");
-        if(doc.match(/\n$/)) {
-            //addCard(doc, column);
+    function editorKeypress(e, column) {
+        if(e.key == 'Enter') {
+            addCard(column);
         }
     }
     
@@ -164,27 +166,11 @@
                         
                         <!-- THE EDITOR IS HERE-->
                         <div class="cardcontentdescription cardeditor">
-                            
-                            <div class="editor">
-                                <InkMde options={{
-                                    hooks: {
-                                        beforeUpdate: (doc) => editorKeypress(doc,column),
-                                    },
-                                    interface: {
-                                        appearance: 'light',
-                                        attribution: false,
-                                        lists: true,
-                                        images: true,
-                                    },
-                                    placeholder: 'New card here',
-                                    plugins: [],
-                                    
-                                }} bind:value={column.editor}></InkMde>
-                            </div>
+                            <div class="editor" bind:this={column.editor} contenteditable="true" on:keypress={(e)=>editorKeypress(e,column)}></div>
                         </div>
                         
                         <div class="cardcontentedit">
-                            <span class="has-tooltip-arrow" data-tooltip="Add This Card">
+                            <span class="has-tooltip-arrow" data-tooltip="Add This Card" on:click={()=>addCard(column)}>
                                 <i class="fa-solid fa-plus"></i>
                             </span>
                         </div>

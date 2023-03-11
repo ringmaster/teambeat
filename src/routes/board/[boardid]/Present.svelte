@@ -46,7 +46,21 @@
             </div>
         </div>
         {#each presentSort([...board.columns]) as card(card.id)}
-        <Card bind:card={card} bind:scene={currentScene} bind:board={board} />
+        <div class="cardrow">
+            <div class="cardcontrols">
+                {#if card.selected}
+                <span class="icon" on:click={()=> card.selected = true}>
+                    <i class="fa-solid fa-eye"></i>
+                </span>
+                {:else}
+                <span class="icon" on:click={()=> card.selected = true}>
+                    <i class="fa-light fa-eye"></i>
+                </span>
+                {/if}
+                {card.selected}
+            </div>
+            <Card bind:card={card} bind:scene={currentScene} bind:board={board} />
+        </div>
         {/each}
     </div>
 </div>
@@ -66,5 +80,12 @@
         background: rgb(255,255,255);
         background: linear-gradient(0deg, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 25%);
         padding-bottom: 1rem;
+    }
+    .cardrow {
+        display: flex;
+        align-items: center;
+    }
+    .cardcontrols {
+        width: 2rem;
     }
 </style>
