@@ -1,6 +1,7 @@
 <script>
     import { pbStore } from "svelte-pocketbase";
     import { afterUpdate } from "svelte";
+    import TagsInput from "./TagsInput.svelte";
     
     export let board;
     
@@ -19,14 +20,9 @@
         })
     }
     
-    function updateScene() {
-        clearTimeout(updateTimer);
-        updateTimer = setTimeout(()=>{
-            board.scenes.forEach((scene)=>{
-                console.log("AFTER UPDATE", scene);
-                $pbStore.collection('scenes').update(scene.id, scene);
-            });
-        }, 750);
+    function updateScene(scene, items) {
+        console.log("SCENE UPDATE", scene);
+        $pbStore.collection('scenes').update(scene.id, scene);
     }
     
 </script>
@@ -35,27 +31,24 @@
 <table class="table does">
     <thead><tr>
         <th>Scene</th>
-        <th>Add</th>
-        <th>Edit</th>
-        <th>Reveal</th>
-        <th>Move</th>
-        <th>Show Votes</th>
-        <th>Vote</th>
-        <th>Show Comments</th>
-        <th>Comment</th>
+        <th>Options</th>
     </tr></thead>
     <tbody>
         {#each board.scenes as scene}
         <tr>
             <td>{scene.title}</td>
-            <td><input type="checkbox" class="checkbox" on:click={updateScene} bind:checked={scene.doAdd}></td>
-            <td><input type="checkbox" class="checkbox" on:click={updateScene} bind:checked={scene.doEdit}></td>
-            <td><input type="checkbox" class="checkbox" on:click={updateScene} bind:checked={scene.doReveal}></td>
-            <td><input type="checkbox" class="checkbox" on:click={updateScene} bind:checked={scene.doMove}></td>
-            <td><input type="checkbox" class="checkbox" on:click={updateScene} bind:checked={scene.doShowVotes}></td>
-            <td><input type="checkbox" class="checkbox" on:click={updateScene} bind:checked={scene.doVote}></td>
-            <td><input type="checkbox" class="checkbox" on:click={updateScene} bind:checked={scene.doShowComments}></td>
-            <td><input type="checkbox" class="checkbox" on:click={updateScene} bind:checked={scene.doComment}></td>
+            <td>
+                <TagsInput bind:value={scene.options} on:change={(items)=>updateScene(scene, items)}>
+                    <option value="doAdd">Add</option>
+                    <option value="doEdit">Edit</option>
+                    <option value="doReveal">Reveal</option>
+                    <option value="doMove">Move</option>
+                    <option value="doShowVotes">Show Votes</option>
+                    <option value="doVote">Vote</option>
+                    <option value="doShowComments">Show Comments</option>
+                    <option value="doComment">Comment</option>
+                </TagsInput>
+            </td>
         </tr>
         {/each}
         <tr>

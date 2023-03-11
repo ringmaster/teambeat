@@ -53,7 +53,7 @@
                 id: boardData.id,
                 name: boardData.name,
                 columns: makeColumns(boardData.expand["columns(board)"]),
-                scenes: boardData.expand["scenes(board)"].sort((a,b)=> a.seq - b.seq),
+                scenes: processScenes(boardData.expand["scenes(board)"]),
                 timerstart: boardData.timerstart,
                 timerlength: boardData.timerlength,
                 facilitators: boardData.facilitators,
@@ -190,15 +190,21 @@
             filter: `board="${currentScene.board}"`,
             sort: '+seq',
             '$autoCancel': false
-        }).then((scenes)=>{
-            board.scenes = scenes;
-            currentScene = board.scenes.reduce((prev, cur) => {
-                if(cur.current) {
-                    return cur
-                }
-                return prev
-            }, board.scenes[0])
-        })
+        }).then(processScenes)
+    }
+    
+    function processScenes(scenes){
+        board.scenes = scenes.sort((a,b)=> a.seq - b.seq).map((scene)=>{
+            scene.do = (flag) => scene.options.indexOf(flag) != -1;
+            return scene;
+        });
+        currentScene = board.scenes.reduce((prev, cur) => {
+            if(cur.current) {
+                return cur
+            }
+            return prev
+        }, board.scenes[0])
+        return board.scenes;
     }
     
     function votetypesSubUpdate(votetype) {
@@ -367,7 +373,7 @@
             </div>
             {/if}
         </div>
-        {#if currentScene.doVote}
+        {#if currentScene.do("doVote")}
         <div class="level-item votesleft">
             <span><b>Votes Left:</b></span>
             {#each board.votetypes as votetype}
@@ -384,8 +390,8 @@
         <div class="level-right is-flex is-justify-content-right is-align-content-center">
             <div class="field has-addons">
                 <!-- svelte-ignore a11y-click-events-have-key-events -->
-                <div class="control dropdown is-right" class:is-hoverable={currentScene.doVote}>
-                    <button class="button is-small is-rounded" disabled="{!currentScene.doVote}">
+                <div class="control dropdown is-right" class:is-hoverable={currentScene.do("doVote")}>
+                    <button class="button is-small is-rounded" disabled="{!currentScene.do("doVote")}">
                         <span class="icon is-small">
                             <i class="fak fa-vote"></i>
                         </span>

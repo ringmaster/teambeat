@@ -45,9 +45,10 @@
         $pbStore.collection('boards').create(data).then((newboard)=>{
             let promises = [];
             const scenedatas = [
-            {"board": newboard.id, "title": "collect", "current": true, "seq": 1, "doAdd": true, "doEdit": true, "doMove": true },
-            {"board": newboard.id, "title": "group", "current": false, "seq": 2, "doAdd": false, "doEdit": false, "doMove": true, "doReveal": true },
-            {"board": newboard.id, "title": "vote", "current": false, "seq": 3, "doAdd": false, "doEdit": false, "doMove": false, "doReveal": true, "doVote": true },
+            {"board": newboard.id, "title": "collect", "current": true, "seq": 1, options: ["doAdd", "doEdit", "doMove"], mode: "columns" },
+            {"board": newboard.id, "title": "group", "current": false, "seq": 2, options: ["doMove", "doReveal"], mode: "columns" },
+            {"board": newboard.id, "title": "vote", "current": false, "seq": 3, options: ["doReveal", "doVote"], mode: "columns" },
+            {"board": newboard.id, "title": "discuss", "current": false, "seq": 4, options: ["doReveal", "doShowVotes", "doComment", "doShowComments"], mode: "present" },
             ];
             scenedatas.forEach((scenedata)=>{
                 promises.push($pbStore.collection('scenes').create(scenedata));

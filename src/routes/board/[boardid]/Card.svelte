@@ -15,7 +15,7 @@
     
     $: user = $pbStore.authStore.model
     $: cardIsCurrentUsers = card.expand.user.id == $pbStore.authStore.model.id;
-    $: skeleton = !cardIsCurrentUsers && !scene.doReveal;
+    $: skeleton = !cardIsCurrentUsers && !scene.do("doReveal");
     $: skeletontext = '<span>' + card.description.replace(/\S/g, 'X').replace(/\s+/g, '</span> <span>').replace(/<span><\/span>/g, '') + '</span>';
     $: isFacilitator = board?.facilitators?.indexOf(user.id) !== -1;
 
@@ -93,7 +93,7 @@
 
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<div class="card" id={card.id} draggable="{scene.doMove}" on:dragstart={handleDragStart} on:dragend={handleDragEnd} transition:slide|local>
+<div class="card" id={card.id} draggable="{scene.do("doMove")}" on:dragstart={handleDragStart} on:dragend={handleDragEnd} transition:slide|local>
     {#key scene}
     <div class="card-content cardcontent" on:click={focusCard}>
         
@@ -103,7 +103,7 @@
         </div>
         {:else}
         <!-- THE EDITOR IS HERE-->
-        {#if (cardIsCurrentUsers && scene.doAdd) || isFacilitator}
+        {#if (cardIsCurrentUsers && scene.do("doAdd")) || isFacilitator}
         <div class="cardcontentdescription cardeditor"><InkMde bind:value={card.description} options={{
             doc: '',
             hooks: {
@@ -127,14 +127,14 @@
                 <i class="fa-solid fa-user"></i>
             </span>
             <!-- svelte-ignore a11y-click-events-have-key-events -->
-            {#if (cardIsCurrentUsers && scene.doAdd) || isFacilitator }
+            {#if (cardIsCurrentUsers && scene.do("doAdd")) || isFacilitator }
             <span class="has-tooltip-arrow" class:has-tooltip-left={scene.mode == 'present'} data-tooltip="Delete Card" on:click={handleDelete}>
                 <i class="fa-solid fa-trash"></i>
             </span>
             {/if}
         </div>
     </div>
-    {#if card.expand["comments(card)"] && scene.doShowComments}
+    {#if card.expand["comments(card)"] && scene.do("doShowComments")}
     <div class="card-content">
         {#each card.expand["comments(card)"] as comment}
         <sl-divider></sl-divider>
@@ -148,23 +148,23 @@
         {/each}
     </div>
     {/if}
-    {#if scene.doShowVotes || scene.doVote || scene.doShowComments}
+    {#if scene.do("doShowVotes") || scene.do("doVote") || scene.do("doShowComments")}
     <div class="card-footer level">
         <div class="level-left">
-            {#if scene.doShowVotes || scene.doVote}
+            {#if scene.do("doShowVotes") || scene.do("doVote")}
             {#each board.votetypes as votetype}
             {#if votetype.amount > 0}
             <div class="level-item votewidget">
-                {#if scene.doVote}
+                {#if scene.do("doVote")}
                 <button class="downvote udvote button is-small" class:is-disabled={cardvotes[votetype.typename].yours<=0} on:click={()=>voteDel(votetype)}><i class="fa-solid fa-minus"></i></button>
                 {/if}
-                {#if scene.doVote}
+                {#if scene.do("doVote")}
                 <span>{cardvotes[votetype.typename].yours}</span>
                 {/if}
-                {#if scene.doShowVotes && scene.doVote}
+                {#if scene.do("doShowVotes") && scene.do("doVote")}
                 <span>/</span>
                 {/if}
-                {#if scene.doShowVotes }
+                {#if scene.do("doShowVotes") }
                 <span>{cardvotes[votetype.typename].total}</span>
                 {/if}
                 <span class="icon" class:is-voted={cardvotes[votetype.typename].yours>0}>
@@ -178,7 +178,7 @@
                     <i class="fak fa-vote"></i>
                     {/if}
                 </span>
-                {#if scene.doVote}
+                {#if scene.do("doVote")}
                 <button class="upvote udvote button is-small" class:is-disabled={$votedata.yours[votetype.typename]>=votetype.amount} on:click={()=>voteAdd(votetype)}><i class="fa-solid fa-plus"></i></button>
                 {/if}
             </div>
@@ -186,7 +186,7 @@
             {/each}
             {/if}
         </div>
-        {#if scene.doShowComments}
+        {#if scene.do("doShowComments")}
         <div class="level-right">
             <div class="level-item">
                 <sl-button-group label="Comment Group">

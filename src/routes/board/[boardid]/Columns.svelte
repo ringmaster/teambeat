@@ -153,13 +153,13 @@
                         <div class="level-item">
                             <h2 class="subtitle">{column.title}</h2>
                         </div>
-                        {#if currentScene.doAdd}
+                        {#if currentScene.do("doAdd")}
                         <div class="level-item">
                         </div>
                         {/if}
                     </div>
                 </div>
-                {#if currentScene.doAdd}
+                {#if currentScene.do("doAdd")}
                 <!-- svelte-ignore a11y-click-events-have-key-events -->
                 <div class="card" on:click={()=>{focusEditor(column)}}>
                     <div class="card-content cardcontent">
@@ -178,7 +178,7 @@
                 </div>
                 {/if}
                 
-                {#each maybeSort([...column.cards], currentScene.doShowVotes) as card(card.id)}
+                {#each maybeSort([...column.cards], currentScene.do("doShowVotes")) as card(card.id)}
                 <Card bind:card={card} bind:scene={currentScene} bind:board={board} on:dragstart={handleDragStart} on:dragend={handleDragEnd} />
                 {/each}
                 
