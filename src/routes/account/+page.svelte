@@ -12,6 +12,9 @@
     $pbStore.collection('users').update(user.id, user).then(()=>{
       loading = false;
       notify("Updated user record successfully.", "info")
+    }).catch((error)=>{
+      loading = false;
+      notify(error, "error")
     })
   }
 </script>
@@ -43,9 +46,23 @@
     </div>
     
     <div class="field">
-      <label class="label" for="password">Password</label>
+      <label class="label" for="password">Old Password</label>
       <div class="control">
         <input class="input" type="password" placeholder="password" id="password" bind:value="{user.password}">
+      </div>
+    </div>
+    
+    <div class="field">
+      <label class="label" for="newpassword">New Password</label>
+      <div class="control">
+        <input class="input" type="password" placeholder="password" id="newpassword" bind:value="{user.newpassword}">
+      </div>
+    </div>
+    
+    <div class="field">
+      <label class="label" for="confirmpassword">Confirm New Password</label>
+      <div class="control">
+        <input class="input" type="password" placeholder="password" id="confirmpassword" bind:value="{user.confirmpassword}">
       </div>
     </div>
     

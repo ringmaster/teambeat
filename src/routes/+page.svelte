@@ -99,9 +99,15 @@
                 </td>
                 <td>
                     {#each board.expand.users as user}
+                    {#if user.anonymous}
+                    <span class="has-tooltip-arrow" data-tooltip="Anonymous: {user.name}">
+                        <i class="fa-regular fa-user-secret"></i>
+                    </span>
+                    {:else}
                     <span class="has-tooltip-arrow" data-tooltip="{user.name}">
                         <i class="fa-solid fa-user"></i>
                     </span>
+                    {/if}
                     {/each}
                 </td>
                 <td>{board.created}</td>
