@@ -2,7 +2,7 @@
     import { createEventDispatcher } from 'svelte';
     import { pbStore } from 'svelte-pocketbase';
     import { votes as votedata } from "$stores/votes.js";
-    import { slide } from 'svelte/transition';
+    import { slide, fade, fly } from 'svelte/transition';
     import InkMde from 'ink-mde/svelte'
     
     const dispatch = createEventDispatcher();
@@ -10,6 +10,7 @@
     export let card;
     export let scene;
     export let board;
+    export let present = false;
     
     let editorEl;
     
@@ -93,7 +94,7 @@
 
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<div class="card" id={card.id} draggable="{scene.do("doMove") && (cardIsCurrentUsers || isFacilitator)}" on:dragstart={handleDragStart} on:dragend={handleDragEnd} transition:slide|local>
+<div class="card" id={card.id} draggable="{scene.do("doMove") && (cardIsCurrentUsers || isFacilitator)}" on:dragstart={handleDragStart} on:dragend={handleDragEnd}>
     {#key scene}
     <div class="card-content cardcontent" on:click={focusCard}>
         {#if skeleton}

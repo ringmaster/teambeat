@@ -4,7 +4,7 @@ export default [
         "description": "Use this format to capture problems with a recent project or process, develop areas for improvement, and show appreciation for reammates.",
         "columns": [
             {seq: 1, title: "Kvetches"},
-            {seq: 2, title: "Appreciatons"},
+            {seq: 2, title: "Appreciations"},
             {seq: 3, title: "Flaws"},
             {seq: 4, title: "Experiments"},
         ]

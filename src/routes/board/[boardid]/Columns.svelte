@@ -3,6 +3,10 @@
     import { pbStore } from "svelte-pocketbase";
     import boarddefaults from "./boarddefaults";
     import { votes as votedata } from "$stores/votes.js";
+
+    import { quintOut } from 'svelte/easing';
+	import { crossfade } from 'svelte/transition';
+	import { flip } from 'svelte/animate';
     
     //import simplemde from "simplemde/src/js/simplemde.js";
     import notify from "../../../utils/notify";
@@ -139,6 +143,24 @@
         }
         return cards;
     }
+
+	const [send, receive] = crossfade({
+		duration: d => Math.sqrt(d * 200),
+
+		fallback(node, params) {
+			const style = getComputedStyle(node);
+			const transform = style.transform === 'none' ? '' : style.transform;
+
+			return {
+				duration: 600,
+				easing: quintOut,
+				css: t => `
+					transform: ${transform} scale(${t});
+					opacity: ${t}
+				`
+			};
+		}
+	});
 </script>
 
 {#if board.columns.length > 0}
@@ -179,7 +201,11 @@
                 {/if}
                 
                 {#each maybeSort([...column.cards], currentScene.do("doShowVotes")) as card(card.id)}
+                <div 	in:receive|local="{{key: card.id}}"
+                out:send|local="{{key: card.id}}"
+                animate:flip|local="{{duration: 200}}">
                 <Card bind:card={card} bind:scene={currentScene} bind:board={board} on:dragstart={handleDragStart} on:dragend={handleDragEnd} />
+                </div>
                 {/each}
                 
                 

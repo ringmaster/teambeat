@@ -10,58 +10,95 @@
     export let board;
     export let currentScene;
     
-    function presentSort(columns) {
+    let onlyvoted = false;
+    let voteSort = 'votes';
+    
+    function decompVotes(cardid, votetype) {
+        let v = $votedata.cards[cardid];
+        if(v == undefined) return 0
+        v = v[votetype];
+        if(v == undefined) return 0
+        v = v.total;
+        if(v == undefined) return 0
+        return v;
+    }
+    
+    function presentSort(columns, onlyvoted) {
         let cards = [];
         columns.forEach(column => {
             cards = [...cards, ...column.cards];
         });
-        cards.sort((a, b) => {
-            let aval = $votedata.cards[a.id] ? $votedata.cards[a.id].votes.total : 0;
-            let bval = $votedata.cards[b.id] ? $votedata.cards[b.id].votes.total : 0;
+        console.log("ONLYVOTED", onlyvoted);
+        cards = cards.sort((a, b) => {
+            let aval = decompVotes(a.id, voteSort);
+            let bval = decompVotes(b.id, voteSort);
             return bval - aval;
-        })
+        }).filter((card) => !onlyvoted || decompVotes(card.id, voteSort) > 0 )
         return cards;
+    }
+    
+    function selectCard(selcard) {
+        currentScene.presenting = selcard.id;
+        $pbStore.collection('scenes').update(currentScene.id, currentScene);
     }
 </script>
 
-<div class="columns presentationscreen">
-    <div class="column">
-        
-    </div>
-    <div class="column is-one-third cardlist">
-        <div class="level filtercontrols">
-            <div class="level-item">
-                <div class="select is-small">
-                    <select>
-                        <option>All Columns</option>
-                        {#each board.columns as column}
-                        <option>{column.title}</option>
-                        {/each}
-                    </select>
+<div class="container">
+    <div class="columns presentationscreen">
+        <div class="column">
+            <div class="presentationarea">
+                {#each presentSort([...board.columns], onlyvoted) as card(card.id)}
+                {#if card.id == currentScene.presenting}
+                <div class="focuscard">
+                <Card bind:card={card} bind:scene={currentScene} bind:board={board} />
                 </div>
-                <label class="checkbox">
-                    <input type="checkbox">
-                    Only Voted
-                </label>
-            </div>
-        </div>
-        {#each presentSort([...board.columns]) as card(card.id)}
-        <div class="cardrow">
-            <div class="cardcontrols">
-                {#if card.selected}
-                <span class="icon" on:click={()=> card.selected = true}>
-                    <i class="fa-solid fa-eye"></i>
-                </span>
-                {:else}
-                <span class="icon" on:click={()=> card.selected = true}>
-                    <i class="fa-light fa-eye"></i>
-                </span>
                 {/if}
-                {card.selected}
+                {/each}
             </div>
-            <Card bind:card={card} bind:scene={currentScene} bind:board={board} />
         </div>
-        {/each}
+        <div class="column is-one-third cardlist">
+            <div class="level filtercontrols">
+                <div class="level-item">
+                    <div class="select is-small">
+                        <select>
+                            <option>All Columns</option>
+                            {#each board.columns as column}
+                            <option>{column.title}</option>
+                            {/each}
+                        </select>
+                    </div>
+                    {#if board.votetypes.length > 1}
+                    <div class="select is-small">
+                        <select bind:value={voteSort}>
+                            {#each board.votetypes as votetype}
+                            <option>{votetype.typename}</option>
+                            {/each}
+                        </select>
+                    </div>
+                    {/if}
+                    <label class="checkbox">
+                        <input type="checkbox" bind:checked={onlyvoted}>
+                        Only Voted 
+                    </label>
+                </div>
+            </div>
+            {#each presentSort([...board.columns], onlyvoted) as card(card.id)}
+            <div class="cardrow">
+                <div class="cardcontrols">
+                    {#if currentScene.presenting == card.id}
+                    <span class="icon" on:click={()=> card.selected = true}>
+                        <i class="fa-solid fa-circle-chevron-left"></i>
+                    </span>
+                    {:else}
+                    <span class="icon" on:click={()=>selectCard(card)}>
+                        <i class="fa-thin fa-circle-chevron-left"></i>
+                    </span>
+                    {/if}
+                </div>
+                <Card bind:card={card} bind:scene={currentScene} bind:board={board} />
+            </div>
+            {/each}
+        </div>
     </div>
 </div>
 
@@ -87,5 +124,13 @@
     }
     .cardcontrols {
         width: 2rem;
+    }
+    .presentationarea {
+        overflow: hidden;
+        display: grid;
+    }
+    .focuscard {
+        grid-column: 1/2;
+        grid-row: 1/2
     }
 </style>
