@@ -90,7 +90,6 @@
             }).catch((err)=>{
                 loading = false;
                 notify("There was a problem creating the user record." + collapseErrData(err), "error");
-                console.log(err)
             })
         }).catch((err)=>{
             loading = false;

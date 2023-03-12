@@ -90,7 +90,6 @@
     }
     
     function addCard(column) {
-        console.log("ADD CARD");
         if(!column.editor.textContent.match(/\S/)) {
             notify('The card you add must have content.', "warning");
         }
@@ -111,11 +110,33 @@
     
     function addPreset() {
         let promises = []
+        let collist = {};
         selectedPreset.columns.forEach((column)=>{
             column.board = board.id;
-            promises.push($pbStore.collection('columns').create(column));
+            promises.push($pbStore.collection('columns').create(column).then((col)=>{
+                collist[col.title] = col.id;
+            }));
         })
-        Promise.all(promises).then(()=>{})
+        let delscenes = board.scenes.map((scene) => scene.id);
+        Promise.all(promises).then(()=>{
+            let promises = [];
+            debugger;
+            selectedPreset.scenes.forEach((scene)=>{
+                scene.board = board.id;
+                scene.options = scene.options.map((item) => {
+                    let r = item.match(/\$(.+)$/)
+                    if(r) {
+                        item = item.replace(/\$(.+)$/, collist[r[1]])
+                    }
+                    return item;
+                });
+                promises.push($pbStore.collection('scenes').create(scene));
+            });
+            delscenes.forEach((sceneid) => {
+                promises.push($pbStore.collection('scenes').delete(sceneid))
+            })
+            Promise.all(promises)
+        })
     }
     
     function focusEditor(column) {
@@ -135,7 +156,6 @@
                 let bval = $votedata.cards[b.id] ? $votedata.cards[b.id].votes.total : 0;
                 return bval - aval;
             })
-            //console.log(cards.map((e)=>`${$votedata.cards[e.id]?.votes?.total} = ${e.description}`))
         }
         return cards;
     }

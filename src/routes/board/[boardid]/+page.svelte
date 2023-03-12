@@ -276,11 +276,6 @@
         notify(`Increased ${votetype.typename} amount to ${votetype.amount}.`, "info", 'info')
     }
     
-    function setMode(newMode) {
-        currentScene.mode = newMode;
-        $pbStore.collection('scenes').update(currentScene.id, currentScene);
-    }
-    
     function shareLink() {
         if (!navigator.clipboard) {
             notify("Your browser does not support this feature.", "error");
@@ -311,9 +306,7 @@
         <div class="level-left">
             <div class="level-item">
                 <h1 class="title">{board.name}</h1>
-            </div>
-            {#if isFacilitator}
-            <div class="level-item">
+                {#if isFacilitator}
                 <div class="dropdown is-hoverable">
                     <div class="dropdown-trigger">
                         <button class="button is-small is-white" aria-haspopup="true" aria-controls="dropdown-menu">
@@ -334,44 +327,8 @@
                         </div>
                     </div>
                 </div>
+                {/if}
             </div>
-            <div class="level-item">
-                <div class="dropdown is-hoverable">
-                    <div class="dropdown-trigger">
-                        <button class="button is-small is-white" aria-haspopup="true" aria-controls="dropdown-menu">
-                            {#if currentScene.mode == 'present'}
-                            <span class="icon is-small">
-                                <i class="fa-light fa-presentation-screen"></i>
-                            </span>
-                            {:else}
-                            <span class="icon is-small">
-                                <i class="fa-light fa-square-kanban"></i>
-                            </span>
-                            {/if}
-                            <span class="icon is-small">
-                                <i class="fas fa-angle-down" aria-hidden="true"></i>
-                            </span>
-                        </button>
-                    </div>
-                    <div class="dropdown-menu" id="dropdown-menu" role="menu">
-                        <div class="dropdown-content">
-                            <a href="#" class="dropdown-item" on:click={()=>{setMode('columns')}} class:is-active={currentScene.mode == 'columns'}>
-                                <span class="icon is-small">
-                                    <i class="fa-light fa-square-kanban"></i>
-                                </span>
-                                <span>Board</span>
-                            </a>
-                            <a href="#" class="dropdown-item" on:click={()=>{setMode('present')}} class:is-active={currentScene.mode == 'present'}>
-                                <span class="icon is-small">
-                                    <i class="fa-light fa-presentation-screen"></i>
-                                </span>
-                                <span>Present</span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {/if}
         </div>
         {#if currentScene.do("doVote")}
         <div class="level-item votesleft">

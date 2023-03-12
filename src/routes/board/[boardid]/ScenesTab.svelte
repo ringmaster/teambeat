@@ -21,7 +21,6 @@
     }
     
     function updateScene(scene, items) {
-        console.log("SCENE UPDATE", scene);
         $pbStore.collection('scenes').update(scene.id, scene);
     }
     
@@ -32,6 +31,7 @@
     <thead><tr>
         <th>Scene</th>
         <th>Options</th>
+        <th>Mode</th>
     </tr></thead>
     <tbody>
         {#each board.scenes as scene}
@@ -51,6 +51,14 @@
                     <option value="hide:{column.id}">Hide {column.title}</option>
                     {/each}
                 </TagsInput>
+            </td>
+            <td>
+                <div class="select">
+                    <select bind:value={scene.mode}>
+                        <option value="columns">Columns</option>
+                        <option value="present">Present</option>
+                    </select>
+                </div>
             </td>
         </tr>
         {/each}

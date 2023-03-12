@@ -8,9 +8,8 @@
         
     function deleteBoard(){
         if(confirmDelete) {
-            $pbStore.collection('boards').delete(board.id).then(()=>{
-                goto("/");
-            })
+            goto("/");
+            $pbStore.collection('boards').delete(board.id);
         } else {
             notify("Check the box to confirm the deletion of this board.", "warning", "exclamation-triangle")
         }
