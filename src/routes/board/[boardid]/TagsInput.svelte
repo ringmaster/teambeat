@@ -33,10 +33,7 @@
             trim: true
         }
         
-        new BulmaTagsInput(node, options);
-        instance = node.BulmaTagsInput();
-
-
+        instance = new BulmaTagsInput(node, options);
         instance.on('after.add', doChange);
         instance.on('after.remove', doChange);
 
