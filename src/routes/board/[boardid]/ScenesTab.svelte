@@ -11,7 +11,9 @@
         const sceneData = {
             "title": newSceneName,
             "seq": maxseq,
-            "board": board.id
+            "board": board.id,
+            "mode": "columns",
+            "options": []
         }
         $pbStore.collection('scenes').create(sceneData).then(()=>{
             newSceneName = '';
