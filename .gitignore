@@ -28,3 +28,5 @@ pb/*
 .vscode/.settings.json
 .gitignore
 teambeat.code-workspace
+fly.toml
+.gitignore
