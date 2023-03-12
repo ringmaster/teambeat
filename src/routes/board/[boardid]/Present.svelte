@@ -26,7 +26,9 @@
     function presentSort(columns, onlyvoted) {
         let cards = [];
         columns.forEach(column => {
-            cards = [...cards, ...column.cards];
+            if(!currentScene.do(`hide:${column.id}`)) {
+                cards = [...cards, ...column.cards];
+            }
         });
         console.log("ONLYVOTED", onlyvoted);
         cards = cards.sort((a, b) => {
@@ -50,7 +52,7 @@
                 {#each presentSort([...board.columns], onlyvoted) as card(card.id)}
                 {#if card.id == currentScene.presenting}
                 <div class="focuscard">
-                <Card bind:card={card} bind:scene={currentScene} bind:board={board} />
+                    <Card bind:card={card} bind:scene={currentScene} bind:board={board} />
                 </div>
                 {/if}
                 {/each}
@@ -59,14 +61,6 @@
         <div class="column is-one-third cardlist">
             <div class="level filtercontrols">
                 <div class="level-item">
-                    <div class="select is-small">
-                        <select>
-                            <option>All Columns</option>
-                            {#each board.columns as column}
-                            <option>{column.title}</option>
-                            {/each}
-                        </select>
-                    </div>
                     {#if board.votetypes.length > 1}
                     <div class="select is-small">
                         <select bind:value={voteSort}>

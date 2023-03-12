@@ -1,12 +1,10 @@
 <script>
     import { pbStore } from "svelte-pocketbase";
-    import { afterUpdate } from "svelte";
     import TagsInput from "./TagsInput.svelte";
     
     export let board;
     
     let newSceneName = '';
-    let updateTimer;
     
     function addScene() {
         const maxseq = board.scenes.reduce((prev, cur)=>{return Math.max(prev,cur.seq)}, 0) + 1;
@@ -47,6 +45,9 @@
                     <option value="doVote">Vote</option>
                     <option value="doShowComments">Show Comments</option>
                     <option value="doComment">Comment</option>
+                    {#each board.columns as column}
+                    <option value="hide:{column.id}">Hide {column.title}</option>
+                    {/each}
                 </TagsInput>
             </td>
         </tr>
