@@ -1,5 +1,5 @@
 <script>
-    import { pbStore, User } from "svelte-pocketbase";
+    import { pbStore } from "svelte-pocketbase";
     import notify from "../../../utils/notify";
     import { goto } from '$app/navigation';
     

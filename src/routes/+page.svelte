@@ -2,12 +2,16 @@
     import { goto } from '$app/navigation';
     import { pbStore } from 'svelte-pocketbase';
     import { onMount } from 'svelte';
+    import notify from '../utils/notify';
     
     $: loggedIn = $pbStore.authStore.isValid
     
     $: user = $pbStore.authStore.model
     
     let boards = [];
+    
+    let username, useremail, userpassword;
+    let loading = false;
     
     function getBoards() {
         $pbStore.collection('boards').getFullList(10, {
@@ -64,6 +68,47 @@
             })
         })
     }
+    
+    function newUser() {
+        const userdata = {
+            "email": useremail,
+            "emailVisibility": false,
+            "password": userpassword,
+            "passwordConfirm": userpassword,
+            "name": username,
+            "anonymous": false,
+        };
+        
+        createUser(userdata);
+    }
+    
+    
+    function collapseErrData(err) {
+        let output = '';
+        Object.keys(err.data.data).forEach((key)=>{
+            output += "\n" + `${key}: ${err.data.data[key].message}`;
+        })
+        return output;
+    }
+    
+    function createUser(userdata) {
+        loading = true;
+        
+        $pbStore.collection('users').create(userdata).then((user)=>{
+            $pbStore.collection('users').authWithPassword(user.username, userdata.password).then((user)=>{
+                document.cookie = $pbStore.authStore.exportToCookie({ httpOnly: false, secure: false });
+                goto("/");
+            }).catch((err)=>{
+                loading = false;
+                notify("There was a problem authenticating the user record." + collapseErrData(err), "error");
+            })
+        }).catch((err)=>{
+            loading = false;
+            notify("There was a problem creating the user record." + collapseErrData(err), "error");
+        })
+    }
+    
+    
     
 </script>
 
@@ -150,6 +195,49 @@
                 <button class="button is-success" on:click={createBoard}>Create Board</button>
                 <button class="button" on:click={()=>newmodal=false}>Cancel</button>
             </footer>
+        </div>
+    </div>
+    {:else}
+    <div class="columns">
+        <div class="column">
+            <div class="notification is-info is-light">
+                <h2 class="subtitle">Create A New Account</h2>
+                <div class="cardz">
+                    <form on:submit="{newUser}">
+                        <div class="field">
+                            <label class="label" for="name">Name</label>
+                            <div class="control">
+                                <input class="input" type="text" placeholder="name" id="name" bind:value="{username}">
+                            </div>
+                        </div>
+                        
+                        <div class="field">
+                            <label class="label" for="email">Email</label>
+                            <div class="control">
+                                <input class="input" type="text" placeholder="name" id="email" bind:value="{useremail}">
+                            </div>
+                        </div>
+                        
+                        <div class="field">
+                            <label class="label" for="password1">Password</label>
+                            <div class="control">
+                                <input class="input" type="password" placeholder="password" id="password1" bind:value="{userpassword}">
+                            </div>
+                        </div>
+                        
+                        <div class="field is-grouped">
+                            <div class="control">
+                                <input class="button is-primary" class:is-loading={loading} type="submit" value="Create Account">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+        </div>
+        <div class="column">
+            <div class="notice">
+            </div>
         </div>
     </div>
     {/if}

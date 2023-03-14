@@ -4,7 +4,7 @@
     import { votes as votedata } from "$stores/votes.js";
     import { slide, fade, fly } from 'svelte/transition';
     import { createAvatar } from '@dicebear/core';
-    import { identicon } from '@dicebear/collection';
+    import { pixelArt } from '@dicebear/collection';
     import InkMde from 'ink-mde/svelte'
     
     const dispatch = createEventDispatcher();
@@ -22,7 +22,7 @@
     $: skeletontext = '<span>' + card.description.replace(/\S/g, 'X').replace(/\s+/g, '</span> <span>').replace(/<span><\/span>/g, '') + '</span>';
     $: isFacilitator = board?.facilitators?.indexOf(user.id) !== -1;
     
-    $: avatar = createAvatar(identicon, {seed: user.id, scale: 200});
+    $: avatar = createAvatar(pixelArt, {seed: card.user, scale: 100});
     
     $: avatarsvg = avatar.toString();
     
@@ -140,7 +140,7 @@
             {/if}
             <!-- svelte-ignore a11y-click-events-have-key-events -->
             {#if (cardIsCurrentUsers && scene.do("doAdd")) || isFacilitator }
-            <span class="has-tooltip-arrow" class:has-tooltip-left={scene.mode == 'present'} data-tooltip="Delete Card" on:click={handleDelete}>
+            <span class="has-tooltip-arrow trash" class:has-tooltip-left={scene.mode == 'present'} data-tooltip="Delete Card" on:click={handleDelete}>
                 <i class="fa-solid fa-trash"></i>
             </span>
             {/if}
