@@ -1,19 +1,31 @@
 <script>
     import GeneralTab from "./GeneralTab.svelte";
-    import VotingTab from "./VotingTab.svelte";
-    import ScenesTab from "./ScenesTab.svelte";
-    import ColumnsTab from "./ColumnsTab.svelte";
+    //import VotingTab from "./VotingTab.svelte";
+    //import ScenesTab from "./ScenesTab.svelte";
+    //import ColumnsTab from "./ColumnsTab.svelte";
+    import { onMount } from "svelte";
     
     export let board;
     export let visible = false;
     
-    let tabs = [
-    {label: "Columns", active: false, component: ColumnsTab},
-    {label: "Scenes", active: false, component: ScenesTab},
-    {label: "Voting", active: false, component: VotingTab},
-    {label: "General", active: true, component: GeneralTab},
-    ];
-
+    let tabs = [];
+    
+    onMount(async () => {
+        try {
+            tabs = [
+            {label: "Columns", active: false, component: (await import ("./ColumnsTab.svelte")).default},
+            {label: "Scenes", active: false, component: (await import ("./ScenesTab.svelte")).default},
+            {label: "Voting", active: false, component: (await import("./VotingTab.svelte")).default},
+            {label: "General", active: true, component: GeneralTab},
+            ];
+        }
+        catch (e) {
+            tabs = [
+            {label: "General", active: true, component: GeneralTab},
+            ]
+        }
+    })
+    
     function setActiveTab(tab) {
         tabs.forEach((t)=>{
             t.active = (t.label == tab.label);
@@ -49,11 +61,11 @@
         
         <div class="drawercontent">
             <div class="drawerscroll">
-            {#each tabs as tab}
-            {#if tab.active}
-            <svelte:component this={tab.component} bind:board />
-            {/if}
-            {/each}
+                {#each tabs as tab}
+                {#if tab.active}
+                <svelte:component this={tab.component} bind:board />
+                {/if}
+                {/each}
             </div>
         </div>
     </div>

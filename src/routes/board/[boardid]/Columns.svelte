@@ -120,7 +120,6 @@
         let delscenes = board.scenes.map((scene) => scene.id);
         Promise.all(promises).then(()=>{
             let promises = [];
-            debugger;
             selectedPreset.scenes.forEach((scene)=>{
                 scene.board = board.id;
                 scene.options = scene.options.map((item) => {
@@ -281,7 +280,7 @@
         min-height: 70vh;
     }
     .cardcolumn {
-        min-width: 30rem;
+        min-width: 20rem;
     }
     :global(.column-over) {
         background-color: #eee;

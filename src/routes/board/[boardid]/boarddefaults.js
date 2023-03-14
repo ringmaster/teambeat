@@ -12,7 +12,7 @@ export default [
             {seq: 1, title: "collect", options: ["doAdd", "doEdit", "doMove"], mode: "columns"},
             {seq: 2, title: "group", options: ["doReveal", "doMove"], mode: "columns"},
             {seq: 3, title: "kvetch", options: ["doReveal", "hide:$Appreciations", "hide:$Flaws", "hide:$Experiments"], mode: "present"},
-            {seq: 4, title: "vote", options: ["doReveal", "doVote", "doMove"], mode: "columns"},
+            {seq: 4, title: "vote", options: ["doReveal", "doVote", "doMove", "hide:$Appreciations", "hide:$Kvetches"], mode: "columns"},
             {seq: 5, title: "discuss", options: ["doReveal", "doShowVotes"], mode: "present"},
             {seq: 6, title: "appreciate", options: ["doReveal", "hide:$Kvetches", "hide:$Flaws", "hide:$Experiments"], mode: "present"},
         ]
