@@ -76,6 +76,22 @@
             }, 750);
         }
     }
+
+    let noteTimer;
+    let noteDirty = false;
+
+    const updateNotes = (notes) => {
+        if(card.notes != notes) {
+            clearTimeout(noteTimer);
+            noteDirty = true;
+            card.notes = notes;
+            noteTimer = setTimeout(() => {
+                $pbStore.collection("cards").update(card.id, card).then(()=>{
+                    noteDirty = false;
+                })
+            }, 750);
+        }
+    }
     
     function focusCard() {
         if(editorEl != undefined) {
@@ -100,8 +116,105 @@
     
 </script>
 
+{#if present}
 
-<!-- svelte-ignore a11y-click-events-have-key-events -->
+<div class="columns present">
+    <div class="column">
+        <div class="card">
+            <div class="card-content cardcontent">
+                <!-- THE EDITOR IS HERE-->
+                
+                <div class="cardcontentdescription cardeditor"><InkMde bind:value={card.description} options={{
+                    doc: '',
+                    hooks: {
+                        afterUpdate: updateCard,
+                    },
+                    interface: {
+                        appearance: 'light',
+                        attribution: false,
+                        lists: true,
+                        images: true,
+                        readonly: !((cardIsCurrentUsers || isFacilitator) && scene.do("doEdit")),
+                    }
+                }}/></div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-content cardcontent">
+                <!-- THE EDITOR IS HERE-->
+                
+                <div class="cardcontentdescription cardeditor">
+                    <h3 class="subtitle">Notes:</h3>
+                    
+                    <InkMde bind:value={card.notes} options={{
+                        doc: '',
+                        hooks: {
+                            afterUpdate: updateNotes,
+                        },
+                        interface: {
+                            appearance: 'light',
+                            attribution: false,
+                            lists: true,
+                            images: true,
+                            readonly: !isFacilitator,
+                        }
+                    }}/>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="column is-one-quarter">
+        <div class="card">
+            <div class="card-content userbox">
+                <div class="avatar">{@html avatarsvg}</div>
+                {#if card.expand.user.anonymous}
+                Anonymous: {card.expand.user.name}
+                {:else}            
+                {card.expand.user.name}
+                {/if}    
+            </div>
+        </div>
+        
+        {#if scene.do("doShowVotes") || scene.do("doVote")}
+        {#each board.votetypes as votetype}
+        {#if votetype.amount > 0}
+        <div class="card">
+            <div class="card-content statbox" class:voted={cardvotes[votetype.typename].yours>0}>
+                <div class="count">
+                    {#if scene.do("doVote")}
+                    <span>{cardvotes[votetype.typename].yours}</span>
+                    {/if}
+                    {#if scene.do("doShowVotes") && scene.do("doVote")}
+                    <span>/</span>
+                    {/if}
+                    {#if scene.do("doShowVotes") }
+                    <span>{cardvotes[votetype.typename].total}</span>
+                    {/if}
+                </div>
+                <span class="icon">
+                    {#if votetype.typename == 'gems'}
+                    <i class="fa-light fa-gem"></i>
+                    {:else if votetype.typename == 'bananas'}
+                    <i class="fa-light fa-banana"></i>
+                    {:else if votetype.typename == 'award'}
+                    <i class="fa-light fa-award"></i>
+                    {:else}
+                    <i class="fak fa-vote"></i>
+                    {/if}
+                </span>
+            </div>
+        </div>
+        {/if}
+        {/each}
+        {/if}
+        
+    </div>
+</div>
+
+
+{:else}
+
 <div class="card" id={card.id} draggable="{scene.do("doMove") && (cardIsCurrentUsers || isFacilitator)}" on:dragstart={handleDragStart} on:dragend={handleDragEnd}>
     {#key scene}
     <div class="card-content cardcontent" on:click={focusCard}>
@@ -223,6 +336,8 @@
     {/key}
 </div>
 
+{/if}
+
 <style>
     .card {
         border-width: 3px 1px 1px;
@@ -311,5 +426,27 @@
     }
     :global(.avatar svg) {
         width: 16px;
+    }
+    .statbox {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        font-weight: bold;
+    }
+    .statbox .voted .count {
+        color: hsl(207, 61%, 53%);
+    }
+    .statbox .icon {
+        margin-left: 0.7rem;
+    }
+    .userbox {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+    }
+    :global(.present .avatar svg) {
+        width: 32px;
     }
 </style>

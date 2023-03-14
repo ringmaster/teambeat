@@ -10,6 +10,9 @@
     export let board;
     export let currentScene;
     
+    $: user = $pbStore.authStore.model
+    $: isFacilitator = board?.facilitators?.indexOf(user.id) !== -1;
+
     let onlyvoted = false;
     let voteSort = 'votes';
     
@@ -37,7 +40,7 @@
         }).filter((card) => !onlyvoted || decompVotes(card.id, voteSort) > 0 )
         return cards;
     }
-
+    
     function presentCard(columns) {
         let cards = [];
         columns.forEach(column => {
@@ -50,8 +53,10 @@
     }
     
     function selectCard(selcard) {
-        currentScene.presenting = selcard.id;
-        $pbStore.collection('scenes').update(currentScene.id, currentScene);
+        if(isFacilitator) {
+            currentScene.presenting = selcard.id;
+            $pbStore.collection('scenes').update(currentScene.id, currentScene);
+        }
     }
 </script>
 
@@ -61,7 +66,7 @@
             <div class="presentationarea">
                 {#each presentCard([...board.columns]) as card(card.id)}
                 <div class="focuscard">
-                    <Card bind:card={card} bind:scene={currentScene} bind:board={board} />
+                    <Card bind:card={card} bind:scene={currentScene} bind:board={board} present=true />
                 </div>
                 {/each}
             </div>
@@ -88,11 +93,11 @@
             <div class="cardrow">
                 <div class="cardcontrols">
                     {#if currentScene.presenting == card.id}
-                    <span class="icon">
+                    <span class="icon chevron">
                         <i class="fa-solid fa-circle-chevron-left"></i>
                     </span>
                     {:else}
-                    <span class="doselect icon" on:click={()=>selectCard(card)}>
+                    <span class="doselect chevron icon" class:facilitator={isFacilitator} on:click={()=>selectCard(card)}>
                         <i class="fa-thin fa-circle-chevron-left"></i>
                     </span>
                     {/if}
@@ -125,7 +130,7 @@
         align-items: center;
     }
     .cardcontrols {
-        width: 2rem;
+        width: 2.5rem;
     }
     .presentationarea {
         overflow: hidden;
@@ -135,7 +140,15 @@
         grid-column: 1/2;
         grid-row: 1/2
     }
-    .doselect {
+    .doselect.facilitator {
         cursor: pointer;
+    }
+    .chevron {
+        height: 2rem;
+        width: 2rem;
+    }
+    :global(.chevron svg) {
+        height: 2rem;
+        width: 2rem;
     }
 </style>
