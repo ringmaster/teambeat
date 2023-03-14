@@ -37,6 +37,17 @@
         }).filter((card) => !onlyvoted || decompVotes(card.id, voteSort) > 0 )
         return cards;
     }
+
+    function presentCard(columns) {
+        let cards = [];
+        columns.forEach(column => {
+            if(!currentScene.do(`hide:${column.id}`)) {
+                cards = [...cards, ...column.cards];
+            }
+        });
+        cards = cards.filter((card) => card.id == currentScene.presenting )
+        return cards;
+    }
     
     function selectCard(selcard) {
         currentScene.presenting = selcard.id;
@@ -48,12 +59,10 @@
     <div class="columns presentationscreen">
         <div class="column">
             <div class="presentationarea">
-                {#each presentSort([...board.columns], onlyvoted) as card(card.id)}
-                {#if card.id == currentScene.presenting}
+                {#each presentCard([...board.columns]) as card(card.id)}
                 <div class="focuscard">
                     <Card bind:card={card} bind:scene={currentScene} bind:board={board} />
                 </div>
-                {/if}
                 {/each}
             </div>
         </div>
@@ -79,7 +88,7 @@
             <div class="cardrow">
                 <div class="cardcontrols">
                     {#if currentScene.presenting == card.id}
-                    <span class="icon" on:click={()=> card.selected = true}>
+                    <span class="icon">
                         <i class="fa-solid fa-circle-chevron-left"></i>
                     </span>
                     {:else}

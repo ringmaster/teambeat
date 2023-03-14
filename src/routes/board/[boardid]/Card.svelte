@@ -65,14 +65,16 @@
     let dirty = false;
     
     const updateCard = (doc) => {
-        clearTimeout(timer);
-        dirty = true;
-        card.description = doc;
-        timer = setTimeout(() => {
-            $pbStore.collection("cards").update(card.id, card).then(()=>{
-                dirty = false;
-            })
-        }, 750);
+        if(card.description != doc) {
+            clearTimeout(timer);
+            dirty = true;
+            card.description = doc;
+            timer = setTimeout(() => {
+                $pbStore.collection("cards").update(card.id, card).then(()=>{
+                    dirty = false;
+                })
+            }, 750);
+        }
     }
     
     function focusCard() {

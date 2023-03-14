@@ -115,7 +115,10 @@
                     $pbStore.collection('cards').unsubscribe();
                 }
                 $pbStore.collection('cards').subscribe('*', function (e) {
-                    item.update();
+                    clearTimeout(item.updateTimeout);
+                    item.updateTimeout = setTimeout(()=>{
+                        item.update()
+                    }, 100);
                 });
                 item.update();
                 return item;
