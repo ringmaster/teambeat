@@ -30,7 +30,6 @@
                 cards = [...cards, ...column.cards];
             }
         });
-        console.log("ONLYVOTED", onlyvoted);
         cards = cards.sort((a, b) => {
             let aval = decompVotes(a.id, voteSort);
             let bval = decompVotes(b.id, voteSort);
@@ -84,7 +83,7 @@
                         <i class="fa-solid fa-circle-chevron-left"></i>
                     </span>
                     {:else}
-                    <span class="icon" on:click={()=>selectCard(card)}>
+                    <span class="doselect icon" on:click={()=>selectCard(card)}>
                         <i class="fa-thin fa-circle-chevron-left"></i>
                     </span>
                     {/if}
@@ -126,5 +125,8 @@
     .focuscard {
         grid-column: 1/2;
         grid-row: 1/2
+    }
+    .doselect {
+        cursor: pointer;
     }
 </style>

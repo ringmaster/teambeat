@@ -29,6 +29,8 @@
 	"dependencies": {
 		"@creativebulma/bulma-tagsinput": "^1.0.3",
 		"@creativebulma/bulma-tooltip": "^1.2.0",
+		"@dicebear/collection": "^5.3.4",
+		"@dicebear/core": "^5.3.4",
 		"@shoelace-style/shoelace": "^2.3.0",
 		"@sveltejs/vite-plugin-svelte": "^2.0.3",
 		"@zerodevx/svelte-toast": "1.0.0-rc.1",

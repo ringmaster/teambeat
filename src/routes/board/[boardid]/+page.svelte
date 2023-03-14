@@ -58,6 +58,7 @@
                 timerlength: boardData.timerlength,
                 facilitators: boardData.facilitators,
                 users: boardData.users,
+                expandedusers: boardData.expand['users'],
                 votetypes: boardData.expand["votetypes(board)"],
                 votecounts: {}
             }
@@ -273,7 +274,7 @@
     function addVotes(votetype, amount) {
         votetype.amount += amount;
         $pbStore.collection('votetypes').update(votetype.id, votetype);
-        notify(`Increased ${votetype.typename} amount to ${votetype.amount}.`, "info", 'info')
+        //notify(`Increased ${votetype.typename} amount to ${votetype.amount}.`, "info", 'info')
     }
     
     function shareLink() {
@@ -332,6 +333,7 @@
         </div>
         {#if currentScene.do("doVote")}
         <div class="level-item votesleft">
+            <div>
             <span><b>Votes Left:</b></span>
             {#each board.votetypes as votetype}
             <span>
@@ -341,6 +343,18 @@
                 {votetype.amount - board.votecounts[votetype.typename]}
             </span>
             {/each}
+            </div>
+            {#if isFacilitator}
+            <div>
+            <span><b>Outstanding votes:</b> </span>
+            {#each board.votetypes as votetype}
+            {#if board.votetypes.length > 1}
+            {votetype.typename} -    
+            {/if}
+            {(board.users.length * votetype.amount)}
+            {/each}
+            </div>
+            {/if}
         </div>
         {/if}
         {#if isFacilitator}
@@ -361,7 +375,11 @@
                         <div class="dropdown-content">
                             {#each board.votetypes as votetype}
                             <div class="dropdown-item">
-                                <div>Add {votetype.typename}</div>
+                                <div>Add {votetype.typename}
+                                    {#if votetype.amount > 0}
+                                    ({votetype.amount})
+                                    {/if}
+                                </div>
                                 <div>
                                     <button class="button is-small is-white" on:click={()=>addVotes(votetype, 1)}>+1</button>
                                     <button class="button is-small is-white" on:click={()=>addVotes(votetype, 5)}>+5</button>

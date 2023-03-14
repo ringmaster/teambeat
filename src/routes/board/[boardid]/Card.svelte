@@ -3,6 +3,8 @@
     import { pbStore } from 'svelte-pocketbase';
     import { votes as votedata } from "$stores/votes.js";
     import { slide, fade, fly } from 'svelte/transition';
+    import { createAvatar } from '@dicebear/core';
+    import { identicon } from '@dicebear/collection';
     import InkMde from 'ink-mde/svelte'
     
     const dispatch = createEventDispatcher();
@@ -19,6 +21,10 @@
     $: skeleton = !cardIsCurrentUsers && !scene.do("doReveal");
     $: skeletontext = '<span>' + card.description.replace(/\S/g, 'X').replace(/\s+/g, '</span> <span>').replace(/<span><\/span>/g, '') + '</span>';
     $: isFacilitator = board?.facilitators?.indexOf(user.id) !== -1;
+    
+    $: avatar = createAvatar(identicon, {seed: user.id, scale: 200});
+    
+    $: avatarsvg = avatar.toString();
     
     function getVoteData(data, id) {
         let neovotes = {}
@@ -123,11 +129,13 @@
         <div class="cardcontentedit">
             {#if card.expand.user.anonymous}
             <span class="has-tooltip-arrow" class:has-tooltip-left={scene.mode == 'present'} data-tooltip="Anonymous: {card.expand.user.name}">
-                <i class="fa-regular fa-user-secret"></i>
+                <!-- i class="fa-regular fa-user-secret"></i -->
+                <span class="avatar">{@html avatarsvg}</span>
             </span>
             {:else}            
             <span class="has-tooltip-arrow" class:has-tooltip-left={scene.mode == 'present'} data-tooltip="{card.expand.user.name}">
-                <i class="fa-solid fa-user"></i>
+                <!-- i class="fa-solid fa-user"></i -->
+                <span class="avatar">{@html avatarsvg}</span>
             </span>
             {/if}
             <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -298,5 +306,8 @@
     }
     :global(.card .ink-mde) {
         border: none;
+    }
+    :global(.avatar svg) {
+        width: 16px;
     }
 </style>

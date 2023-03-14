@@ -18,7 +18,6 @@
 
     $pbStore.authStore.onChange((token, model) => {
         user = model;
-        console.log(token, model);
     });
     
 </script>
@@ -98,10 +97,6 @@
 <style lang="scss">
     :root {
         --sl-font-size-medium: 1.6rem;
-    }
-    
-    :global(body) {
-        /* font-family: 'Roboto', var(--sl-font-sans) */
     }
     :global(.navigation + .container) {
         /* padding-bottom: 7.5rem; */
