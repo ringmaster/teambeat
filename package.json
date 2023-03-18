@@ -42,6 +42,7 @@
 		"milligram": "^1.4.1",
 		"svelte-chartjs": "^3.1.2",
 		"svelte-drag-and-drop-actions": "^1.0.0",
+		"svelte-markdown": "^0.2.3",
 		"svelte-pocketbase": "^0.0.4",
 		"uuid": "^9.0.0"
 	}

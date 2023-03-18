@@ -12,7 +12,7 @@
     
     $: user = $pbStore.authStore.model
     $: isFacilitator = board?.facilitators?.indexOf(user.id) !== -1;
-
+    
     let onlyvoted = false;
     let voteSort = 'votes';
     
@@ -62,14 +62,12 @@
 
 <div class="container">
     <div class="columns presentationscreen">
-        <div class="column">
-            <div class="presentationarea">
-                {#each presentCard([...board.columns]) as card(card.id)}
-                <div class="focuscard">
-                    <Card bind:card={card} bind:scene={currentScene} bind:board={board} present=true />
-                </div>
-                {/each}
+        <div class="column presentationarea">
+            {#each presentCard([...board.columns]) as card(card.id)}
+            <div class="focuscard">
+                <Card bind:card={card} bind:scene={currentScene} bind:board={board} present=true />
             </div>
+            {/each}
         </div>
         <div class="column is-one-third cardlist">
             <div class="level filtercontrols">
@@ -98,9 +96,11 @@
                         <i class="fa-solid fa-circle-chevron-left"></i>
                     </span>
                     {:else}
+                    {#if isFacilitator}
                     <span class="doselect chevron icon" class:facilitator={isFacilitator} on:click={()=>selectCard(card)}>
                         <i class="fa-thin fa-circle-chevron-left"></i>
                     </span>
+                    {/if}
                     {/if}
                     {/key}
                 </div>
@@ -135,7 +135,7 @@
         width: 2.5rem;
     }
     .presentationarea {
-        overflow: hidden;
+        overflow: scroll;
         display: grid;
     }
     .focuscard {

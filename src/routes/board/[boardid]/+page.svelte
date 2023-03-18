@@ -114,12 +114,14 @@
                 item.disconnect = function(){
                     $pbStore.collection('cards').unsubscribe();
                 }
-                $pbStore.collection('cards').subscribe('*', function (e) {
+                item.debounceUpdate = function(){
                     clearTimeout(item.updateTimeout);
                     item.updateTimeout = setTimeout(()=>{
                         item.update()
-                    }, 100);
-                });
+                    }, 100);                    
+                }
+                $pbStore.collection('cards').subscribe('*', item.debounceUpdate);
+                $pbStore.collection('agreements').subscribe('*', item.debounceUpdate);
                 item.update();
                 return item;
             })
@@ -133,7 +135,7 @@
         let cardData = await $pbStore.collection('cards').getFullList(10, {
             sort: "-created",
             filter: 'column = "' + column.id + '"',
-            expand: 'user,comments(card),votes(card),cards(groupedto),groupedto',
+            expand: 'user,comments(card),votes(card),cards(groupedto),groupedto,agreements(card)',
             '$cancelKey': column.id // Wihtout this, the client cancels separate column requests as non-unique
         })
         return cardData;

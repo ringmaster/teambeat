@@ -43,7 +43,7 @@
             const data = {
                 "user": user.id,
                 "type": "default",
-                "description": column.editor.textContent,
+                "description": column.editor.innerText,
                 "options": "{}",
                 "column": column.id
             };

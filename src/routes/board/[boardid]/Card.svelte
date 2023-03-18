@@ -7,6 +7,8 @@
     import { createAvatar } from '@dicebear/core';
     import { pixelArt } from '@dicebear/collection';
     import InkMde from 'ink-mde/svelte'
+    import SvelteMarkdown from 'svelte-markdown'
+	import notify from '../../../utils/notify';
     
     export let card;
     export let scene;
@@ -147,6 +149,29 @@
             })
         })
     }
+    
+    let agreementEdit;
+    function agreementAdd() {
+        if(!agreementEdit.innerText.match(/\S/)) {
+            notify('You must add text for the new agreement.', 'error');
+            return;
+        }
+        let agreement = {
+            content: agreementEdit.innerText,
+            card: card.id
+        }
+        $pbStore.collection('agreements').create(agreement)
+        agreementEdit.innerHTML = '';
+    }
+    function agreementKeypress(e) {
+        if(e.key == 'Enter') {
+            agreementAdd();
+            e.preventDefault();
+        }
+    }
+    function agreementDelete(agreement) {
+        $pbStore.collection('agreements').delete(agreement.id)
+    }
 </script>
 
 {#if present}
@@ -157,6 +182,7 @@
             <div class="card-content cardcontent">
                 <!-- THE EDITOR IS HERE-->
                 
+                {#if ((cardIsCurrentUsers || isFacilitator) && scene.do("doEdit"))}
                 <div class="cardcontentdescription cardeditor"><InkMde bind:value={card.description} options={{
                     doc: '',
                     hooks: {
@@ -167,9 +193,11 @@
                         attribution: false,
                         lists: true,
                         images: true,
-                        readonly: !((cardIsCurrentUsers || isFacilitator) && scene.do("doEdit")),
                     }
                 }}/></div>
+                {:else}
+                <SvelteMarkdown source={card.description}/>
+                {/if}
                 
                 {#if card.expand["cards(groupedto)"]?.length > 0 }
                 {#each card.expand["cards(groupedto)"] as groupCard(groupCard.id)}
@@ -185,12 +213,12 @@
             
         </div>
         
+        <h3 class="subtitle">Notes:</h3>
         <div class="card">
             <div class="card-content cardcontent">
                 <!-- THE EDITOR IS HERE-->
                 
                 <div class="cardcontentdescription cardeditor">
-                    <h3 class="subtitle">Notes:</h3>
                     
                     <InkMde bind:value={card.notes} options={{
                         doc: '',
@@ -208,8 +236,47 @@
                 </div>
             </div>
         </div>
+        
+        <h3 class="subtitle">Agreements:</h3>
+        {#if isFacilitator}
+        <div class="card">
+            <div class="card-content columns">
+                <!-- THE EDITOR IS HERE-->
+                <div class="cardcontentdescription cardeditor column">
+                    <div class="editor" bind:this={agreementEdit} contenteditable="true" on:keypress={agreementKeypress}></div>
+                </div>
+                
+                <div class="cardcontentedit column">
+                    <span class="has-tooltip-arrow" data-tooltip="Add This Agreement" on:click={agreementAdd}>
+                        <i class="fa-solid fa-plus"></i>
+                    </span>
+                </div>
+            </div>
+        </div>
+        {/if}
+        {#if card.expand['agreements(card)']?.length > 0}
+        {#each [...card.expand['agreements(card)']].reverse() as agreement(agreement.id)}
+        <div class="card" transition:fade>
+            <div class="card-content columns">
+                <!-- THE EDITOR IS HERE-->
+                <div class="cardcontentdescription cardeditor column">
+                    {agreement.content}
+                </div>
+                
+                {#if isFacilitator}
+                <div class="cardcontentedit column">
+                    <span class="has-tooltip-arrow trash" data-tooltip="Delete Agreement" on:click={()=>agreementDelete(agreement)}>
+                        <i class="fa-solid fa-trash"></i>
+                    </span>
+                </div>
+                {/if}
+            </div>
+        </div>
+        {/each}
+        {/if}
+        
     </div>
-    <div class="column is-one-quarter">
+    <div class="column is-one-quarter presentationfacets">
         <div class="card">
             <div class="card-content userbox">
                 <div class="avatar">{@html avatarsvg}</div>
@@ -273,52 +340,56 @@ use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTyp
     {:else}
     <!-- THE EDITOR IS HERE-->
     
-    <div class="cardcontentdescription cardeditor"><InkMde bind:value={card.description} options={{
-        doc: '',
-        hooks: {
-            afterUpdate: updateCard,
-        },
-        interface: {
-            appearance: 'light',
-            attribution: false,
-            lists: true,
-            images: true,
-            readonly: !((cardIsCurrentUsers || isFacilitator) && scene.do("doEdit")),
-        }
-    }}/>
-    {#if card.expand["cards(groupedto)"]?.length > 0 }
-    {#each card.expand["cards(groupedto)"] as groupCard(groupCard.id)}
-    <div class="groupitem" use:asDroppable={{Extras: groupCard, Dummy:dynamicDummy, Pannable: '.boardscroll', PanSensorWidth: 50, Operations: 'move', onlyFrom: dragOnlyFrom, DataToOffer: {"text/card": groupCard.id} }}>
-        <span class="icon">
-            <i class="fa-light fa-diagram-subtask"></i>
-        </span>
-        {groupCard.description}
+    <div class="cardcontentdescription cardeditor">
+        {#if ((cardIsCurrentUsers || isFacilitator) && scene.do("doEdit"))}
+        <div class="cardcontentdescription cardeditor"><InkMde bind:value={card.description} options={{
+            doc: '',
+            hooks: {
+                afterUpdate: updateCard,
+            },
+            interface: {
+                appearance: 'light',
+                attribution: false,
+                lists: true,
+                images: true,
+            }
+        }}/></div>
+        {:else}
+        <SvelteMarkdown source={card.description}/>
+        {/if}
+        {#if card.expand["cards(groupedto)"]?.length > 0 }
+        {#each card.expand["cards(groupedto)"] as groupCard(groupCard.id)}
+        <div class="groupitem" use:asDroppable={{Extras: groupCard, Dummy:dynamicDummy, Pannable: '.boardscroll', PanSensorWidth: 50, Operations: 'move', onlyFrom: dragOnlyFrom, DataToOffer: {"text/card": groupCard.id} }}>
+            <span class="icon">
+                <i class="fa-light fa-diagram-subtask"></i>
+            </span>
+            {groupCard.description}
+        </div>
+        {/each}
+        {/if}
     </div>
-    {/each}
+    
     {/if}
-</div>
-
-{/if}
-
-<div class="cardcontentedit">
-    {#if card.expand.user.anonymous}
-    <span class="has-tooltip-arrow" class:has-tooltip-left={scene.mode == 'present'} data-tooltip="Anonymous: {card.expand.user.name}">
-        <!-- i class="fa-regular fa-user-secret"></i -->
-        <span class="avatar">{@html avatarsvg}</span>
-    </span>
-    {:else}            
-    <span class="has-tooltip-arrow" class:has-tooltip-left={scene.mode == 'present'} data-tooltip="{card.expand.user.name}">
-        <!-- i class="fa-solid fa-user"></i -->
-        <span class="avatar">{@html avatarsvg}</span>
-    </span>
-    {/if}
-    <!-- svelte-ignore a11y-click-events-have-key-events -->
-    {#if (cardIsCurrentUsers && scene.do("doAdd")) || isFacilitator }
-    <span class="has-tooltip-arrow trash" class:has-tooltip-left={scene.mode == 'present'} data-tooltip="Delete Card" on:click={handleDelete}>
-        <i class="fa-solid fa-trash"></i>
-    </span>
-    {/if}
-</div>
+    
+    <div class="cardcontentedit">
+        {#if card.expand.user.anonymous}
+        <span class="has-tooltip-arrow" class:has-tooltip-left={scene.mode == 'present'} data-tooltip="Anonymous: {card.expand.user.name}">
+            <!-- i class="fa-regular fa-user-secret"></i -->
+            <span class="avatar">{@html avatarsvg}</span>
+        </span>
+        {:else}            
+        <span class="has-tooltip-arrow" class:has-tooltip-left={scene.mode == 'present'} data-tooltip="{card.expand.user.name}">
+            <!-- i class="fa-solid fa-user"></i -->
+            <span class="avatar">{@html avatarsvg}</span>
+        </span>
+        {/if}
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
+        {#if (cardIsCurrentUsers && scene.do("doAdd")) || isFacilitator }
+        <span class="has-tooltip-arrow trash" class:has-tooltip-left={scene.mode == 'present'} data-tooltip="Delete Card" on:click={handleDelete}>
+            <i class="fa-solid fa-trash"></i>
+        </span>
+        {/if}
+    </div>
 </div>
 
 {#if card.expand["comments(card)"] && scene.do("doShowComments")}
@@ -527,5 +598,15 @@ use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTyp
     .card.canmove .groupitem:hover {
         border-left: 3px solid #34495e;
         cursor: grab;
+    }
+    .presentationfacets {
+        position: sticky;
+        top: 0px;
+    }
+    :global(.cardeditor .html code) {
+        white-space: break-spaces;
+    }
+    .editor {
+        outline: none;
     }
 </style>
