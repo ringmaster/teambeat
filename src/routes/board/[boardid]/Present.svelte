@@ -92,6 +92,7 @@
             {#each presentSort([...board.columns], onlyvoted) as card(card.id)}
             <div class="cardrow">
                 <div class="cardcontrols">
+                    {#key voteSort}
                     {#if currentScene.presenting == card.id}
                     <span class="icon chevron">
                         <i class="fa-solid fa-circle-chevron-left"></i>
@@ -101,6 +102,7 @@
                         <i class="fa-thin fa-circle-chevron-left"></i>
                     </span>
                     {/if}
+                    {/key}
                 </div>
                 <Card bind:card={card} bind:scene={currentScene} bind:board={board} />
             </div>

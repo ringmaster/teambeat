@@ -2,6 +2,8 @@
     import { createEventDispatcher } from 'svelte';
     import { pbStore } from 'svelte-pocketbase';
     import { votes as votedata } from "$stores/votes.js";
+    import { asDroppable } from 'svelte-drag-and-drop-actions'
+    import { asDropZone } from 'svelte-drag-and-drop-actions'
     import { slide, fade, fly } from 'svelte/transition';
     import { createAvatar } from '@dicebear/core';
     import { pixelArt } from '@dicebear/collection';
@@ -76,10 +78,10 @@
             }, 750);
         }
     }
-
+    
     let noteTimer;
     let noteDirty = false;
-
+    
     const updateNotes = (notes) => {
         if(card.notes != notes) {
             clearTimeout(noteTimer);
@@ -113,7 +115,39 @@
             $pbStore.collection('votes').delete(vote.id);
         })
     }
-    
+        
+    $: dragEnabled = scene.do("doMove") && (cardIsCurrentUsers || isFacilitator)
+    $: groupEnabled = scene.do("doGroup")
+    $: acceptDropTypes = groupEnabled ? { 'text/card':'all' } : {}
+    $: dragOnlyFrom = dragEnabled ? '.card' : 'zzzzzz'
+
+    function dynamicDummy() {
+        let proxy = document.createElement('div');
+        proxy.style.cssText = 'width:20rem;';
+        proxy.classList.add("card");
+        let content = document.createElement('div');
+        proxy.appendChild(content);
+        content.classList.add('card-content');
+        content.classList.add('cardcontent');
+        let desc = card.description.split(/[\n\r]+/)
+        let last;
+        desc.forEach((item) => {
+            content.appendChild(document.createTextNode(item));
+            last = content.appendChild(document.createElement('br'));
+        })
+        content.removeChild(last);
+        document.body.appendChild(proxy);
+        setTimeout(()=>document.body.removeChild(proxy), 0);
+        return proxy;
+    }
+
+    let cardElement;
+
+    function dropZoneCard(x,y, Operation, DataOffered, DroppableExtras, DropZoneExtras) {
+        console.log('DROP ON CARD', DropZoneExtras);
+        cardElement.classList.remove('droptarget');
+        return false;
+    }
 </script>
 
 {#if present}
@@ -215,7 +249,10 @@
 
 {:else}
 
-<div class="card" id={card.id} draggable="{scene.do("doMove") && (cardIsCurrentUsers || isFacilitator)}" on:dragstart={handleDragStart} on:dragend={handleDragEnd}>
+<div class="card" id={card.id} draggable="{dragEnabled}" bind:this={cardElement} class:cangroup={groupEnabled}
+use:asDroppable={{Extras: card, Dummy:dynamicDummy, Pannable: '.boardscroll', PanSensorWidth: 50, Operations: 'move', onlyFrom: dragOnlyFrom, DataToOffer: {"text/card": card.id} }}
+use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTypes}}
+>
     {#key scene}
     <div class="card-content cardcontent" on:click={focusCard}>
         {#if skeleton}
@@ -344,6 +381,9 @@
         box-shadow: var(--sl-shadow-large);
         margin-bottom: 1rem;
         width: 100%;
+    }
+    .card.cangroup.hovered {
+        box-shadow: 0px 0px 10px cornflowerblue;
     }
     .card-footer {
         /* display: flex;

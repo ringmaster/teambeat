@@ -43,6 +43,7 @@
                     <option value="doEdit">Edit</option>
                     <option value="doReveal">Reveal</option>
                     <option value="doMove">Move</option>
+                    <option value="doGroup">Group</option>
                     <option value="doShowVotes">Show Votes</option>
                     <option value="doVote">Vote</option>
                     <option value="doShowComments">Show Comments</option>

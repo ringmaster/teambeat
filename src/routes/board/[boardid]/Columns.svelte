@@ -3,6 +3,7 @@
     import { pbStore } from "svelte-pocketbase";
     import boarddefaults from "./boarddefaults";
     import { votes as votedata } from "$stores/votes.js";
+    import { asDropZone } from 'svelte-drag-and-drop-actions'
     
     import { quintOut } from 'svelte/easing';
     import { crossfade } from 'svelte/transition';
@@ -16,77 +17,16 @@
     
     let selectedPreset;
     $: user = $pbStore.authStore.model
-    
-    let status = '';
-    let dropped_in = false;
-    
-    // https://svelte.dev/repl/adf5a97b91164c239cc1e6d0c76c2abe?version=3.14.1
-    // https://www.javascripttutorial.net/web-apis/javascript-drag-and-drop/
-    
-    function handleDragStart(e) {
-        status = "Dragging the element " + e.detail.currentTarget.getAttribute('id');
-        // This sets the class on the original before the dragged clone is made
-        window.setTimeout(()=>e.detail.target.classList.add('novis'), 0);
-        e.detail.dataTransfer.dropEffect = "move";
-        e.detail.dataTransfer.setData("text", e.detail.target.getAttribute('id'));
-    }
-    
-    function handleDragEnd(e) {
-        e.preventDefault();
-        if (dropped_in == false) {
-            window.setTimeout(()=>e.detail.target.classList.remove('novis'), 0);
-            status = "You let the " + e.detail.target.getAttribute('id') + " go.";
-        }
-        dropped_in = false;
-    }
-    
-    function handleDragEnter(e) {
-        e.preventDefault();
-        status = "You are dragging over " + e.currentTarget.getAttribute('id');
-        let columnOver = document.getElementsByClassName('column-over')
-        for(let element of columnOver) {
-            element.classList.remove('column-over');
-        };
-        e.target.closest('.column').classList.add('column-over')
-    }
-    
-    function handleDragOver(e) {
-        e.preventDefault();
-        let columnOver = document.getElementsByClassName('column-over')
-        for(let element of columnOver) {
-            element.classList.remove('column-over');
-        };
-        e.target.closest('.column').classList.add('column-over')
-    }
-    
-    function handleDragLeave(e) {
-        e.preventDefault();
-        if(e.target.classList.contains('column')) {
-            status = "You left the " + e.target.getAttribute('id');
-            e.target.closest('.column').classList.remove('column-over');
-        }
-        else {
-            e.cancelBubble = true;
-        }
-    }
-    
-    async function handleDragDrop(e) {
-        e.preventDefault();
-        e.target.closest('.column').classList.remove('column-over');
-        var element_id = e.dataTransfer.getData("text");
-        document.getElementById(element_id).classList.remove('novis');
-        dropped_in = true;
-        status = "You droped " + element_id + " into drop zone " + e.target.closest('.column').id;
         
-        // Load the initial card data
-        let record = await $pbStore.collection('cards').getOne(element_id);
-        
-        // Update the column on the card
-        let oldColumnId = record.column;
-        record.column = e.target.closest('.column').id;
-        
-        // Submit the updated data
-        record = await $pbStore.collection('cards').update(element_id, record);
+    function dropZoneDrop(x,y, Operation, offeredTypeList, droppedCard, targetColumn) {
+        if(targetColumn.id == droppedCard.column) {
+            console.log("CAN'T DROP ON SAME COLUMN", droppedCard, targetColumn);
+            return false;
+        }
+        console.log("DROP ON COLUMN", droppedCard, targetColumn);
+
+        droppedCard.column = targetColumn.id;
+        $pbStore.collection('cards').update(droppedCard.id, droppedCard);
     }
     
     function addCard(column) {
@@ -186,7 +126,7 @@
             {#each board.columns as column}
             {#if !currentScene.do(`hide:${column.id}`)}
             
-            <div class="column cardcolumn content" on:dragenter={handleDragEnter} on:dragleave={handleDragLeave} on:dragover={handleDragOver} on:drop={handleDragDrop} id="{column.id}">
+            <div class="column cardcolumn content" use:asDropZone={{Extras: column, onDrop: dropZoneDrop, TypesToAccept:{ 'text/card':'all' }}} id="column-{column.id}">
                 <div class="columnheader level">
                     <div class="level-left">
                         <div class="level-item">
@@ -219,7 +159,7 @@
                 
                 {#each maybeSort([...column.cards], currentScene.do("doShowVotes")) as card(card.id)}
                 <div in:receive|local="{{key: card.id}}" out:send|local="{{key: card.id}}" animate:flip|local="{{duration: 200}}">
-                    <Card bind:card={card} bind:scene={currentScene} bind:board={board} on:dragstart={handleDragStart} on:dragend={handleDragEnd} />
+                    <Card bind:card={card} bind:scene={currentScene} bind:board={board} />
                 </div>
                 {/each}
                 
@@ -282,8 +222,8 @@
     .cardcolumn {
         min-width: 20rem;
     }
-    :global(.column-over) {
-        background-color: #eee;
+    :global(.column.hovered .columnheader h2) {
+        text-shadow: 0px 0px 10px cornflowerblue;
     }
     :global(.novis) {
         opacity: 0.0;
