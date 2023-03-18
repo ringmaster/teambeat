@@ -8,7 +8,7 @@
     import { pixelArt } from '@dicebear/collection';
     import InkMde from 'ink-mde/svelte'
     import SvelteMarkdown from 'svelte-markdown'
-	import notify from '../../../utils/notify';
+    import notify from '../../../utils/notify';
     
     export let card;
     export let scene;
@@ -196,7 +196,9 @@
                     }
                 }}/></div>
                 {:else}
-                <SvelteMarkdown source={card.description}/>
+                <div class="content">
+                    <SvelteMarkdown source={card.description}/>
+                </div>
                 {/if}
                 
                 {#if card.expand["cards(groupedto)"]?.length > 0 }
@@ -273,6 +275,8 @@
             </div>
         </div>
         {/each}
+        {:else}
+        <p>No agreements yet.</p>
         {/if}
         
     </div>
@@ -355,7 +359,9 @@ use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTyp
             }
         }}/></div>
         {:else}
-        <SvelteMarkdown source={card.description}/>
+        <div class="content">
+            <SvelteMarkdown source={card.description}/>
+        </div>
         {/if}
         {#if card.expand["cards(groupedto)"]?.length > 0 }
         {#each card.expand["cards(groupedto)"] as groupCard(groupCard.id)}
