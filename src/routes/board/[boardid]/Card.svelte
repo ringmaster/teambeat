@@ -170,7 +170,19 @@
                         readonly: !((cardIsCurrentUsers || isFacilitator) && scene.do("doEdit")),
                     }
                 }}/></div>
+                
+                {#if card.expand["cards(groupedto)"]?.length > 0 }
+                {#each card.expand["cards(groupedto)"] as groupCard(groupCard.id)}
+                <div class="groupitem" >
+                    <span class="icon">
+                        <i class="fa-light fa-diagram-subtask"></i>
+                    </span>
+                    {groupCard.description}
+                </div>
+                {/each}
+                {/if}
             </div>
+            
         </div>
         
         <div class="card">
@@ -248,7 +260,7 @@
 
 {:else}
 
-<div class="card" id="card-{card.id}" class:cangroup={groupEnabled}
+<div class="card" id="card-{card.id}" class:cangroup={groupEnabled} class:canmove={dragEnabled}
 use:asDroppable={{Extras: card, Dummy:dynamicDummy, Pannable: '.boardscroll', PanSensorWidth: 50, Operations: 'move', onlyFrom: dragOnlyFrom, DataToOffer: {"text/card": card.id} }}
 use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTypes}}
 >
@@ -275,10 +287,10 @@ use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTyp
         }
     }}/>
     {#if card.expand["cards(groupedto)"]?.length > 0 }
-    {#each card.expand["cards(groupedto)"] as groupCard}
+    {#each card.expand["cards(groupedto)"] as groupCard(groupCard.id)}
     <div class="groupitem" use:asDroppable={{Extras: groupCard, Dummy:dynamicDummy, Pannable: '.boardscroll', PanSensorWidth: 50, Operations: 'move', onlyFrom: dragOnlyFrom, DataToOffer: {"text/card": groupCard.id} }}>
         <span class="icon">
-            <i class="fa-light fa-cards-blank"></i>
+            <i class="fa-light fa-diagram-subtask"></i>
         </span>
         {groupCard.description}
     </div>
@@ -393,8 +405,12 @@ use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTyp
         margin-bottom: 1rem;
         width: 100%;
     }
+    .card.canmove:hover:not(:has(.groupitem:hover,.ink:hover)) {
+        cursor: grab;
+        border-top: 3px solid #34495e;
+    }
     .card.cangroup.hovered {
-        box-shadow: 0px 0px 10px cornflowerblue;
+        box-shadow: 0px 0px 10px #034a91;
     }
     .card-footer {
         /* display: flex;
@@ -404,6 +420,9 @@ use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTyp
     }
     .cardcontent {
         display: flex;
+    }
+    .present .cardcontent {
+        display: block;
     }
     .cardcontentdescription {
         flex-grow: 1;
@@ -502,5 +521,11 @@ use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTyp
     }
     .groupitem {
         font-size: smaller;
+        padding: 4px 4px;
+        border-left: 3px solid transparent;
+    }
+    .card.canmove .groupitem:hover {
+        border-left: 3px solid #34495e;
+        cursor: grab;
     }
 </style>

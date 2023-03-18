@@ -32,13 +32,8 @@ This procedure should only be necessary once if the /pb/ directory is preserved 
     1. Show outstanding votes to facilitator
     1. Allow people to mark themselves as done for the scene
 1. Users
-    1. Allow users to create accounts in advance
     1. Allow facilitator to add user to board
     1. Allow facilitator to promote user to facilitator
-1. Presentation mode
-    1. Create presentation card display
-1. Notes
-    1. Allow facilitator to add notes to cards
 1. Agreements
     1. Allow faciliatator to add agreements to cards
 1. Questions

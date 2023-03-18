@@ -229,7 +229,7 @@
         min-width: 20rem;
     }
     :global(.column.hovered .columnheader h2) {
-        text-shadow: 0px 0px 10px cornflowerblue;
+        text-shadow: 0px 0px 10px #034a91;
     }
     :global(.novis) {
         opacity: 0.0;
