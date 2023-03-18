@@ -26,7 +26,13 @@
         console.log("DROP ON COLUMN", droppedCard, targetColumn);
 
         droppedCard.column = targetColumn.id;
-        $pbStore.collection('cards').update(droppedCard.id, droppedCard);
+        let follow = ()=>{}
+        if(droppedCard.groupedto != null) {
+            let parent = droppedCard.expand.groupedto;
+            //follow = () => {$pbStore.collection('cards').update(parent.id, parent)};
+            droppedCard.groupedto = null;
+        }
+        $pbStore.collection('cards').update(droppedCard.id, droppedCard).then(follow);
     }
     
     function addCard(column) {

@@ -1,5 +1,4 @@
 <script>
-    import { createEventDispatcher } from 'svelte';
     import { pbStore } from 'svelte-pocketbase';
     import { votes as votedata } from "$stores/votes.js";
     import { asDroppable } from 'svelte-drag-and-drop-actions'
@@ -8,8 +7,6 @@
     import { createAvatar } from '@dicebear/core';
     import { pixelArt } from '@dicebear/collection';
     import InkMde from 'ink-mde/svelte'
-    
-    const dispatch = createEventDispatcher();
     
     export let card;
     export let scene;
@@ -43,14 +40,6 @@
     }
     
     $: cardvotes = getVoteData($votedata, card.id)
-    
-    function handleDragStart(e) {
-        dispatch("dragstart", e)
-    }
-    
-    function handleDragEnd(e) {
-        dispatch("dragend", e)
-    }
     
     function handleDelete(e){
         $pbStore.collection('cards').delete(card.id);
@@ -115,13 +104,14 @@
             $pbStore.collection('votes').delete(vote.id);
         })
     }
-        
+    
     $: dragEnabled = scene.do("doMove") && (cardIsCurrentUsers || isFacilitator)
     $: groupEnabled = scene.do("doGroup")
     $: acceptDropTypes = groupEnabled ? { 'text/card':'all' } : {}
-    $: dragOnlyFrom = dragEnabled ? '.card' : 'zzzzzz'
-
-    function dynamicDummy() {
+    $: dragOnlyFrom = dragEnabled ? '.card,.groupitem' : 'zzzzzz'
+    
+    function dynamicDummy(extras) {
+        console.log(extras)
         let proxy = document.createElement('div');
         proxy.style.cssText = 'width:20rem;';
         proxy.classList.add("card");
@@ -129,7 +119,7 @@
         proxy.appendChild(content);
         content.classList.add('card-content');
         content.classList.add('cardcontent');
-        let desc = card.description.split(/[\n\r]+/)
+        let desc = extras.description.split(/[\n\r]+/)
         let last;
         desc.forEach((item) => {
             content.appendChild(document.createTextNode(item));
@@ -140,13 +130,22 @@
         setTimeout(()=>document.body.removeChild(proxy), 0);
         return proxy;
     }
-
-    let cardElement;
-
-    function dropZoneCard(x,y, Operation, DataOffered, DroppableExtras, DropZoneExtras) {
-        console.log('DROP ON CARD', DropZoneExtras);
-        cardElement.classList.remove('droptarget');
-        return false;
+    
+    function dropZoneCard(x,y, Operation, DataOffered, sourceCard, targetCard) {        
+        if(sourceCard.id == targetCard.id) return false;
+        console.log('DROP ON CARD', targetCard);
+        
+        sourceCard.column = null;
+        sourceCard.groupedto = targetCard.id;
+        $pbStore.collection('cards').update(sourceCard.id, sourceCard)
+        $pbStore.collection('cards').getFullList(200, {filter: `groupedto = "${sourceCard.id}"`}).then((results)=>{
+            results.forEach((subcard)=>{
+                console.log(subcard);
+                subcard.column = null;
+                subcard.groupedto = targetCard.id;
+                $pbStore.collection('cards').update(subcard.id, subcard)
+            })
+        })
     }
 </script>
 
@@ -249,128 +248,140 @@
 
 {:else}
 
-<div class="card" id={card.id} draggable="{dragEnabled}" bind:this={cardElement} class:cangroup={groupEnabled}
+<div class="card" id="card-{card.id}" class:cangroup={groupEnabled}
 use:asDroppable={{Extras: card, Dummy:dynamicDummy, Pannable: '.boardscroll', PanSensorWidth: 50, Operations: 'move', onlyFrom: dragOnlyFrom, DataToOffer: {"text/card": card.id} }}
 use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTypes}}
 >
-    {#key scene}
-    <div class="card-content cardcontent" on:click={focusCard}>
-        {#if skeleton}
-        <div class="cardcontentdescription skeleton-paragraphs">
-            {@html skeletontext}
-        </div>
+{#key scene}
+<div class="card-content cardcontent" on:click={focusCard}>
+    {#if skeleton}
+    <div class="cardcontentdescription skeleton-paragraphs">
+        {@html skeletontext}
+    </div>
+    {:else}
+    <!-- THE EDITOR IS HERE-->
+    
+    <div class="cardcontentdescription cardeditor"><InkMde bind:value={card.description} options={{
+        doc: '',
+        hooks: {
+            afterUpdate: updateCard,
+        },
+        interface: {
+            appearance: 'light',
+            attribution: false,
+            lists: true,
+            images: true,
+            readonly: !((cardIsCurrentUsers || isFacilitator) && scene.do("doEdit")),
+        }
+    }}/>
+    {#if card.expand["cards(groupedto)"]?.length > 0 }
+    {#each card.expand["cards(groupedto)"] as groupCard}
+    <div class="groupitem" use:asDroppable={{Extras: groupCard, Dummy:dynamicDummy, Pannable: '.boardscroll', PanSensorWidth: 50, Operations: 'move', onlyFrom: dragOnlyFrom, DataToOffer: {"text/card": groupCard.id} }}>
+        <span class="icon">
+            <i class="fa-light fa-cards-blank"></i>
+        </span>
+        {groupCard.description}
+    </div>
+    {/each}
+    {/if}
+</div>
+
+{/if}
+
+<div class="cardcontentedit">
+    {#if card.expand.user.anonymous}
+    <span class="has-tooltip-arrow" class:has-tooltip-left={scene.mode == 'present'} data-tooltip="Anonymous: {card.expand.user.name}">
+        <!-- i class="fa-regular fa-user-secret"></i -->
+        <span class="avatar">{@html avatarsvg}</span>
+    </span>
+    {:else}            
+    <span class="has-tooltip-arrow" class:has-tooltip-left={scene.mode == 'present'} data-tooltip="{card.expand.user.name}">
+        <!-- i class="fa-solid fa-user"></i -->
+        <span class="avatar">{@html avatarsvg}</span>
+    </span>
+    {/if}
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    {#if (cardIsCurrentUsers && scene.do("doAdd")) || isFacilitator }
+    <span class="has-tooltip-arrow trash" class:has-tooltip-left={scene.mode == 'present'} data-tooltip="Delete Card" on:click={handleDelete}>
+        <i class="fa-solid fa-trash"></i>
+    </span>
+    {/if}
+</div>
+</div>
+
+{#if card.expand["comments(card)"] && scene.do("doShowComments")}
+<div class="card-content">
+    {#each card.expand["comments(card)"] as comment}
+    <sl-divider></sl-divider>
+    <div class="comment">
+        {#if comment.emoji != ""}
+        <i class="{getEmoji(comment.emoji)}"></i>
         {:else}
-        <!-- THE EDITOR IS HERE-->
-        
-        <div class="cardcontentdescription cardeditor"><InkMde bind:value={card.description} options={{
-            doc: '',
-            hooks: {
-                afterUpdate: updateCard,
-            },
-            interface: {
-                appearance: 'light',
-                attribution: false,
-                lists: true,
-                images: true,
-                readonly: !((cardIsCurrentUsers || isFacilitator) && scene.do("doEdit")),
-            }
-        }}/></div>
-        
-        {/if}
-        
-        <div class="cardcontentedit">
-            {#if card.expand.user.anonymous}
-            <span class="has-tooltip-arrow" class:has-tooltip-left={scene.mode == 'present'} data-tooltip="Anonymous: {card.expand.user.name}">
-                <!-- i class="fa-regular fa-user-secret"></i -->
-                <span class="avatar">{@html avatarsvg}</span>
-            </span>
-            {:else}            
-            <span class="has-tooltip-arrow" class:has-tooltip-left={scene.mode == 'present'} data-tooltip="{card.expand.user.name}">
-                <!-- i class="fa-solid fa-user"></i -->
-                <span class="avatar">{@html avatarsvg}</span>
-            </span>
-            {/if}
-            <!-- svelte-ignore a11y-click-events-have-key-events -->
-            {#if (cardIsCurrentUsers && scene.do("doAdd")) || isFacilitator }
-            <span class="has-tooltip-arrow trash" class:has-tooltip-left={scene.mode == 'present'} data-tooltip="Delete Card" on:click={handleDelete}>
-                <i class="fa-solid fa-trash"></i>
-            </span>
-            {/if}
-        </div>
+        <i class="fa-regular fa-message-lines"></i>
+        {/if} {comment.body}
     </div>
-    {#if card.expand["comments(card)"] && scene.do("doShowComments")}
-    <div class="card-content">
-        {#each card.expand["comments(card)"] as comment}
-        <sl-divider></sl-divider>
-        <div class="comment">
-            {#if comment.emoji != ""}
-            <i class="{getEmoji(comment.emoji)}"></i>
-            {:else}
-            <i class="fa-regular fa-message-lines"></i>
-            {/if} {comment.body}
+    {/each}
+</div>
+{/if}
+{#if scene.do("doShowVotes") || scene.do("doVote") || scene.do("doShowComments")}
+<div class="card-footer level">
+    <div class="level-left">
+        {#if scene.do("doShowVotes") || scene.do("doVote")}
+        {#each board.votetypes as votetype}
+        {#if votetype.amount > 0}
+        <div class="level-item votewidget">
+            {#if scene.do("doVote")}
+            <button class="downvote udvote button is-small" class:is-disabled={cardvotes[votetype.typename].yours<=0} on:click={()=>voteDel(votetype)}><i class="fa-solid fa-minus"></i></button>
+            {/if}
+            {#if scene.do("doVote")}
+            <span>{cardvotes[votetype.typename].yours}</span>
+            {/if}
+            {#if scene.do("doShowVotes") && scene.do("doVote")}
+            <span>/</span>
+            {/if}
+            {#if scene.do("doShowVotes") }
+            <span>{cardvotes[votetype.typename].total}</span>
+            {/if}
+            <span class="icon" class:is-voted={cardvotes[votetype.typename].yours>0}>
+                {#if votetype.typename == 'gems'}
+                <i class="fa-light fa-gem"></i>
+                {:else if votetype.typename == 'bananas'}
+                <i class="fa-light fa-banana"></i>
+                {:else if votetype.typename == 'award'}
+                <i class="fa-light fa-award"></i>
+                {:else}
+                <i class="fak fa-vote"></i>
+                {/if}
+            </span>
+            {#if scene.do("doVote")}
+            <button class="upvote udvote button is-small" class:is-disabled={$votedata.yours[votetype.typename]>=votetype.amount} on:click={()=>voteAdd(votetype)}><i class="fa-solid fa-plus"></i></button>
+            {/if}
         </div>
+        {/if}
         {/each}
-    </div>
-    {/if}
-    {#if scene.do("doShowVotes") || scene.do("doVote") || scene.do("doShowComments")}
-    <div class="card-footer level">
-        <div class="level-left">
-            {#if scene.do("doShowVotes") || scene.do("doVote")}
-            {#each board.votetypes as votetype}
-            {#if votetype.amount > 0}
-            <div class="level-item votewidget">
-                {#if scene.do("doVote")}
-                <button class="downvote udvote button is-small" class:is-disabled={cardvotes[votetype.typename].yours<=0} on:click={()=>voteDel(votetype)}><i class="fa-solid fa-minus"></i></button>
-                {/if}
-                {#if scene.do("doVote")}
-                <span>{cardvotes[votetype.typename].yours}</span>
-                {/if}
-                {#if scene.do("doShowVotes") && scene.do("doVote")}
-                <span>/</span>
-                {/if}
-                {#if scene.do("doShowVotes") }
-                <span>{cardvotes[votetype.typename].total}</span>
-                {/if}
-                <span class="icon" class:is-voted={cardvotes[votetype.typename].yours>0}>
-                    {#if votetype.typename == 'gems'}
-                    <i class="fa-light fa-gem"></i>
-                    {:else if votetype.typename == 'bananas'}
-                    <i class="fa-light fa-banana"></i>
-                    {:else if votetype.typename == 'award'}
-                    <i class="fa-light fa-award"></i>
-                    {:else}
-                    <i class="fak fa-vote"></i>
-                    {/if}
-                </span>
-                {#if scene.do("doVote")}
-                <button class="upvote udvote button is-small" class:is-disabled={$votedata.yours[votetype.typename]>=votetype.amount} on:click={()=>voteAdd(votetype)}><i class="fa-solid fa-plus"></i></button>
-                {/if}
-            </div>
-            {/if}
-            {/each}
-            {/if}
-        </div>
-        {#if scene.do("doShowComments")}
-        <div class="level-right">
-            <div class="level-item">
-                <sl-button-group label="Comment Group">
-                    <sl-button ><i class="fa-regular fa-message-medical"></i></sl-button>
-                    <sl-dropdown placement="bottom-end">
-                        <sl-button slot="trigger" caret>
-                            <sl-visually-hidden>More comment options</sl-visually-hidden>
-                        </sl-button>
-                        <sl-menu>
-                            <sl-menu-item><i class="fa-regular fa-face-smile"></i></sl-menu-item>
-                            <sl-menu-item><i class="fa-regular fa-face-frown"></i></sl-menu-item>
-                        </sl-menu>
-                    </sl-dropdown>
-                </sl-button-group>
-            </div>
-        </div>
         {/if}
     </div>
+    {#if scene.do("doShowComments")}
+    <div class="level-right">
+        <div class="level-item">
+            <sl-button-group label="Comment Group">
+                <sl-button ><i class="fa-regular fa-message-medical"></i></sl-button>
+                <sl-dropdown placement="bottom-end">
+                    <sl-button slot="trigger" caret>
+                        <sl-visually-hidden>More comment options</sl-visually-hidden>
+                    </sl-button>
+                    <sl-menu>
+                        <sl-menu-item><i class="fa-regular fa-face-smile"></i></sl-menu-item>
+                        <sl-menu-item><i class="fa-regular fa-face-frown"></i></sl-menu-item>
+                    </sl-menu>
+                </sl-dropdown>
+            </sl-button-group>
+        </div>
+    </div>
     {/if}
-    {/key}
+</div>
+{/if}
+{/key}
 </div>
 
 {/if}
@@ -488,5 +499,8 @@ use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTyp
     }
     :global(.present .avatar svg) {
         width: 32px;
+    }
+    .groupitem {
+        font-size: smaller;
     }
 </style>
