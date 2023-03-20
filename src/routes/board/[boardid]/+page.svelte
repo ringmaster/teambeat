@@ -3,7 +3,7 @@
     import { votes } from "$stores/votes.js";
     import Columns from "./Columns.svelte";
     import Present from "./Present.svelte";
-    import {onDestroy, tick} from "svelte"
+    import {onDestroy, tick, onMount} from "svelte"
     import { fly, fade } from 'svelte/transition';
     import { goto } from '$app/navigation';
     import notify from "../../../utils/notify";
@@ -23,6 +23,8 @@
     let startTimer;
     let stopTimer;
     let currentScene = {title: "", loaded: false};
+    let presenceInterval;
+    let presenceId = null;
     let audioFile = [new Audio("/alarmding2.mp3"), new Audio("/alarmding1.mp3")];
     let boardData;
     let board = {columns: [], scenes: [], facilitators: [], currentScene: {title: ''}, votetypes: [], votecounts: []};
@@ -40,8 +42,44 @@
     onDestroy(()=>{
         board.columns.forEach((column) => {
             column.disconnect();
-        })
+        });
+        if(presenceId != null) {
+            $pbStore.collection('presence').delete(presenceId);
+            presenceId = null;
+        }
+        clearInterval(presenceInterval);
     })
+    
+    onMount(()=>{
+        presenceInterval = setInterval(doPresence, 12345)
+        doPresence();
+    })
+    
+    function doPresence() {
+        if(!board.id) {
+            setTimeout(doPresence, 100);
+            return
+        }
+        let presence = {
+            user: user.id,
+            board: board.id,
+            recently: Date.now()
+        }
+        $pbStore.collection('presence').getFirstListItem(`board = "${presence.board}" && user = "${presence.user}"`).then((result)=>{
+            presenceId = result.id
+            $pbStore.collection('presence').update(presenceId, presence).then((result)=>{
+                presenceId = result.id
+            }).catch((err)=>{
+                console.log('PRESENCE ERROR', err)
+            })
+        }).catch((err) => {
+            $pbStore.collection('presence').create(presence).then((result)=> {
+                presenceId = result.id;
+            }).catch((err)=>{
+                console.log('PRESENCE CREATION ERROR', err)
+            })
+        })
+    }
     
     function getBoard() {
         if($pbStore.authStore.isValid) {
@@ -63,6 +101,7 @@
                 votecounts: {}
             }
             board.votecounts = getVoteCounts();
+            board.voteStatus = {};
             
             currentScene = board.scenes.reduce((prev, cur) => {
                 if(cur.current) {
@@ -83,7 +122,7 @@
             })
             
             $pbStore.collection('votes').subscribe('*', votesSubUpdate);
-            votesSubUpdate({record: {user: $pbStore.authStore.model.id}});
+            votesSubUpdate();
         })
     }
     
@@ -237,8 +276,13 @@
         return votes;
     }
     
-    function votesSubUpdate(vote) {
-        if(vote.record.user != $pbStore.authStore.model.id) return;
+    function assignedVotes(typename) {
+        let result = board.votetypes.filter((type)=>type.typename == typename)
+        return result[0].amount;
+    }
+    
+    function votesSubUpdate() {
+        //if(vote.record.user != $pbStore.authStore.model.id) return;
         $pbStore.collection('votes').getFullList(200, {
             filter: `card.column.board = "${data.boardid}" && user = "${$pbStore.authStore.model.id}"`,
             expand: "votetype"
@@ -250,6 +294,12 @@
                 }
             })
             board.votecounts = votes;
+        })
+        $pbStore.collection('votestatus').getFullList(/*{filter: `board = "${board.id}"`}*/).then((voteStatuses)=>{
+            board.voteStatus = {}
+            voteStatuses.forEach((item)=>{
+                board.voteStatus[item.typename] = item;
+            })
         })
     }
     
@@ -339,25 +389,27 @@
         {#if currentScene.do("doVote")}
         <div class="level-item votesleft">
             <div>
-            <span><b>Votes Left:</b></span>
-            {#each board.votetypes as votetype}
-            <span>
-                {#if board.votetypes.length > 1}
-                {votetype.typename} -    
-                {/if}
-                {votetype.amount - board.votecounts[votetype.typename]}
-            </span>
-            {/each}
+                <span><b>Votes Left:</b></span>
+                {#each board.votetypes as votetype}
+                <span>
+                    {#if board.votetypes.length > 1}
+                    {votetype.typename} -    
+                    {/if}
+                    {votetype.amount - board.votecounts[votetype.typename]}
+                </span>
+                {/each}
             </div>
             {#if isFacilitator}
             <div>
-            <span><b>Outstanding votes:</b> </span>
-            {#each board.votetypes as votetype}
-            {#if board.votetypes.length > 1}
-            {votetype.typename} -    
-            {/if}
-            {(board.users.length * votetype.amount)}
-            {/each}
+                <span><b>Outstanding votes:</b> </span>
+                {#each board.votetypes as votetype}
+                <span>
+                {#if board.votetypes.length > 1}
+                {votetype.typename} -    
+                {/if}
+                {board.voteStatus[votetype.typename]?.remaining || 0}
+                </span>
+                {/each}
             </div>
             {/if}
         </div>
