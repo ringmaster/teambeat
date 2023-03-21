@@ -17,14 +17,14 @@
     
     let selectedPreset;
     $: user = $pbStore.authStore.model
-        
+    
     function dropZoneDrop(x,y, Operation, offeredTypeList, droppedCard, targetColumn) {
         if(targetColumn.id == droppedCard.column) {
             console.log("CAN'T DROP ON SAME COLUMN", droppedCard, targetColumn);
             return false;
         }
         console.log("DROP ON COLUMN", droppedCard, targetColumn);
-
+        
         droppedCard.column = targetColumn.id;
         let follow = ()=>{}
         if(droppedCard.groupedto != null) {
@@ -258,6 +258,9 @@
         flex-grow: 0;
         max-width: 16px;
         padding-left: 1rem;
+    }
+    .editor {
+        overflow-wrap: anywhere;
     }
     .editor {
         outline: none;

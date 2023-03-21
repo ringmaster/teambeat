@@ -20,7 +20,7 @@
     $: user = $pbStore.authStore.model
     $: cardIsCurrentUsers = card.expand.user.id == $pbStore.authStore.model.id;
     $: skeleton = !cardIsCurrentUsers && !scene.do("doReveal");
-    $: skeletontext = '<span>' + card.description.replace(/\S/g, 'X').replace(/\s+/g, '</span> <span>').replace(/<span><\/span>/g, '') + '</span>';
+    $: skeletontext = '<span>' + card.description.replace(/\S/g, 'X').replace(/X{6,}/, 'XXXXX').replace(/\s+/g, '</span> <span>').replace(/<span><\/span>/g, '') + '</span>';
     $: isFacilitator = board?.facilitators?.indexOf(user.id) !== -1;
     
     $: avatar = createAvatar(pixelArt, {seed: card.user, scale: 100});
@@ -564,6 +564,7 @@ use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTyp
     }
     .cardeditor {
         outline: none;
+        overflow-wrap: anywhere;
     }
     :global(.card .ink-mde .ink-mde-editor) {
         padding: 0px;
