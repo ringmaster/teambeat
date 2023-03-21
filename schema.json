@@ -853,7 +853,7 @@
         "updateRule": null,
         "deleteRule": null,
         "options": {
-            "query": "select (ROW_NUMBER() OVER()) as id, COUNT() as total, board\nFROM presence\n  WHERE UNIXEPOCH() - recently < 21\nGROUP by presence.board"
+            "query": "SELECT (ROW_NUMBER() OVER()) AS id, COUNT() AS total, board FROM (SELECT MAX(recently) AS recently, board FROM presence GROUP BY user, board) WHERE UNIXEPOCH() - recently < 21 GROUP BY board"
         }
     },
     {
