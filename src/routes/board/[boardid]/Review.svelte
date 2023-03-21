@@ -97,8 +97,8 @@
                 appearance: 'light',
                 attribution: false,
                 lists: true,
-                images: true,
-                readOnly: true
+                images: false,
+                readonly: true
             }
         }}/>
         
