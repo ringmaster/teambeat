@@ -90,7 +90,7 @@
             {#each presentSort([...board.columns], onlyvoted) as card(card.id)}
             <div class="cardrow">
                 <div class="cardcontrols">
-                    {#key voteSort}
+                    {#key voteSort, currentScene.presenting}
                     {#if currentScene.presenting == card.id}
                     <span class="icon chevron">
                         <i class="fa-solid fa-circle-chevron-left"></i>

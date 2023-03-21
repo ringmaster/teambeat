@@ -366,7 +366,8 @@
                     "maxSelect": 1,
                     "values": [
                         "columns",
-                        "present"
+                        "present",
+                        "review"
                     ]
                 }
             },

@@ -6,16 +6,17 @@
     
     pbStore.set(env.PUBLIC_POCKETBASE_URL);
     $pbStore.autoCancellation(false);
-
+    
     let user = $pbStore.authStore.model
     let isValid = $pbStore.authStore.isValid
+    let burger = false
     
     if(!$pbStore.authStore.isValid) {
         if (["/", "/login"].indexOf(location.href) === false) {
             goto("/");
         }
     }
-
+    
     $pbStore.authStore.onChange((token, model) => {
         user = model;
     });
@@ -35,9 +36,14 @@
                 <i class="fa-sharp fa-solid fa-wave-pulse"></i>
                 <h1 class="title">Teambeat</h1>
             </a>
+            <a role="button" href="#" class="navbar-burger" class:is-active={burger} aria-label="menu" aria-expanded="false" on:click={()=>{burger=!burger}}>
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+            </a>
         </div>
         
-        <div class="navbar-menu">
+        <div class="navbar-menu" class:is-active={burger}>
             <div class="navbar-start">
                 <a class="navbar-item" href="/">Boards</a>
                 <a class="navbar-item" href="#docs">Documentation</a>

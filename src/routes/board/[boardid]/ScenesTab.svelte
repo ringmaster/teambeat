@@ -58,6 +58,7 @@
                     <select bind:value={scene.mode}>
                         <option value="columns">Columns</option>
                         <option value="present">Present</option>
+                        <option value="review">Review</option>
                     </select>
                 </div>
             </td>

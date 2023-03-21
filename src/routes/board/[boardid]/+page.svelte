@@ -3,6 +3,7 @@
     import { votes } from "$stores/votes.js";
     import Columns from "./Columns.svelte";
     import Present from "./Present.svelte";
+    import Review from "./Review.svelte";
     import {onDestroy, tick, onMount} from "svelte"
     import { fly, fade } from 'svelte/transition';
     import { goto } from '$app/navigation';
@@ -345,8 +346,13 @@
     }
 </script>
 
+
 <svelte:head>
-<title>Teambeat - {board.name}</title>
+{#await boardData}
+<title>Teambeat - loading...</title>
+{:then foo}
+<title>{board.name} - Teambeat</title>
+{/await}
 </svelte:head>
 
 
@@ -404,10 +410,10 @@
                 <span><b>Outstanding votes:</b> </span>
                 {#each board.votetypes as votetype}
                 <span>
-                {#if board.votetypes.length > 1}
-                {votetype.typename} -    
-                {/if}
-                {board.voteStatus[votetype.typename]?.remaining || 0}
+                    {#if board.votetypes.length > 1}
+                    {votetype.typename} -    
+                    {/if}
+                    {board.voteStatus[votetype.typename]?.remaining || 0}
                 </span>
                 {/each}
             </div>
@@ -502,8 +508,11 @@
     </div>
 </div>
 
+
 {#if currentScene.mode == 'present'}
 <Present bind:board bind:currentScene />
+{:else if currentScene.mode == 'review'}
+<Review bind:board bind:currentScene />
 {:else}
 <Columns bind:board bind:currentScene />
 {/if}
