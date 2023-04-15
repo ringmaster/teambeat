@@ -10,6 +10,7 @@
     let user = $pbStore.authStore.model
     let isValid = $pbStore.authStore.isValid
     let burger = false
+    let showDocs = false;
     
     if(!$pbStore.authStore.isValid) {
         if (["/", "/login"].indexOf(location.href) === false) {
@@ -46,7 +47,7 @@
         <div class="navbar-menu" class:is-active={burger}>
             <div class="navbar-start">
                 <a class="navbar-item" href="/">Boards</a>
-                <a class="navbar-item" href="#docs">Documentation</a>
+                <a class="navbar-item" href="/docs">Documentation</a>
             </div>
             
             <div class="navbar-end">

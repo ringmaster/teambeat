@@ -1,12 +1,19 @@
 <script>
     import { pbStore } from "svelte-pocketbase";
     import TagsInput from "./TagsInput.svelte";
+    import notify from "$utils/notify";
+
     
     export let board;
     
     let newSceneName = '';
     
     function addScene() {
+        if(newSceneName == '') {
+            notify("Please specify a name for the new scene.", "error");
+            return;
+        }
+
         const maxseq = board.scenes.reduce((prev, cur)=>{return Math.max(prev,cur.seq)}, 0) + 1;
         const sceneData = {
             "title": newSceneName,
@@ -77,3 +84,13 @@
         </tr>
     </tbody>
 </table>
+
+<style>
+    .table thead {
+        position: sticky;
+        top: 0px;
+        z-index: 100;
+        background: rgb(255,255,255);
+        background: linear-gradient(0deg, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 25%);
+    }
+</style>

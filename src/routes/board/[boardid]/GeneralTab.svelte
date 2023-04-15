@@ -32,7 +32,12 @@
                 {#each users as user}
                 <tr>
                     <td>{user.name}</td>
-                    <td><input class="checkbox" type="checkbox" checked={user.anonymous}></td>
+                    <td>
+                        {#if user.anonymous}
+                        <i class="fa-regular fa-square-check"></i>
+                        {:else}
+                        <i class="fa-regular fa-square"></i>
+                        {/if}
                     <td><input class="checkbox" type="checkbox" checked={board.facilitators.indexOf(user.id) != -1}></td>
                 </tr>
                 {/each}

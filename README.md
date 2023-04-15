@@ -4,6 +4,8 @@
 
 TeamBeat is a tool to enable teams to easily facilitate remote retrospectives.
 
+Check out [the demo video](https://youtu.be/5yohNS_0u0g)!
+
 # How to run the application
 
 1. Clone the repo

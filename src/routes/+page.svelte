@@ -98,7 +98,7 @@
             $pbStore.authStore.clear();
             $pbStore.collection('users').authWithPassword(user.username, userdata.password).then((user)=>{
                 document.cookie = $pbStore.authStore.exportToCookie({ httpOnly: false, secure: false });
-                location.reload();
+                goto('/');
             }).catch((err)=>{
                 loading = false;
                 notify("There was a problem authenticating the user record." + collapseErrData(err), "error");
@@ -123,7 +123,8 @@
     
     <p>Teambeat is a tool for realtime retrospectives, surveys, and team pulse checks.</p>
     
-    {#if loggedIn}
+    {#key loading}
+    {#if $pbStore.authStore.isValid}
     <h2>Your Boards</h2>
     <table class="table is-fullwidth">
         <thead>
@@ -242,6 +243,7 @@
         </div>
     </div>
     {/if}
+    {/key}
 </div>
 
 

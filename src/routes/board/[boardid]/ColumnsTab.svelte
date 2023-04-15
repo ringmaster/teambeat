@@ -1,12 +1,17 @@
 <script>
     import { pbStore } from "svelte-pocketbase";
-
+    import notify from "$utils/notify";
+    
     export let board;
-
+    
     let newColumnName = '';
-    let newColumnVote = false;
-
+    
     function addColumn() {
+        if(newColumnName == '') {
+            notify("Please specify a name for the new column.", "error");
+            return;
+        }
+
         const maxseq = board.columns.reduce((prev, cur)=>{return Math.max(prev,cur.seq)}, 0) + 1;
         const columnData = {
             "title": newColumnName,
@@ -17,7 +22,7 @@
             newColumnName = '';
         })
     }    
-
+    
     function delColumn(id) {
         $pbStore.collection('columns').delete(id);
     }
@@ -44,7 +49,6 @@
         {/each}
         <tr>
             <td><input type="text" class="input" bind:value={newColumnName} on:keypress={(e)=>{if(e.key == 'Enter')addColumn()}}></td>
-            <td><input type="checkbox" class="checkbox" bind:checked={newColumnVote}></td>
             <td>
                 <button class="button is-small is-success is-light" on:click={addColumn}>
                     <span class="icon is-small">
@@ -56,3 +60,13 @@
         </tr>
     </tbody>
 </table>
+
+<style>
+    .table thead {
+        position: sticky;
+        top: 0px;
+        z-index: 100;
+        background: rgb(255,255,255);
+        background: linear-gradient(0deg, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 25%);
+    }
+</style>

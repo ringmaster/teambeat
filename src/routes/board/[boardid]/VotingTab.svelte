@@ -1,18 +1,23 @@
 <script>
     import { pbStore } from "svelte-pocketbase";
+	import notify from "$utils/notify";
     
     export let board;
     
     let newVoteType = '';
     
     function addVoteType() {
+        if(newVoteType == '') {
+            notify("Please specify a name for the new type of vote.", "error");
+            return;
+        }
+
         const voteTypeData = {
             "typename": newVoteType,
             "amount": 0,
             "board": board.id
         }
         $pbStore.collection('votetypes').create(voteTypeData).then(()=>{
-            //getBoard();
             newVoteType = '';
         })
     }
@@ -59,3 +64,13 @@
         </tr>
     </tbody>
 </table>
+
+<style>
+    .table thead {
+        position: sticky;
+        top: 0px;
+        z-index: 100;
+        background: rgb(255,255,255);
+        background: linear-gradient(0deg, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 25%);
+    }
+</style>
