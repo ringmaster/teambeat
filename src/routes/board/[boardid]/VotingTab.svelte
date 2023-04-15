@@ -29,8 +29,6 @@
     <thead><tr>
         <th>Vote Type</th>
         <th>Available</th>
-        <th>Color</th>
-        <th>Icon</th>
         <th>Delete</th>
     </tr></thead>
     <tbody>
@@ -38,8 +36,6 @@
         <tr>
             <td>{votetype.typename}</td>
             <td>{votetype.amount}</td>
-            <td>black</td>
-            <td>default</td>
             <td>
                 <button class="button is-small is-danger is-light" on:click={()=>delVoteType(votetype.id)} disabled={votetype.typename == 'votes'} class:is-disabled={votetype.typename == 'votes'}>
                     <span>Delete</span>

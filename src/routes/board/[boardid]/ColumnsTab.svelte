@@ -26,14 +26,12 @@
 <table class="table does">
     <thead><tr>
         <th>Column</th>
-        <th>Vote</th>
         <th>Delete</th>
     </tr></thead>
     <tbody>
         {#each board.columns as column}
         <tr>
             <td>{column.title}</td>
-            <td><input type="checkbox" class="checkbox"></td>
             <td>
                 <button class="button is-small is-danger is-light" on:click={()=>delColumn(column.id)}>
                     <span>Delete</span>
