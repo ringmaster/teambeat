@@ -95,9 +95,10 @@
         loading = true;
         
         $pbStore.collection('users').create(userdata).then((user)=>{
+            $pbStore.authStore.clear();
             $pbStore.collection('users').authWithPassword(user.username, userdata.password).then((user)=>{
                 document.cookie = $pbStore.authStore.exportToCookie({ httpOnly: false, secure: false });
-                goto("/");
+                location.reload();
             }).catch((err)=>{
                 loading = false;
                 notify("There was a problem authenticating the user record." + collapseErrData(err), "error");
