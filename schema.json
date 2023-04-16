@@ -1,5 +1,127 @@
 [
     {
+        "id": "5q14kb5gmm2kxde",
+        "name": "boardpresence",
+        "type": "view",
+        "system": false,
+        "schema": [
+            {
+                "id": "uhefghge",
+                "name": "total",
+                "type": "number",
+                "system": false,
+                "required": false,
+                "options": {
+                    "min": null,
+                    "max": null
+                }
+            },
+            {
+                "id": "9ddu37wz",
+                "name": "board",
+                "type": "json",
+                "system": false,
+                "required": false,
+                "options": {}
+            }
+        ],
+        "indexes": [],
+        "listRule": null,
+        "viewRule": null,
+        "createRule": null,
+        "updateRule": null,
+        "deleteRule": null,
+        "options": {
+            "query": "SELECT (ROW_NUMBER() OVER()) AS id, COUNT() AS total, board FROM (SELECT MAX(recently) AS recently, board FROM presence GROUP BY user, board) WHERE UNIXEPOCH() - recently < 21 GROUP BY board"
+        }
+    },
+    {
+        "id": "fjodrjzhrdqlb34",
+        "name": "votestatus",
+        "type": "view",
+        "system": false,
+        "schema": [
+            {
+                "id": "obbyplar",
+                "name": "typename",
+                "type": "text",
+                "system": false,
+                "required": false,
+                "options": {
+                    "min": null,
+                    "max": null,
+                    "pattern": ""
+                }
+            },
+            {
+                "id": "i0niciuq",
+                "name": "board",
+                "type": "relation",
+                "system": false,
+                "required": false,
+                "options": {
+                    "collectionId": "okipigcv64f5rtw",
+                    "cascadeDelete": true,
+                    "minSelect": null,
+                    "maxSelect": 1,
+                    "displayFields": [
+                        "name"
+                    ]
+                }
+            },
+            {
+                "id": "5ilizf5q",
+                "name": "amount",
+                "type": "number",
+                "system": false,
+                "required": false,
+                "options": {
+                    "min": 0,
+                    "max": null
+                }
+            },
+            {
+                "id": "oclwqml2",
+                "name": "voted",
+                "type": "number",
+                "system": false,
+                "required": false,
+                "options": {
+                    "min": null,
+                    "max": null
+                }
+            },
+            {
+                "id": "uhefghge",
+                "name": "userspresent",
+                "type": "number",
+                "system": false,
+                "required": false,
+                "options": {
+                    "min": null,
+                    "max": null
+                }
+            },
+            {
+                "id": "zqw36tvx",
+                "name": "remaining",
+                "type": "json",
+                "system": false,
+                "required": false,
+                "options": {}
+            }
+        ],
+        "indexes": [],
+        "listRule": "",
+        "viewRule": "",
+        "createRule": null,
+        "updateRule": null,
+        "deleteRule": null,
+        "options": {
+            "query": "select votetypes.id, votetypes.typename, votetypes.board, votetypes.amount, count(votes.id) as voted, boardpresence.total as userspresent, ((boardpresence.total * votetypes.amount) - count(votes.id)) as remaining\nfrom votetypes\nleft join votes on votes.votetype = votetypes.id\ninner join boardpresence on boardpresence.board = votetypes.board\ngroup by votetypes.id"
+        }
+    },
+    {
         "id": "_pb_users_auth_",
         "name": "users",
         "type": "auth",
@@ -11,7 +133,6 @@
                 "type": "text",
                 "system": false,
                 "required": false,
-                "unique": false,
                 "options": {
                     "min": null,
                     "max": null,
@@ -24,9 +145,11 @@
                 "type": "bool",
                 "system": false,
                 "required": false,
-                "unique": false,
                 "options": {}
             }
+        ],
+        "indexes": [
+            "CREATE INDEX `__pb_users_auth__created_idx` ON `users` (`created`)"
         ],
         "listRule": "",
         "viewRule": "",
@@ -56,7 +179,6 @@
                 "type": "relation",
                 "system": false,
                 "required": true,
-                "unique": false,
                 "options": {
                     "collectionId": "_pb_users_auth_",
                     "cascadeDelete": false,
@@ -71,7 +193,6 @@
                 "type": "select",
                 "system": false,
                 "required": true,
-                "unique": false,
                 "options": {
                     "maxSelect": 1,
                     "values": [
@@ -87,7 +208,6 @@
                 "type": "text",
                 "system": false,
                 "required": false,
-                "unique": false,
                 "options": {
                     "min": null,
                     "max": null,
@@ -100,7 +220,6 @@
                 "type": "json",
                 "system": false,
                 "required": false,
-                "unique": false,
                 "options": {}
             },
             {
@@ -109,7 +228,6 @@
                 "type": "relation",
                 "system": false,
                 "required": false,
-                "unique": false,
                 "options": {
                     "collectionId": "0m5589a5c6zbh1x",
                     "cascadeDelete": true,
@@ -124,7 +242,6 @@
                 "type": "text",
                 "system": false,
                 "required": false,
-                "unique": false,
                 "options": {
                     "min": null,
                     "max": null,
@@ -137,7 +254,6 @@
                 "type": "relation",
                 "system": false,
                 "required": false,
-                "unique": false,
                 "options": {
                     "collectionId": "a5ckunr0hfgn4uv",
                     "cascadeDelete": false,
@@ -148,6 +264,9 @@
                     ]
                 }
             }
+        ],
+        "indexes": [
+            "CREATE INDEX `_a5ckunr0hfgn4uv_created_idx` ON \"cards\" (`created`)"
         ],
         "listRule": "",
         "viewRule": "",
@@ -168,7 +287,6 @@
                 "type": "text",
                 "system": false,
                 "required": true,
-                "unique": false,
                 "options": {
                     "min": null,
                     "max": null,
@@ -181,7 +299,6 @@
                 "type": "relation",
                 "system": false,
                 "required": false,
-                "unique": false,
                 "options": {
                     "collectionId": "_pb_users_auth_",
                     "cascadeDelete": false,
@@ -196,7 +313,6 @@
                 "type": "relation",
                 "system": false,
                 "required": true,
-                "unique": false,
                 "options": {
                     "collectionId": "_pb_users_auth_",
                     "cascadeDelete": false,
@@ -211,7 +327,6 @@
                 "type": "number",
                 "system": false,
                 "required": false,
-                "unique": false,
                 "options": {
                     "min": null,
                     "max": null
@@ -223,7 +338,6 @@
                 "type": "number",
                 "system": false,
                 "required": false,
-                "unique": false,
                 "options": {
                     "min": null,
                     "max": null
@@ -235,9 +349,11 @@
                 "type": "json",
                 "system": false,
                 "required": false,
-                "unique": false,
                 "options": {}
             }
+        ],
+        "indexes": [
+            "CREATE INDEX `_okipigcv64f5rtw_created_idx` ON `boards` (`created`)"
         ],
         "listRule": "",
         "viewRule": "",
@@ -258,7 +374,6 @@
                 "type": "text",
                 "system": false,
                 "required": true,
-                "unique": false,
                 "options": {
                     "min": null,
                     "max": null,
@@ -271,7 +386,6 @@
                 "type": "number",
                 "system": false,
                 "required": true,
-                "unique": false,
                 "options": {
                     "min": null,
                     "max": null
@@ -283,7 +397,6 @@
                 "type": "relation",
                 "system": false,
                 "required": true,
-                "unique": false,
                 "options": {
                     "collectionId": "okipigcv64f5rtw",
                     "cascadeDelete": true,
@@ -292,6 +405,9 @@
                     "displayFields": null
                 }
             }
+        ],
+        "indexes": [
+            "CREATE INDEX `_0m5589a5c6zbh1x_created_idx` ON `columns` (`created`)"
         ],
         "listRule": "",
         "viewRule": "",
@@ -312,7 +428,6 @@
                 "type": "relation",
                 "system": false,
                 "required": true,
-                "unique": false,
                 "options": {
                     "collectionId": "okipigcv64f5rtw",
                     "cascadeDelete": true,
@@ -327,7 +442,6 @@
                 "type": "text",
                 "system": false,
                 "required": true,
-                "unique": false,
                 "options": {
                     "min": null,
                     "max": null,
@@ -340,7 +454,6 @@
                 "type": "bool",
                 "system": false,
                 "required": false,
-                "unique": false,
                 "options": {}
             },
             {
@@ -349,7 +462,6 @@
                 "type": "number",
                 "system": false,
                 "required": true,
-                "unique": false,
                 "options": {
                     "min": null,
                     "max": null
@@ -361,7 +473,6 @@
                 "type": "select",
                 "system": false,
                 "required": false,
-                "unique": false,
                 "options": {
                     "maxSelect": 1,
                     "values": [
@@ -377,7 +488,6 @@
                 "type": "relation",
                 "system": false,
                 "required": false,
-                "unique": false,
                 "options": {
                     "collectionId": "a5ckunr0hfgn4uv",
                     "cascadeDelete": false,
@@ -394,9 +504,11 @@
                 "type": "json",
                 "system": false,
                 "required": false,
-                "unique": false,
                 "options": {}
             }
+        ],
+        "indexes": [
+            "CREATE INDEX `_efppfy05u535lzs_created_idx` ON `scenes` (`created`)"
         ],
         "listRule": "",
         "viewRule": "",
@@ -417,7 +529,6 @@
                 "type": "text",
                 "system": false,
                 "required": false,
-                "unique": false,
                 "options": {
                     "min": null,
                     "max": null,
@@ -430,7 +541,6 @@
                 "type": "relation",
                 "system": false,
                 "required": true,
-                "unique": false,
                 "options": {
                     "collectionId": "_pb_users_auth_",
                     "cascadeDelete": false,
@@ -445,7 +555,6 @@
                 "type": "select",
                 "system": false,
                 "required": false,
-                "unique": false,
                 "options": {
                     "maxSelect": 1,
                     "values": [
@@ -460,7 +569,6 @@
                 "type": "relation",
                 "system": false,
                 "required": true,
-                "unique": false,
                 "options": {
                     "collectionId": "a5ckunr0hfgn4uv",
                     "cascadeDelete": true,
@@ -469,6 +577,9 @@
                     "displayFields": null
                 }
             }
+        ],
+        "indexes": [
+            "CREATE INDEX `_7xb7yhra6jm7gug_created_idx` ON `comments` (`created`)"
         ],
         "listRule": "",
         "viewRule": "",
@@ -489,7 +600,6 @@
                 "type": "relation",
                 "system": false,
                 "required": false,
-                "unique": false,
                 "options": {
                     "collectionId": "a5ckunr0hfgn4uv",
                     "cascadeDelete": true,
@@ -506,7 +616,6 @@
                 "type": "relation",
                 "system": false,
                 "required": false,
-                "unique": false,
                 "options": {
                     "collectionId": "_pb_users_auth_",
                     "cascadeDelete": true,
@@ -523,7 +632,6 @@
                 "type": "relation",
                 "system": false,
                 "required": false,
-                "unique": false,
                 "options": {
                     "collectionId": "hn3w1shsrrwkwgs",
                     "cascadeDelete": true,
@@ -534,6 +642,9 @@
                     ]
                 }
             }
+        ],
+        "indexes": [
+            "CREATE INDEX `_qiukekktwoh7kb7_created_idx` ON `votes` (`created`)"
         ],
         "listRule": "",
         "viewRule": "",
@@ -554,7 +665,6 @@
                 "type": "text",
                 "system": false,
                 "required": false,
-                "unique": false,
                 "options": {
                     "min": null,
                     "max": null,
@@ -567,7 +677,6 @@
                 "type": "relation",
                 "system": false,
                 "required": false,
-                "unique": false,
                 "options": {
                     "collectionId": "okipigcv64f5rtw",
                     "cascadeDelete": true,
@@ -584,12 +693,14 @@
                 "type": "number",
                 "system": false,
                 "required": false,
-                "unique": false,
                 "options": {
                     "min": 0,
                     "max": null
                 }
             }
+        ],
+        "indexes": [
+            "CREATE INDEX `_hn3w1shsrrwkwgs_created_idx` ON `votetypes` (`created`)"
         ],
         "listRule": "",
         "viewRule": "",
@@ -610,7 +721,6 @@
                 "type": "text",
                 "system": false,
                 "required": false,
-                "unique": false,
                 "options": {
                     "min": null,
                     "max": null,
@@ -623,7 +733,6 @@
                 "type": "relation",
                 "system": false,
                 "required": false,
-                "unique": false,
                 "options": {
                     "collectionId": "a5ckunr0hfgn4uv",
                     "cascadeDelete": true,
@@ -638,7 +747,6 @@
                 "type": "select",
                 "system": false,
                 "required": true,
-                "unique": false,
                 "options": {
                     "maxSelect": 1,
                     "values": [
@@ -648,6 +756,9 @@
                     ]
                 }
             }
+        ],
+        "indexes": [
+            "CREATE INDEX `_yvptolfvwxhnmci_created_idx` ON `questions` (`created`)"
         ],
         "listRule": null,
         "viewRule": null,
@@ -668,7 +779,6 @@
                 "type": "text",
                 "system": false,
                 "required": false,
-                "unique": false,
                 "options": {
                     "min": null,
                     "max": null,
@@ -681,7 +791,6 @@
                 "type": "relation",
                 "system": false,
                 "required": false,
-                "unique": false,
                 "options": {
                     "collectionId": "yvptolfvwxhnmci",
                     "cascadeDelete": true,
@@ -696,7 +805,6 @@
                 "type": "relation",
                 "system": false,
                 "required": false,
-                "unique": false,
                 "options": {
                     "collectionId": "_pb_users_auth_",
                     "cascadeDelete": true,
@@ -705,6 +813,9 @@
                     "displayFields": []
                 }
             }
+        ],
+        "indexes": [
+            "CREATE INDEX `_igneqldgfx68dcq_created_idx` ON `answers` (`created`)"
         ],
         "listRule": null,
         "viewRule": null,
@@ -725,7 +836,6 @@
                 "type": "text",
                 "system": false,
                 "required": false,
-                "unique": false,
                 "options": {
                     "min": null,
                     "max": null,
@@ -738,7 +848,6 @@
                 "type": "relation",
                 "system": false,
                 "required": true,
-                "unique": false,
                 "options": {
                     "collectionId": "a5ckunr0hfgn4uv",
                     "cascadeDelete": true,
@@ -749,6 +858,9 @@
                     ]
                 }
             }
+        ],
+        "indexes": [
+            "CREATE INDEX `_lf0hq26ohq6yhiu_created_idx` ON \"agreements\" (`created`)"
         ],
         "listRule": "",
         "viewRule": "",
@@ -769,7 +881,6 @@
                 "type": "relation",
                 "system": false,
                 "required": true,
-                "unique": false,
                 "options": {
                     "collectionId": "_pb_users_auth_",
                     "cascadeDelete": true,
@@ -784,10 +895,9 @@
                 "type": "relation",
                 "system": false,
                 "required": true,
-                "unique": false,
                 "options": {
                     "collectionId": "okipigcv64f5rtw",
-                    "cascadeDelete": false,
+                    "cascadeDelete": true,
                     "minSelect": null,
                     "maxSelect": 1,
                     "displayFields": []
@@ -799,12 +909,14 @@
                 "type": "number",
                 "system": false,
                 "required": true,
-                "unique": false,
                 "options": {
                     "min": null,
                     "max": null
                 }
             }
+        ],
+        "indexes": [
+            "CREATE INDEX `_jgtxjgfrjy8rr49_created_idx` ON `presence` (`created`)"
         ],
         "listRule": "",
         "viewRule": "",
@@ -812,139 +924,5 @@
         "updateRule": "",
         "deleteRule": "",
         "options": {}
-    },
-    {
-        "id": "5q14kb5gmm2kxde",
-        "name": "boardpresence",
-        "type": "view",
-        "system": false,
-        "schema": [
-            {
-                "id": "ugove6jq",
-                "name": "total",
-                "type": "number",
-                "system": false,
-                "required": false,
-                "unique": false,
-                "options": {
-                    "min": null,
-                    "max": null
-                }
-            },
-            {
-                "id": "vtf6oof9",
-                "name": "board",
-                "type": "relation",
-                "system": false,
-                "required": true,
-                "unique": false,
-                "options": {
-                    "collectionId": "okipigcv64f5rtw",
-                    "cascadeDelete": false,
-                    "minSelect": null,
-                    "maxSelect": 1,
-                    "displayFields": []
-                }
-            }
-        ],
-        "listRule": null,
-        "viewRule": null,
-        "createRule": null,
-        "updateRule": null,
-        "deleteRule": null,
-        "options": {
-            "query": "SELECT (ROW_NUMBER() OVER()) AS id, COUNT() AS total, board FROM (SELECT MAX(recently) AS recently, board FROM presence GROUP BY user, board) WHERE UNIXEPOCH() - recently < 21 GROUP BY board"
-        }
-    },
-    {
-        "id": "fjodrjzhrdqlb34",
-        "name": "votestatus",
-        "type": "view",
-        "system": false,
-        "schema": [
-            {
-                "id": "obbyplar",
-                "name": "typename",
-                "type": "text",
-                "system": false,
-                "required": false,
-                "unique": false,
-                "options": {
-                    "min": null,
-                    "max": null,
-                    "pattern": ""
-                }
-            },
-            {
-                "id": "i0niciuq",
-                "name": "board",
-                "type": "relation",
-                "system": false,
-                "required": false,
-                "unique": false,
-                "options": {
-                    "collectionId": "okipigcv64f5rtw",
-                    "cascadeDelete": true,
-                    "minSelect": null,
-                    "maxSelect": 1,
-                    "displayFields": [
-                        "name"
-                    ]
-                }
-            },
-            {
-                "id": "5ilizf5q",
-                "name": "amount",
-                "type": "number",
-                "system": false,
-                "required": false,
-                "unique": false,
-                "options": {
-                    "min": 0,
-                    "max": null
-                }
-            },
-            {
-                "id": "t2ei9xgc",
-                "name": "voted",
-                "type": "number",
-                "system": false,
-                "required": false,
-                "unique": false,
-                "options": {
-                    "min": null,
-                    "max": null
-                }
-            },
-            {
-                "id": "m8wrm9eb",
-                "name": "userspresent",
-                "type": "number",
-                "system": false,
-                "required": false,
-                "unique": false,
-                "options": {
-                    "min": null,
-                    "max": null
-                }
-            },
-            {
-                "id": "milynlzy",
-                "name": "remaining",
-                "type": "json",
-                "system": false,
-                "required": false,
-                "unique": false,
-                "options": {}
-            }
-        ],
-        "listRule": "",
-        "viewRule": "",
-        "createRule": null,
-        "updateRule": null,
-        "deleteRule": null,
-        "options": {
-            "query": "select votetypes.id, votetypes.typename, votetypes.board, votetypes.amount, count(votes.id) as voted, boardpresence.total as userspresent, ((boardpresence.total * votetypes.amount) - count(votes.id)) as remaining\nfrom votetypes\nleft join votes on votes.votetype = votetypes.id\ninner join boardpresence on boardpresence.board = votetypes.board\ngroup by votetypes.id"
-        }
     }
 ]
