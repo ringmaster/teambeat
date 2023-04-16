@@ -1,9 +1,11 @@
 <script>
     import { pbStore } from "svelte-pocketbase";
-    import notify from "../../../utils/notify";
+    import notify from "$utils/notify";
     import { goto } from '$app/navigation';
+    import { addDemoData } from "./demo";
     
     let confirmDelete =false;
+    let confirmDemo =false;
     export let board;
     
     $: users = board.expandedusers ? board.expandedusers : []
@@ -15,6 +17,15 @@
             }).catch(err => notify(err.message, "error"))
         } else {
             notify("Check the box to confirm the deletion of this board.", "warning", "exclamation-triangle")
+        }
+    }
+
+    function demoBoard(){
+        if(confirmDemo) {
+            addDemoData(board);
+        }
+        else {
+            notify("Check the box to confirm adding demo content to this board.", "warning", "exclamation-triangle")
         }
     }
 </script>
@@ -51,6 +62,12 @@
                 <button class="button is-link is-light" on:click={deleteBoard}>
                     <span class="icon is-small"><input class="checkbox" type="checkbox" bind:checked={confirmDelete} on:click={(e)=>e.stopPropagation()}></span>
                     <span>Delete Board</span>
+                </button>
+            </div>
+            <div class="control">
+                <button class="button is-link is-light" on:click={demoBoard}>
+                    <span class="icon is-small"><input class="checkbox" type="checkbox" bind:checked={confirmDemo} on:click={(e)=>e.stopPropagation()}></span>
+                    <span>Demo Data</span>
                 </button>
             </div>
         </div>

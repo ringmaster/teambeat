@@ -63,11 +63,30 @@
 <div class="container">
     <div class="columns presentationscreen">
         <div class="column presentationarea">
+            {#if currentScene.presenting }
             {#each presentCard([...board.columns]) as card(card.id)}
             <div class="focuscard">
                 <Card bind:card={card} bind:scene={currentScene} bind:board={board} present=true />
             </div>
             {/each}
+            {:else}
+            {#if isFacilitator}
+            <div class="notification is-info is-light">
+                <div class="content">
+                    <h2>There is no card selected to present</h2>
+                    <p>To begin, you must select a card from the list to the right.  When you select a card, the card will appear here for all participants.</p>
+                    <p>To select a card, click the <i class="fa-thin fa-circle-chevron-left"></i> icon next to the card.</p>
+                </div>
+            </div>
+            {:else}
+            <div class="notification is-info is-light">
+                <div class="content">
+                    <h2>There is no card selected to present</h2>
+                    <p>When a facilitator selects a card to present, it will appear here for all participants.</p>
+                </div>
+            </div>
+            {/if}
+            {/if}
         </div>
         <div class="column is-one-third cardlist">
             <div class="level filtercontrols">

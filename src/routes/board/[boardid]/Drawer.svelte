@@ -47,6 +47,7 @@
                 <div class="tabs is-small">
                     <ul>
                         {#each tabs as tab}
+                        <!-- svelte-ignore a11y-missing-attribute -->
                         <li class:is-active={tab.active}><a on:click={()=>{setActiveTab(tab)}}>{tab.label}</a></li>
                         {/each}
                     </ul>

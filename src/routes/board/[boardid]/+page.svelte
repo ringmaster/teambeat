@@ -296,7 +296,7 @@
             })
             board.votecounts = votes;
         })
-        $pbStore.collection('votestatus').getFullList(/*{filter: `board = "${board.id}"`}*/).then((voteStatuses)=>{
+        $pbStore.collection('votestatus').getFullList(200, {filter: `board = "${board.id}"`}).then((voteStatuses)=>{
             board.voteStatus = {}
             voteStatuses.forEach((item)=>{
                 board.voteStatus[item.typename] = item;
