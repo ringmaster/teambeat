@@ -53,6 +53,7 @@
             {"board": newboard.id, "title": "group", "current": false, "seq": 2, options: ["doMove", "doReveal"], mode: "columns" },
             {"board": newboard.id, "title": "vote", "current": false, "seq": 3, options: ["doReveal", "doVote"], mode: "columns" },
             {"board": newboard.id, "title": "discuss", "current": false, "seq": 4, options: ["doReveal", "doShowVotes", "doComment", "doShowComments"], mode: "present" },
+            {"board": newboard.id, "title": "review", "current": false, "seq": 5, options: [], mode: "review" },
             ];
             scenedatas.forEach((scenedata)=>{
                 promises.push($pbStore.collection('scenes').create(scenedata));
@@ -98,7 +99,9 @@
             $pbStore.authStore.clear();
             $pbStore.collection('users').authWithPassword(user.username, userdata.password).then((user)=>{
                 document.cookie = $pbStore.authStore.exportToCookie({ httpOnly: false, secure: false });
-                goto('/');
+                $pbStore.authStore.authRefresh().then(()=>{
+                    goto('/');
+                })
             }).catch((err)=>{
                 loading = false;
                 notify("There was a problem authenticating the user record." + collapseErrData(err), "error");
@@ -123,7 +126,7 @@
     
     <p>Teambeat is a tool for realtime retrospectives, surveys, and team pulse checks.</p>
     
-    {#key loading}
+    {#key loggedIn}
     {#if $pbStore.authStore.isValid}
     <h2>Your Boards</h2>
     <table class="table is-fullwidth">
