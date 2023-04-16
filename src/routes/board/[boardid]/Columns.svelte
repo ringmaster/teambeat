@@ -206,9 +206,9 @@
                     <button class="button" on:click={addPreset}>Use Preset</button>
                 </div>
             </div>
-            <p>
-                {selectedPreset?.description}
-            </p>
+            <div class="content">
+                {@html selectedPreset?.description}
+            </div>
         </div>
     </div>
 </div>
