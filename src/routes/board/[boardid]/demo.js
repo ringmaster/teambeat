@@ -28,6 +28,7 @@ async function makeDemoUser(anon = false) {
         "passwordConfirm": tempPassword,
         "name": randomUsername(),
         "anonymous": anon,
+        "demo": true,
     };
     
     let user = await kStore.collection('users').create(userdata);
@@ -55,7 +56,7 @@ function makeDemoCard(user, column) {
         "user": user.id,
         "type": "default",
         "description": generateLoremIpsum(),
-        "options": "{}",
+        "options": `{"demo":true}`,
         "column": column.id
     };
     

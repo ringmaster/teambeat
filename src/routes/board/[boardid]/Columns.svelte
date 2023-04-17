@@ -132,7 +132,7 @@
             {#each board.columns as column}
             {#if !currentScene.do(`hide:${column.id}`)}
             
-            <div class="column cardcolumn content" use:asDropZone={{Extras: column, onDrop: dropZoneDrop, TypesToAccept:{ 'text/card':'all' }}} id="column-{column.id}">
+            <div class="column cardcolumn content" use:asDropZone={{Extras: column, onDrop: dropZoneDrop, TypesToAccept:{ 'text/card':'all' }}} draggable="false" id="column-{column.id}">
                 <div class="columnheader level">
                     <div class="level-left">
                         <div class="level-item">

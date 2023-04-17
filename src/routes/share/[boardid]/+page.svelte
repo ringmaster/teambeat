@@ -71,7 +71,7 @@
     function createUser(userdata) {
         loading = true;
         
-        $pbStore.collection("boards").getFirstListItem(`id = "${data.boardid}"`).then((board)=>{
+        $pbStore.collection("boards").getOne(data.boardid).then((board)=>{
             $pbStore.collection('users').create(userdata).then((user)=>{
                 $pbStore.collection('users').authWithPassword(user.username, userdata.password).then((user)=>{
                     document.cookie = $pbStore.authStore.exportToCookie({ httpOnly: false, secure: false });
@@ -104,8 +104,8 @@
     
     async function doLogin() {
         loading = true;
-        $pbStore.collection('boards').getFirstListItem(`id = "${data.boardid}"`).then((board)=>{
-            $pbStore.collection('users').authWithPassword(username, password).then((authData)=>{
+        $pbStore.collection('boards').getOne(data.boardid).then((board)=>{
+            $pbStore.collection('users').authWithPassword(email, password).then((authData)=>{
                 document.cookie = $pbStore.authStore.exportToCookie({ httpOnly: false, secure: false })
                 
                 if(board.users.indexOf($pbStore.authStore.model.id) == -1) {
@@ -180,9 +180,9 @@
                 <form on:submit={doLogin}>
                     
                     <div class="field">
-                        <label for="username" class="label">Username</label>
+                        <label for="username" class="label">Email</label>
                         <div class="control">
-                            <input type="text" class="input" placeholder="username" id="username" bind:value="{username}">
+                            <input type="text" class="input" placeholder="email" id="email" bind:value="{useremail}">
                         </div>
                     </div>
                     

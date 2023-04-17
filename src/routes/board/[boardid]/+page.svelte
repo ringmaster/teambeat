@@ -31,7 +31,7 @@
     let board = {columns: [], scenes: [], facilitators: [], currentScene: {title: ''}, votetypes: [], votecounts: []};
     
     $: isFacilitator = board?.facilitators?.indexOf(user.id) !== -1;
-    $: totalCards = board?.columns?.reduce((prev, column)=>{return prev + column.cards.length}, 0)
+    $: totalCards = board?.columns?.reduce((prev, column)=>{return prev + (currentScene.do(`hide:${column.id}`) ? 0 : column.cards.length)}, 0)
     $: pureVoteCount = Math.ceil(Math.sqrt(totalCards))
     
     if($pbStore.authStore.isValid) {
@@ -259,6 +259,7 @@
             filter: `board = "${data.boardid}"`
         }).then((votetypes)=>{
             board.votetypes = votetypes;
+            votesSubUpdate();
         })
     }
     
