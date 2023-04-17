@@ -36,387 +36,6 @@
         }
     },
     {
-        "id": "fjodrjzhrdqlb34",
-        "name": "votestatus",
-        "type": "view",
-        "system": false,
-        "schema": [
-            {
-                "id": "obbyplar",
-                "name": "typename",
-                "type": "text",
-                "system": false,
-                "required": false,
-                "options": {
-                    "min": null,
-                    "max": null,
-                    "pattern": ""
-                }
-            },
-            {
-                "id": "i0niciuq",
-                "name": "board",
-                "type": "relation",
-                "system": false,
-                "required": false,
-                "options": {
-                    "collectionId": "okipigcv64f5rtw",
-                    "cascadeDelete": true,
-                    "minSelect": null,
-                    "maxSelect": 1,
-                    "displayFields": [
-                        "name"
-                    ]
-                }
-            },
-            {
-                "id": "5ilizf5q",
-                "name": "amount",
-                "type": "number",
-                "system": false,
-                "required": false,
-                "options": {
-                    "min": 0,
-                    "max": null
-                }
-            },
-            {
-                "id": "oclwqml2",
-                "name": "voted",
-                "type": "number",
-                "system": false,
-                "required": false,
-                "options": {
-                    "min": null,
-                    "max": null
-                }
-            },
-            {
-                "id": "uhefghge",
-                "name": "userspresent",
-                "type": "number",
-                "system": false,
-                "required": false,
-                "options": {
-                    "min": null,
-                    "max": null
-                }
-            },
-            {
-                "id": "zqw36tvx",
-                "name": "remaining",
-                "type": "json",
-                "system": false,
-                "required": false,
-                "options": {}
-            }
-        ],
-        "indexes": [],
-        "listRule": "",
-        "viewRule": "",
-        "createRule": null,
-        "updateRule": null,
-        "deleteRule": null,
-        "options": {
-            "query": "select votetypes.id, votetypes.typename, votetypes.board, votetypes.amount, count(votes.id) as voted, boardpresence.total as userspresent, ((boardpresence.total * votetypes.amount) - count(votes.id)) as remaining\nfrom votetypes\nleft join votes on votes.votetype = votetypes.id\ninner join boardpresence on boardpresence.board = votetypes.board\ngroup by votetypes.id"
-        }
-    },
-    {
-        "id": "_pb_users_auth_",
-        "name": "users",
-        "type": "auth",
-        "system": false,
-        "schema": [
-            {
-                "id": "4mabr3ft",
-                "name": "name",
-                "type": "text",
-                "system": false,
-                "required": false,
-                "options": {
-                    "min": null,
-                    "max": null,
-                    "pattern": ""
-                }
-            },
-            {
-                "id": "7uyqicoq",
-                "name": "anonymous",
-                "type": "bool",
-                "system": false,
-                "required": false,
-                "options": {}
-            }
-        ],
-        "indexes": [
-            "CREATE INDEX `__pb_users_auth__created_idx` ON `users` (`created`)"
-        ],
-        "listRule": "",
-        "viewRule": "",
-        "createRule": "",
-        "updateRule": "id = @request.auth.id",
-        "deleteRule": "id = @request.auth.id",
-        "options": {
-            "allowEmailAuth": true,
-            "allowOAuth2Auth": true,
-            "allowUsernameAuth": true,
-            "exceptEmailDomains": null,
-            "manageRule": null,
-            "minPasswordLength": 8,
-            "onlyEmailDomains": null,
-            "requireEmail": false
-        }
-    },
-    {
-        "id": "a5ckunr0hfgn4uv",
-        "name": "cards",
-        "type": "base",
-        "system": false,
-        "schema": [
-            {
-                "id": "jzc1rrsp",
-                "name": "user",
-                "type": "relation",
-                "system": false,
-                "required": true,
-                "options": {
-                    "collectionId": "_pb_users_auth_",
-                    "cascadeDelete": false,
-                    "minSelect": null,
-                    "maxSelect": 1,
-                    "displayFields": null
-                }
-            },
-            {
-                "id": "fqtalxpa",
-                "name": "type",
-                "type": "select",
-                "system": false,
-                "required": true,
-                "options": {
-                    "maxSelect": 1,
-                    "values": [
-                        "default",
-                        "rating",
-                        "vote"
-                    ]
-                }
-            },
-            {
-                "id": "xcicwoel",
-                "name": "description",
-                "type": "text",
-                "system": false,
-                "required": false,
-                "options": {
-                    "min": null,
-                    "max": null,
-                    "pattern": ""
-                }
-            },
-            {
-                "id": "dqexoons",
-                "name": "options",
-                "type": "json",
-                "system": false,
-                "required": false,
-                "options": {}
-            },
-            {
-                "id": "55jq47e8",
-                "name": "column",
-                "type": "relation",
-                "system": false,
-                "required": false,
-                "options": {
-                    "collectionId": "0m5589a5c6zbh1x",
-                    "cascadeDelete": true,
-                    "minSelect": null,
-                    "maxSelect": 1,
-                    "displayFields": null
-                }
-            },
-            {
-                "id": "psoklkx3",
-                "name": "notes",
-                "type": "text",
-                "system": false,
-                "required": false,
-                "options": {
-                    "min": null,
-                    "max": null,
-                    "pattern": ""
-                }
-            },
-            {
-                "id": "owp99rqo",
-                "name": "groupedto",
-                "type": "relation",
-                "system": false,
-                "required": false,
-                "options": {
-                    "collectionId": "a5ckunr0hfgn4uv",
-                    "cascadeDelete": false,
-                    "minSelect": null,
-                    "maxSelect": 1,
-                    "displayFields": [
-                        "description"
-                    ]
-                }
-            }
-        ],
-        "indexes": [
-            "CREATE INDEX `_a5ckunr0hfgn4uv_created_idx` ON \"cards\" (`created`)"
-        ],
-        "listRule": "",
-        "viewRule": "",
-        "createRule": "",
-        "updateRule": "",
-        "deleteRule": "",
-        "options": {}
-    },
-    {
-        "id": "okipigcv64f5rtw",
-        "name": "boards",
-        "type": "base",
-        "system": false,
-        "schema": [
-            {
-                "id": "uslyii8k",
-                "name": "name",
-                "type": "text",
-                "system": false,
-                "required": true,
-                "options": {
-                    "min": null,
-                    "max": null,
-                    "pattern": ""
-                }
-            },
-            {
-                "id": "qcodij7m",
-                "name": "users",
-                "type": "relation",
-                "system": false,
-                "required": false,
-                "options": {
-                    "collectionId": "_pb_users_auth_",
-                    "cascadeDelete": false,
-                    "minSelect": null,
-                    "maxSelect": null,
-                    "displayFields": null
-                }
-            },
-            {
-                "id": "egdfduag",
-                "name": "facilitators",
-                "type": "relation",
-                "system": false,
-                "required": true,
-                "options": {
-                    "collectionId": "_pb_users_auth_",
-                    "cascadeDelete": false,
-                    "minSelect": null,
-                    "maxSelect": null,
-                    "displayFields": null
-                }
-            },
-            {
-                "id": "dwyzkdv1",
-                "name": "timerlength",
-                "type": "number",
-                "system": false,
-                "required": false,
-                "options": {
-                    "min": null,
-                    "max": null
-                }
-            },
-            {
-                "id": "i0bzknnx",
-                "name": "timerstart",
-                "type": "number",
-                "system": false,
-                "required": false,
-                "options": {
-                    "min": null,
-                    "max": null
-                }
-            },
-            {
-                "id": "owkljuly",
-                "name": "votes",
-                "type": "json",
-                "system": false,
-                "required": false,
-                "options": {}
-            }
-        ],
-        "indexes": [
-            "CREATE INDEX `_okipigcv64f5rtw_created_idx` ON `boards` (`created`)"
-        ],
-        "listRule": "",
-        "viewRule": "",
-        "createRule": "",
-        "updateRule": "",
-        "deleteRule": "",
-        "options": {}
-    },
-    {
-        "id": "0m5589a5c6zbh1x",
-        "name": "columns",
-        "type": "base",
-        "system": false,
-        "schema": [
-            {
-                "id": "d38nndoc",
-                "name": "title",
-                "type": "text",
-                "system": false,
-                "required": true,
-                "options": {
-                    "min": null,
-                    "max": null,
-                    "pattern": ""
-                }
-            },
-            {
-                "id": "nj9ipi4f",
-                "name": "seq",
-                "type": "number",
-                "system": false,
-                "required": true,
-                "options": {
-                    "min": null,
-                    "max": null
-                }
-            },
-            {
-                "id": "9ut77p7t",
-                "name": "board",
-                "type": "relation",
-                "system": false,
-                "required": true,
-                "options": {
-                    "collectionId": "okipigcv64f5rtw",
-                    "cascadeDelete": true,
-                    "minSelect": null,
-                    "maxSelect": 1,
-                    "displayFields": null
-                }
-            }
-        ],
-        "indexes": [
-            "CREATE INDEX `_0m5589a5c6zbh1x_created_idx` ON `columns` (`created`)"
-        ],
-        "listRule": "",
-        "viewRule": "",
-        "createRule": "",
-        "updateRule": "",
-        "deleteRule": "",
-        "options": {}
-    },
-    {
         "id": "efppfy05u535lzs",
         "name": "scenes",
         "type": "base",
@@ -916,13 +535,403 @@
             }
         ],
         "indexes": [
-            "CREATE INDEX `_jgtxjgfrjy8rr49_created_idx` ON `presence` (`created`)"
+            "CREATE INDEX `_jgtxjgfrjy8rr49_created_idx` ON `presence` (`created`)",
+            "CREATE UNIQUE INDEX `idx_nShVfai` ON `presence` (\n  `user`,\n  `board`\n)"
+        ],
+        "listRule": "@request.auth.id = user.id",
+        "viewRule": "@request.auth.id = user.id",
+        "createRule": "@request.auth.id = user.id",
+        "updateRule": "@request.auth.id = user.id",
+        "deleteRule": "@request.auth.id = user.id",
+        "options": {}
+    },
+    {
+        "id": "0m5589a5c6zbh1x",
+        "name": "columns",
+        "type": "base",
+        "system": false,
+        "schema": [
+            {
+                "id": "d38nndoc",
+                "name": "title",
+                "type": "text",
+                "system": false,
+                "required": true,
+                "options": {
+                    "min": null,
+                    "max": null,
+                    "pattern": ""
+                }
+            },
+            {
+                "id": "nj9ipi4f",
+                "name": "seq",
+                "type": "number",
+                "system": false,
+                "required": true,
+                "options": {
+                    "min": null,
+                    "max": null
+                }
+            },
+            {
+                "id": "9ut77p7t",
+                "name": "board",
+                "type": "relation",
+                "system": false,
+                "required": true,
+                "options": {
+                    "collectionId": "okipigcv64f5rtw",
+                    "cascadeDelete": true,
+                    "minSelect": null,
+                    "maxSelect": 1,
+                    "displayFields": null
+                }
+            }
+        ],
+        "indexes": [
+            "CREATE INDEX `_0m5589a5c6zbh1x_created_idx` ON `columns` (`created`)"
+        ],
+        "listRule": "board.users.id ?= @request.auth.id",
+        "viewRule": "board.users.id ?= @request.auth.id",
+        "createRule": "board.users.id ?= @request.auth.id",
+        "updateRule": "board.users.id ?= @request.auth.id",
+        "deleteRule": "board.users.id ?= @request.auth.id",
+        "options": {}
+    },
+    {
+        "id": "_pb_users_auth_",
+        "name": "users",
+        "type": "auth",
+        "system": false,
+        "schema": [
+            {
+                "id": "4mabr3ft",
+                "name": "name",
+                "type": "text",
+                "system": false,
+                "required": false,
+                "options": {
+                    "min": null,
+                    "max": null,
+                    "pattern": ""
+                }
+            },
+            {
+                "id": "7uyqicoq",
+                "name": "anonymous",
+                "type": "bool",
+                "system": false,
+                "required": false,
+                "options": {}
+            },
+            {
+                "id": "8z59yksi",
+                "name": "demo",
+                "type": "bool",
+                "system": false,
+                "required": false,
+                "options": {}
+            }
+        ],
+        "indexes": [
+            "CREATE INDEX `__pb_users_auth__created_idx` ON `users` (`created`)"
         ],
         "listRule": "",
         "viewRule": "",
         "createRule": "",
-        "updateRule": "",
-        "deleteRule": "",
+        "updateRule": "id = @request.auth.id",
+        "deleteRule": "id = @request.auth.id",
+        "options": {
+            "allowEmailAuth": true,
+            "allowOAuth2Auth": true,
+            "allowUsernameAuth": true,
+            "exceptEmailDomains": null,
+            "manageRule": null,
+            "minPasswordLength": 8,
+            "onlyEmailDomains": null,
+            "requireEmail": false
+        }
+    },
+    {
+        "id": "a5ckunr0hfgn4uv",
+        "name": "cards",
+        "type": "base",
+        "system": false,
+        "schema": [
+            {
+                "id": "jzc1rrsp",
+                "name": "user",
+                "type": "relation",
+                "system": false,
+                "required": true,
+                "options": {
+                    "collectionId": "_pb_users_auth_",
+                    "cascadeDelete": false,
+                    "minSelect": null,
+                    "maxSelect": 1,
+                    "displayFields": null
+                }
+            },
+            {
+                "id": "fqtalxpa",
+                "name": "type",
+                "type": "select",
+                "system": false,
+                "required": true,
+                "options": {
+                    "maxSelect": 1,
+                    "values": [
+                        "default",
+                        "rating",
+                        "vote"
+                    ]
+                }
+            },
+            {
+                "id": "xcicwoel",
+                "name": "description",
+                "type": "text",
+                "system": false,
+                "required": false,
+                "options": {
+                    "min": null,
+                    "max": null,
+                    "pattern": ""
+                }
+            },
+            {
+                "id": "dqexoons",
+                "name": "options",
+                "type": "json",
+                "system": false,
+                "required": false,
+                "options": {}
+            },
+            {
+                "id": "55jq47e8",
+                "name": "column",
+                "type": "relation",
+                "system": false,
+                "required": false,
+                "options": {
+                    "collectionId": "0m5589a5c6zbh1x",
+                    "cascadeDelete": true,
+                    "minSelect": null,
+                    "maxSelect": 1,
+                    "displayFields": null
+                }
+            },
+            {
+                "id": "psoklkx3",
+                "name": "notes",
+                "type": "text",
+                "system": false,
+                "required": false,
+                "options": {
+                    "min": null,
+                    "max": null,
+                    "pattern": ""
+                }
+            },
+            {
+                "id": "owp99rqo",
+                "name": "groupedto",
+                "type": "relation",
+                "system": false,
+                "required": false,
+                "options": {
+                    "collectionId": "a5ckunr0hfgn4uv",
+                    "cascadeDelete": false,
+                    "minSelect": null,
+                    "maxSelect": 1,
+                    "displayFields": [
+                        "description"
+                    ]
+                }
+            }
+        ],
+        "indexes": [
+            "CREATE INDEX `_a5ckunr0hfgn4uv_created_idx` ON `cards` (`created`)"
+        ],
+        "listRule": "column.board.users.id ?= @request.auth.id || groupedto.column.board.users.id ?= @request.auth.id",
+        "viewRule": "column.board.users.id ?= @request.auth.id || groupedto.column.board.users.id ?= @request.auth.id",
+        "createRule": "(@request.auth.id = user.id && @request.data.column.board.users.id ?= @request.auth.id) || ( @request.auth.id != \"\" && @request.data.user.demo = true)",
+        "updateRule": "column.board.users.id ?= @request.auth.id || groupedto.column.board.users.id ?= @request.auth.id",
+        "deleteRule": "column.board.users.id ?= @request.auth.id || groupedto.column.board.users.id ?= @request.auth.id",
         "options": {}
+    },
+    {
+        "id": "okipigcv64f5rtw",
+        "name": "boards",
+        "type": "base",
+        "system": false,
+        "schema": [
+            {
+                "id": "uslyii8k",
+                "name": "name",
+                "type": "text",
+                "system": false,
+                "required": true,
+                "options": {
+                    "min": null,
+                    "max": null,
+                    "pattern": ""
+                }
+            },
+            {
+                "id": "qcodij7m",
+                "name": "users",
+                "type": "relation",
+                "system": false,
+                "required": false,
+                "options": {
+                    "collectionId": "_pb_users_auth_",
+                    "cascadeDelete": false,
+                    "minSelect": null,
+                    "maxSelect": null,
+                    "displayFields": null
+                }
+            },
+            {
+                "id": "egdfduag",
+                "name": "facilitators",
+                "type": "relation",
+                "system": false,
+                "required": true,
+                "options": {
+                    "collectionId": "_pb_users_auth_",
+                    "cascadeDelete": false,
+                    "minSelect": null,
+                    "maxSelect": null,
+                    "displayFields": null
+                }
+            },
+            {
+                "id": "dwyzkdv1",
+                "name": "timerlength",
+                "type": "number",
+                "system": false,
+                "required": false,
+                "options": {
+                    "min": null,
+                    "max": null
+                }
+            },
+            {
+                "id": "i0bzknnx",
+                "name": "timerstart",
+                "type": "number",
+                "system": false,
+                "required": false,
+                "options": {
+                    "min": null,
+                    "max": null
+                }
+            },
+            {
+                "id": "owkljuly",
+                "name": "votes",
+                "type": "json",
+                "system": false,
+                "required": false,
+                "options": {}
+            }
+        ],
+        "indexes": [
+            "CREATE INDEX `_okipigcv64f5rtw_created_idx` ON `boards` (`created`)"
+        ],
+        "listRule": "facilitators.id ?= @request.auth.id || users.id ?= @request.auth.id",
+        "viewRule": "",
+        "createRule": "@request.auth.id != \"\" && @request.auth.anonymous != true",
+        "updateRule": "",
+        "deleteRule": "@request.data.facilitators.id ?= @request.auth.id",
+        "options": {}
+    },
+    {
+        "id": "fjodrjzhrdqlb34",
+        "name": "votestatus",
+        "type": "view",
+        "system": false,
+        "schema": [
+            {
+                "id": "obbyplar",
+                "name": "typename",
+                "type": "text",
+                "system": false,
+                "required": false,
+                "options": {
+                    "min": null,
+                    "max": null,
+                    "pattern": ""
+                }
+            },
+            {
+                "id": "i0niciuq",
+                "name": "board",
+                "type": "relation",
+                "system": false,
+                "required": false,
+                "options": {
+                    "collectionId": "okipigcv64f5rtw",
+                    "cascadeDelete": true,
+                    "minSelect": null,
+                    "maxSelect": 1,
+                    "displayFields": [
+                        "name"
+                    ]
+                }
+            },
+            {
+                "id": "5ilizf5q",
+                "name": "amount",
+                "type": "number",
+                "system": false,
+                "required": false,
+                "options": {
+                    "min": 0,
+                    "max": null
+                }
+            },
+            {
+                "id": "tlevxln9",
+                "name": "voted",
+                "type": "number",
+                "system": false,
+                "required": false,
+                "options": {
+                    "min": null,
+                    "max": null
+                }
+            },
+            {
+                "id": "uhefghge",
+                "name": "userspresent",
+                "type": "number",
+                "system": false,
+                "required": false,
+                "options": {
+                    "min": null,
+                    "max": null
+                }
+            },
+            {
+                "id": "ikmwajcf",
+                "name": "remaining",
+                "type": "json",
+                "system": false,
+                "required": false,
+                "options": {}
+            }
+        ],
+        "indexes": [],
+        "listRule": "",
+        "viewRule": "",
+        "createRule": null,
+        "updateRule": null,
+        "deleteRule": null,
+        "options": {
+            "query": "select votetypes.id, votetypes.typename, votetypes.board, votetypes.amount, count(votes.id) as voted, boardpresence.total as userspresent, max(0,((boardpresence.total * votetypes.amount) - count(votes.id))) as remaining\nfrom votetypes\nleft join votes on votes.votetype = votetypes.id\ninner join boardpresence on boardpresence.board = votetypes.board\ngroup by votetypes.id"
+        }
     }
 ]
