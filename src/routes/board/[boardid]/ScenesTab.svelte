@@ -2,7 +2,7 @@
     import { pbStore } from "svelte-pocketbase";
     import TagsInput from "./TagsInput.svelte";
     import notify from "$utils/notify";
-
+    
     
     export let board;
     
@@ -13,7 +13,7 @@
             notify("Please specify a name for the new scene.", "error");
             return;
         }
-
+        
         const maxseq = board.scenes.reduce((prev, cur)=>{return Math.max(prev,cur.seq)}, 0) + 1;
         const sceneData = {
             "title": newSceneName,
@@ -30,6 +30,10 @@
     function updateScene(scene, items) {
         $pbStore.collection('scenes').update(scene.id, scene);
     }
+
+    function delScene(scene) {
+        $pbStore.collection('scenes').delete(scene.id);
+    }
     
 </script>
 
@@ -39,6 +43,7 @@
         <th>Scene</th>
         <th>Options</th>
         <th>Mode</th>
+        <th>Remove</th>
     </tr></thead>
     <tbody>
         {#each board.scenes as scene}
@@ -48,7 +53,7 @@
                 <TagsInput bind:value={scene.options} on:change={(items)=>updateScene(scene, items)}>
                     <option value="doAdd">Add</option>
                     <option value="doEdit">Edit</option>
-                    <option value="doReveal">Reveal</option>
+                    <option value="doHidden">Hidden</option>
                     <option value="doMove">Move</option>
                     <option value="doGroup">Group</option>
                     <option value="doShowVotes">Show Votes</option>
@@ -57,6 +62,7 @@
                     <option value="doComment">Comment</option>
                     {#each board.columns as column}
                     <option value="hide:{column.id}">Hide {column.title}</option>
+                    <option value="solo:{column.id}">Solo {column.title}</option>
                     {/each}
                 </TagsInput>
             </td>
@@ -69,11 +75,21 @@
                     </select>
                 </div>
             </td>
+            <td>
+                {#if board.scenes.length > 1}
+                <button class="button is-small is-danger is-light" on:click={()=>delScene(scene)}>
+                    <span>Delete</span>
+                    <span class="icon is-small">
+                        <i class="fas fa-times"></i>
+                    </span>
+                </button>
+                {/if}
+            </td>
         </tr>
         {/each}
         <tr>
             <td><input type="text" class="input" bind:value={newSceneName} on:keypress={(e)=>{if(e.key == 'Enter')addScene()}}></td>
-            <td colspan="5">
+            <td colspan="6">
                 <button class="button is-small is-success is-light" on:click={addScene}>
                     <span class="icon is-small">
                         <i class="fas fa-plus"></i>

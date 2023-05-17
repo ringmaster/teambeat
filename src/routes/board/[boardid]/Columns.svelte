@@ -17,6 +17,8 @@
     
     let selectedPreset;
     $: user = $pbStore.authStore.model
+
+    $: acceptDropTypes = currentScene.do("doMove") ? { 'text/card':'all' } : {'text/card':'all'}
     
     function dropZoneDrop(x,y, Operation, offeredTypeList, droppedCard, targetColumn) {
         if(targetColumn.id == droppedCard.column) {
@@ -122,6 +124,14 @@
             };
         }
     });
+
+    function showColumn(columnId) {
+        const soloed = currentScene.options.reduce( (reduced, flag) => /^solo:(\S+)/.test(flag) ? flag.match(/^solo:(\S+)/)[1] : reduced, false)
+        if(soloed) {
+            return columnId == soloed
+        }
+        return !currentScene.do(`hide:${columnId}`)
+    }
     
 </script>
 
@@ -130,9 +140,9 @@
     <div class="board">
         <div class="row columns">
             {#each board.columns as column}
-            {#if !currentScene.do(`hide:${column.id}`)}
+            {#if showColumn(column.id)}
             
-            <div class="column cardcolumn content" use:asDropZone={{Extras: column, onDrop: dropZoneDrop, TypesToAccept:{ 'text/card':'all' }}} draggable="false" id="column-{column.id}">
+            <div class="column cardcolumn content" use:asDropZone={{Extras: column, onDrop: dropZoneDrop, TypesToAccept: acceptDropTypes}} id="column-{column.id}">
                 <div class="columnheader level">
                     <div class="level-left">
                         <div class="level-item">

@@ -25,11 +25,19 @@
         if(v == undefined) return 0
         return v;
     }
+
+    function showColumn(columnId) {
+        const soloed = currentScene.options.reduce( (reduced, flag) => /^solo:(\S+)/.test(flag) ? flag.match(/^solo:(\S+)/)[1] : reduced, false)
+        if(soloed) {
+            return columnId == soloed
+        }
+        return !currentScene.do(`hide:${columnId}`)
+    }
     
     function presentSort(columns, onlyvoted) {
         let cards = [];
         columns.forEach(column => {
-            if(!currentScene.do(`hide:${column.id}`)) {
+            if(showColumn(column.id)) {
                 cards = [...cards, ...column.cards];
             }
         });
@@ -44,7 +52,7 @@
     function presentCard(columns) {
         let cards = [];
         columns.forEach(column => {
-            if(!currentScene.do(`hide:${column.id}`)) {
+            if(showColumn(column.id)) {
                 cards = [...cards, ...column.cards];
             }
         });

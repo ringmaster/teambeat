@@ -8,7 +8,7 @@
     import { pixelArt } from '@dicebear/collection';
     import InkMde from 'ink-mde/svelte'
     import SvelteMarkdown from 'svelte-markdown'
-    import notify from '../../../utils/notify';
+    import notify from '$utils/notify';
     
     export let card;
     export let scene;
@@ -19,13 +19,15 @@
     
     $: user = $pbStore.authStore.model
     $: cardIsCurrentUsers = card.expand.user.id == $pbStore.authStore.model.id;
-    $: skeleton = !cardIsCurrentUsers && !scene.do("doReveal");
+    $: skeleton = !cardIsCurrentUsers && scene.do("doHidden");
     $: skeletontext = '<span>' + card.description.replace(/\S/g, 'X').replace(/X{6,}/, 'XXXXX').replace(/\s+/g, '</span> <span>').replace(/<span><\/span>/g, '') + '</span>';
     $: isFacilitator = board?.facilitators?.indexOf(user.id) !== -1;
     
     $: avatar = createAvatar(pixelArt, {seed: card.user, scale: 100});
     
     $: avatarsvg = avatar.toString();
+    
+    $: cardRating = card.options.ratings ? card.options.ratings[user.id] ? card.options.ratings[user.id] : 0 : 0
     
     function getVoteData(data, id) {
         let neovotes = {}
@@ -72,7 +74,7 @@
     
     let noteTimer;
     let noteDirty = false;
-    
+
     const updateNotes = (notes) => {
         if(card.notes != notes) {
             clearTimeout(noteTimer);
@@ -84,6 +86,15 @@
                 })
             }, 750);
         }
+    }
+    
+    function setRating(e) {
+        if(card.options.ratings == undefined) {
+            card.options.ratings = {}
+        }
+        card.options.ratings[user.id] = e.target.value;
+        $pbStore.collection("cards").update(card.id, card).then(()=>{
+        })
     }
     
     function focusCard() {
@@ -107,10 +118,11 @@
         })
     }
     
-    $: dragEnabled = scene.do("doMove") && (cardIsCurrentUsers || isFacilitator)
+    $: dragEnabled = scene.do("doGroup") || (scene.do("doMove") && (cardIsCurrentUsers || isFacilitator))
     $: groupEnabled = scene.do("doGroup")
     $: acceptDropTypes = groupEnabled ? { 'text/card':'all' } : {}
     $: dragOnlyFrom = dragEnabled ? '.card,.groupitem' : 'zzzzzz'
+    $: cardOperations = (scene.do("doMove") ? 'move' : '') + ' ' + (groupEnabled ? 'link' : '')
     
     function dynamicDummy(extras) {
         console.log(extras)
@@ -222,7 +234,7 @@
                 
                 <div class="cardcontentdescription cardeditor">
                     
-                    <InkMde bind:value={card.notes} options={{
+                    <InkMde value={card.notes} options={{
                         doc: '',
                         hooks: {
                             afterUpdate: updateNotes,
@@ -286,7 +298,7 @@
                 <div class="avatar">{@html avatarsvg}</div>
                 {#if card.expand.user.anonymous}
                 Anonymous: {card.expand.user.name}
-                {:else}            
+                {:else}
                 {card.expand.user.name}
                 {/if}    
             </div>
@@ -332,7 +344,7 @@
 {:else}
 
 <div class="card" id="card-{card.id}" class:cangroup={groupEnabled} class:canmove={dragEnabled}
-use:asDroppable={{Extras: card, Dummy:dynamicDummy, Pannable: '.boardscroll', PanSensorWidth: 50, Operations: 'move', onlyFrom: dragOnlyFrom, DataToOffer: {"text/card": card.id} }}
+use:asDroppable={{Extras: card, Dummy:dynamicDummy, Pannable: '.boardscroll', Operations: cardOperations , PanSensorWidth: 50, Operations: 'move', onlyFrom: dragOnlyFrom, DataToOffer: {"text/card": card.id} }}
 use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTypes}}
 >
 {#key scene}
@@ -397,6 +409,12 @@ use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTyp
         {/if}
     </div>
 </div>
+
+{#if card.type == 'rating' && !dragEnabled}
+<div class="card-content">
+    <input class="slider is-fullwidth" step="1" min="1" max="5" value="{cardRating}" type="range" disabled={dragEnabled} on:change={setRating}>
+</div>
+{/if}
 
 {#if card.expand["comments(card)"] && scene.do("doShowComments")}
 <div class="card-content">
@@ -615,5 +633,8 @@ use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTyp
     }
     .editor {
         outline: none;
+    }
+    .slider {
+        color: green;
     }
 </style>

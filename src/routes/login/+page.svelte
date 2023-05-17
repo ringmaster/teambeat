@@ -74,6 +74,12 @@
           </div>
         </div>
       </form>
+
+      <p>
+        <small>
+          <a href="/forgot">Darn, I forgot my password.</a>
+        </small>
+      </p>
       
     </div>
     <div class="column">

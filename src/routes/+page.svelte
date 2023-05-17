@@ -49,10 +49,10 @@
         $pbStore.collection('boards').create(data).then((newboard)=>{
             let promises = [];
             const scenedatas = [
-            {"board": newboard.id, "title": "collect", "current": true, "seq": 1, options: ["doAdd", "doEdit", "doMove"], mode: "columns" },
-            {"board": newboard.id, "title": "group", "current": false, "seq": 2, options: ["doMove", "doReveal"], mode: "columns" },
-            {"board": newboard.id, "title": "vote", "current": false, "seq": 3, options: ["doReveal", "doVote"], mode: "columns" },
-            {"board": newboard.id, "title": "discuss", "current": false, "seq": 4, options: ["doReveal", "doShowVotes", "doComment", "doShowComments"], mode: "present" },
+            {"board": newboard.id, "title": "collect", "current": true, "seq": 1, options: ["doAdd", "doEdit", "doMove", "doHidden"], mode: "columns" },
+            {"board": newboard.id, "title": "group", "current": false, "seq": 2, options: ["doMove"], mode: "columns" },
+            {"board": newboard.id, "title": "vote", "current": false, "seq": 3, options: ["doVote"], mode: "columns" },
+            {"board": newboard.id, "title": "discuss", "current": false, "seq": 4, options: ["doShowVotes", "doComment", "doShowComments"], mode: "present" },
             {"board": newboard.id, "title": "review", "current": false, "seq": 5, options: [], mode: "review" },
             ];
             scenedatas.forEach((scenedata)=>{
@@ -172,36 +172,6 @@
         </div>
     </div>
     
-    <div class="modal" class:is-active={newmodal}>
-        <div class="modal-background"></div>
-        <div class="modal-card">
-            <header class="modal-card-head">
-                <p class="modal-card-title">Create New Board</p>
-            </header>
-            <section class="modal-card-body">
-                <form>
-                    <div class="field">
-                        <label class="label" for="boardname">Board Name</label>
-                        <div class="control" class:has-icons-right={badBoard!=''}>
-                            <input id="boardname" class:is-danger={badBoard!=''} class="input" type="text" placeholder="Board Name" bind:value={newBoardName} on:keypress={(e)=>{if(e.key=="Enter") createBoard()}}>
-                            {#if badBoard != ''}
-                            <span class="icon is-small is-right">
-                                <i class="fas fa-exclamation-triangle"></i>
-                            </span>
-                            {/if}
-                        </div>
-                        {#if badBoard != ''}
-                        <p class="help is-danger">{badBoard}</p>
-                        {/if}
-                    </div>
-                </form>
-            </section>
-            <footer class="modal-card-foot">
-                <button class="button is-success" on:click={createBoard}>Create Board</button>
-                <button class="button" on:click={()=>newmodal=false}>Cancel</button>
-            </footer>
-        </div>
-    </div>
     {:else}
     <div class="columns">
         <div class="column">
@@ -247,6 +217,37 @@
     </div>
     {/if}
     {/key}
+</div>
+
+<div class="modal" class:is-active={newmodal}>
+    <div class="modal-background"></div>
+    <div class="modal-card">
+        <header class="modal-card-head">
+            <p class="modal-card-title">Create New Board</p>
+        </header>
+        <section class="modal-card-body">
+            <form>
+                <div class="field">
+                    <label class="label" for="boardname">Board Name</label>
+                    <div class="control" class:has-icons-right={badBoard!=''}>
+                        <input id="boardname" class:is-danger={badBoard!=''} class="input" type="text" placeholder="Board Name" bind:value={newBoardName} on:keypress={(e)=>{if(e.key=="Enter") createBoard()}}>
+                        {#if badBoard != ''}
+                        <span class="icon is-small is-right">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </span>
+                        {/if}
+                    </div>
+                    {#if badBoard != ''}
+                    <p class="help is-danger">{badBoard}</p>
+                    {/if}
+                </div>
+            </form>
+        </section>
+        <footer class="modal-card-foot">
+            <button class="button is-success" on:click={createBoard}>Create Board</button>
+            <button class="button" on:click={()=>newmodal=false}>Cancel</button>
+        </footer>
+    </div>
 </div>
 
 

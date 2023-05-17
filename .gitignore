@@ -31,3 +31,4 @@ teambeat.code-workspace
 fly.toml
 .gitignore
 .vscode/settings.json
+static/teambeat.svg

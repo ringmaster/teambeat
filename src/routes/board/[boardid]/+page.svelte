@@ -29,9 +29,17 @@
     let audioFile = [new Audio("/alarmding2.mp3"), new Audio("/alarmding1.mp3")];
     let boardData;
     let board = {columns: [], scenes: [], facilitators: [], currentScene: {title: ''}, votetypes: [], votecounts: []};
+
+    function showColumn(columnId) {
+        const soloed = currentScene.options.reduce( (reduced, flag) => /^solo:(\S+)/.test(flag) ? flag.match(/^solo:(\S+)/)[1] : reduced, false)
+        if(soloed) {
+            return columnId == soloed
+        }
+        return !currentScene.do(`hide:${columnId}`)
+    }
     
     $: isFacilitator = board?.facilitators?.indexOf(user.id) !== -1;
-    $: totalCards = board?.columns?.reduce((prev, column)=>{return prev + (currentScene.do(`hide:${column.id}`) ? 0 : column.cards.length)}, 0)
+    $: totalCards = board?.columns?.reduce((prev, column)=>{return prev + (showColumn(column.id) ? column.cards.length : 0)}, 0)
     $: pureVoteCount = Math.ceil(Math.sqrt(totalCards))
     
     if($pbStore.authStore.isValid) {
@@ -345,6 +353,8 @@
             notify("There was a problem copying the share link to the clipboard.", "error");
         });
     }
+
+    $: openVotes =  board.votetypes.reduce((prev, voteType) => voteType.amount + prev, 0)
 </script>
 
 
@@ -372,7 +382,7 @@
                 {#if isFacilitator}
                 <div class="dropdown is-hoverable">
                     <div class="dropdown-trigger">
-                        <button class="button is-small is-white" aria-haspopup="true" aria-controls="dropdown-menu">
+                        <button class="button is-small is-rounded is-primary is-light" aria-haspopup="true" aria-controls="dropdown-menu">
                             <span class="icon"><i class="fa-light fa-clapperboard"></i></span>
                             <span>{currentScene.title}</span>
                             <span class="icon is-small">
@@ -395,6 +405,7 @@
         </div>
         {#if currentScene.do("doVote")}
         <div class="level-item votesleft">
+            {#if openVotes > 0}
             <div>
                 <span><b>Votes Left:</b></span>
                 {#each board.votetypes as votetype}
@@ -419,6 +430,13 @@
                 {/each}
             </div>
             {/if}
+            {:else}
+            {#if isFacilitator}
+            <div class="has-text-danger">Add votes <i class="fa-solid fa-arrow-right-long"></i></div>
+            {:else}
+            <div>Facilitator must add votes</div>
+            {/if}
+            {/if}
         </div>
         {/if}
         {#if isFacilitator}
@@ -426,7 +444,7 @@
             <div class="field has-addons">
                 <!-- svelte-ignore a11y-click-events-have-key-events -->
                 <div class="control dropdown is-right" class:is-hoverable={currentScene.do("doVote")}>
-                    <button class="button is-small is-rounded" disabled="{!currentScene.do("doVote")}">
+                    <button class="button is-small is-rounded is-primary is-light" disabled="{!currentScene.do("doVote")}">
                         <span class="icon is-small">
                             <i class="fak fa-vote"></i>
                         </span>
@@ -459,7 +477,7 @@
                     </div>
                 </div>
                 <div class="control dropdown is-hoverable is-right">
-                    <button class="button is-small is-rounded">
+                    <button class="button is-small is-rounded is-primary is-light">
                         <span class="icon is-small">
                             <i class="fa-light fa-timer"></i>
                         </span>
@@ -490,14 +508,14 @@
                     </div>
                 </div>
                 <div class="control">
-                    <button class="button is-small is-rounded" on:click={shareLink}>
+                    <button class="button is-small is-rounded is-primary is-light" on:click={shareLink}>
                         <span class="icon is-small">
                             <i class="fa-light fa-share"></i>
                         </span>
                     </button>
                 </div>                
                 <div class="control">
-                    <button class="button is-small is-rounded" on:click={configBoard}>
+                    <button class="button is-small is-rounded is-primary is-light" on:click={configBoard}>
                         <span class="icon is-small">
                             <i class="fa-light fa-gear"></i>
                         </span>
@@ -543,6 +561,8 @@
 {/if}
 
 <style lang="scss">
+    @import "../node_modules/bulmaswatch/flatly/variables";
+
     .container {
         padding-bottom: 0;
     }
@@ -583,5 +603,11 @@
         width: 95%;
         justify-content: left;
         margin: 3px 0px;
+    }
+    .dropdown-item.is-active {
+        background-color: $primary;
+    }
+    .button.is-primary.is-light[disabled] {
+        border-color: $white-ter;
     }
 </style>

@@ -34,7 +34,7 @@
     <div class="container">
         <div class="navbar-brand">
             <a href="/" class="navbar-item">
-                <i class="fa-sharp fa-solid fa-wave-pulse"></i>
+                <i class="fa-kit fa-teambeat" style="height:2em;width:2em;"></i>
                 <h1 class="title">Teambeat</h1>
             </a>
             <a role="button" href="#" class="navbar-burger" class:is-active={burger} aria-label="menu" aria-expanded="false" on:click={()=>{burger=!burger}}>
