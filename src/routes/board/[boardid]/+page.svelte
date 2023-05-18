@@ -379,28 +379,6 @@
         <div class="level-left">
             <div class="level-item">
                 <h1 class="title">{board.name}</h1>
-                {#if isFacilitator}
-                <div class="dropdown is-hoverable">
-                    <div class="dropdown-trigger">
-                        <button class="button is-small is-rounded is-primary is-light" aria-haspopup="true" aria-controls="dropdown-menu">
-                            <span class="icon"><i class="fa-light fa-clapperboard"></i></span>
-                            <span>{currentScene.title}</span>
-                            <span class="icon is-small">
-                                <i class="fas fa-angle-down" aria-hidden="true"></i>
-                            </span>
-                        </button>
-                    </div>
-                    <div class="dropdown-menu" id="dropdown-menu" role="menu">
-                        <div class="dropdown-content">
-                            {#each board.scenes as scene}
-                            <a href="#" class="dropdown-item" on:click={()=>setScene(scene)} class:is-active={scene == currentScene}>
-                                {scene.title}
-                            </a>
-                            {/each}
-                        </div>
-                    </div>
-                </div>
-                {/if}
             </div>
         </div>
         {#if currentScene.do("doVote")}
@@ -441,6 +419,27 @@
         {/if}
         {#if isFacilitator}
         <div class="level-right is-flex is-justify-content-right is-align-content-center">
+            <div class="dropdown is-hoverable mx-1">
+                <div class="dropdown-trigger">
+                    <button class="button is-small is-rounded is-primary is-light" aria-haspopup="true" aria-controls="dropdown-menu">
+                        <span class="icon"><i class="fa-light fa-clapperboard"></i></span>
+                        <span>{currentScene.title}</span>
+                        <span class="icon is-small">
+                            <i class="fas fa-angle-down" aria-hidden="true"></i>
+                        </span>
+                    </button>
+                </div>
+                <div class="dropdown-menu" id="dropdown-menu" role="menu">
+                    <div class="dropdown-content">
+                        {#each board.scenes as scene}
+                        <a href="#" class="dropdown-item" on:click={()=>setScene(scene)} class:is-active={scene == currentScene}>
+                            {scene.title}
+                        </a>
+                        {/each}
+                    </div>
+                </div>
+            </div>
+
             <div class="field has-addons">
                 <!-- svelte-ignore a11y-click-events-have-key-events -->
                 <div class="control dropdown is-right" class:is-hoverable={currentScene.do("doVote")}>

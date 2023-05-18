@@ -17,7 +17,7 @@
     
     let selectedPreset;
     $: user = $pbStore.authStore.model
-
+    
     $: acceptDropTypes = currentScene.do("doMove") ? { 'text/card':'all' } : {'text/card':'all'}
     
     function dropZoneDrop(x,y, Operation, offeredTypeList, droppedCard, targetColumn) {
@@ -124,7 +124,7 @@
             };
         }
     });
-
+    
     function showColumn(columnId) {
         const soloed = currentScene.options.reduce( (reduced, flag) => /^solo:(\S+)/.test(flag) ? flag.match(/^solo:(\S+)/)[1] : reduced, false)
         if(soloed) {
@@ -173,11 +173,15 @@
                 </div>
                 {/if}
                 
-                {#each maybeSort([...column.cards], currentScene.do("doShowVotes")) as card(card.id)}
-                <div in:receive|local="{{key: card.id}}" out:send|local="{{key: card.id}}" animate:flip|local="{{duration: 200}}">
-                    <Card bind:card={card} bind:scene={currentScene} bind:board={board} />
+                <div class="columncontent">
+                    
+                    {#each maybeSort([...column.cards], currentScene.do("doShowVotes")) as card(card.id)}
+                    <div in:receive|local="{{key: card.id}}" out:send|local="{{key: card.id}}" animate:flip|local="{{duration: 200}}">
+                        <Card bind:card={card} bind:scene={currentScene} bind:board={board} />
+                    </div>
+                    {/each}
+                    
                 </div>
-                {/each}
                 
                 
             </div>
@@ -274,5 +278,10 @@
     }
     .editor {
         outline: none;
+    }
+    .columncontent {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+        gap: 1rem;
     }
 </style>

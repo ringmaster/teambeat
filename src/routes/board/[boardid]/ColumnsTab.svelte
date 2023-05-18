@@ -11,7 +11,7 @@
             notify("Please specify a name for the new column.", "error");
             return;
         }
-
+        
         const maxseq = board.columns.reduce((prev, cur)=>{return Math.max(prev,cur.seq)}, 0) + 1;
         const columnData = {
             "title": newColumnName,
@@ -26,17 +26,28 @@
     function delColumn(id) {
         $pbStore.collection('columns').delete(id);
     }
+
+    function addDeck() {
+        notify('This feature is incomplete, but will eventually allow you to add a deck of pre-defined cards to the column, which will be useful for pulse check surveys.')
+    }
 </script>
 
 <table class="table does">
     <thead><tr>
         <th>Column</th>
+        <th>Decks</th>
         <th>Delete</th>
     </tr></thead>
     <tbody>
         {#each board.columns as column}
         <tr>
             <td>{column.title}</td>
+            <td>
+                <button class="button is-small is-primary is-light" on:click={addDeck}>
+                    <span class="icon is-small"><i class="fas fa-cards"></i></span>
+                    <span>Add Deck</span>
+                </button>
+            </td>
             <td>
                 <button class="button is-small is-danger is-light" on:click={()=>delColumn(column.id)}>
                     <span>Delete</span>
@@ -48,7 +59,7 @@
         </tr>
         {/each}
         <tr>
-            <td><input type="text" class="input" bind:value={newColumnName} on:keypress={(e)=>{if(e.key == 'Enter')addColumn()}}></td>
+            <td colspan="2"><input type="text" class="input" bind:value={newColumnName} on:keypress={(e)=>{if(e.key == 'Enter')addColumn()}}></td>
             <td>
                 <button class="button is-small is-success is-light" on:click={addColumn}>
                     <span class="icon is-small">

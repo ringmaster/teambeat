@@ -9,6 +9,16 @@
     import InkMde from 'ink-mde/svelte'
     import SvelteMarkdown from 'svelte-markdown'
     import notify from '$utils/notify';
+    import { Bar } from 'svelte-chartjs'
+    import {
+        Chart,
+        Title,
+        Tooltip,
+        Legend,
+        BarElement,
+        CategoryScale,
+        LinearScale,
+    } from 'chart.js';
     
     export let card;
     export let scene;
@@ -28,6 +38,15 @@
     $: avatarsvg = avatar.toString();
     
     $: cardRating = card.options.ratings ? card.options.ratings[user.id] ? card.options.ratings[user.id] : 0 : 0
+    
+    Chart.register(
+    Title,
+    Tooltip,
+    Legend,
+    BarElement,
+    CategoryScale,
+    LinearScale
+    );
     
     function getVoteData(data, id) {
         let neovotes = {}
@@ -74,7 +93,7 @@
     
     let noteTimer;
     let noteDirty = false;
-
+    
     const updateNotes = (notes) => {
         if(card.notes != notes) {
             clearTimeout(noteTimer);
@@ -84,15 +103,16 @@
                 $pbStore.collection("cards").update(card.id, card).then(()=>{
                     noteDirty = false;
                 })
-            }, 750);
+            }, 250);
         }
     }
     
-    function setRating(e) {
+    function setRating(value) {
+        if (dragEnabled || !scene.do('doEdit')) return
         if(card.options.ratings == undefined) {
             card.options.ratings = {}
         }
-        card.options.ratings[user.id] = e.target.value;
+        card.options.ratings[user.id] = value;
         $pbStore.collection("cards").update(card.id, card).then(()=>{
         })
     }
@@ -184,6 +204,68 @@
     function agreementDelete(agreement) {
         $pbStore.collection('agreements').delete(agreement.id)
     }
+    
+    let cachedNotes = card.notes
+    function bouncedNotes(newcontent) {
+        if(noteDirty) {
+            return cachedNotes
+        }
+        else {
+            cachedNotes = newcontent
+            return newcontent
+        }
+    }
+    
+    $: cardNotes = bouncedNotes(card.notes)
+    
+    function setCardType(newType) {
+        card.type = newType
+        $pbStore.collection('cards').update(card.id, card)
+    }
+    
+    function getCardBarData(card) {
+        let actual = [0,0,0,0,0]
+        let total = 0
+        
+        
+        if(card.type == 'rating' && card.options.ratings != undefined) {
+            Object.values(card.options.ratings).forEach((rating)=>{
+                if(rating != 0) {
+                    actual[rating-1]++
+                    total++
+                }
+            })
+            
+            actual = actual.map((item)=> Math.round(100 * item / total))
+        }
+        
+        return {
+            labels: ['1', '2', '3', '4', '5'],
+            datasets: [
+            {
+                label: `% of ${total} Votes`,
+                data: actual,
+                backgroundColor: [
+                'rgba(255, 0, 0, 0.4)',
+                'rgba(255, 104, 1, 0.4)',
+                'rgba(255, 211, 0, 0.4)',
+                'rgba(172, 182, 5, 0.4)',
+                'rgba(89, 146, 9, 0.4)',
+                ],
+                borderWidth: 2,
+                borderColor: [
+                'rgba(255, 0, 0, 1)',
+                'rgba(255, 104, 1, 1)',
+                'rgba(255, 211, 0, 1)',
+                'rgba(172, 182, 5, 1)',
+                'rgba(89, 146, 9, 1)',
+                ],
+            },
+            ],
+        }
+    }
+    
+    $: cardBarData = getCardBarData(card)
 </script>
 
 {#if present}
@@ -225,16 +307,22 @@
                 {/if}
             </div>
             
+            {#if card.type == 'rating'}
+            <div class="barchart">
+                <Bar data={cardBarData} options={{ responsive: true, animation: {duration: 0} }} />
+            </div>
+            {/if}
+            
         </div>
         
         <h3 class="subtitle">Notes:</h3>
         <div class="card">
-            <div class="card-content cardcontent">
+            <div class="card-content cardcontent" class:dirty={noteDirty}>
                 <!-- THE EDITOR IS HERE-->
                 
                 <div class="cardcontentdescription cardeditor">
                     
-                    <InkMde value={card.notes} options={{
+                    <InkMde value={cardNotes} options={{
                         doc: '',
                         hooks: {
                             afterUpdate: updateNotes,
@@ -401,18 +489,65 @@ use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTyp
             <span class="avatar">{@html avatarsvg}</span>
         </span>
         {/if}
-        <!-- svelte-ignore a11y-click-events-have-key-events -->
-        {#if (cardIsCurrentUsers && scene.do("doAdd")) || isFacilitator }
-        <span class="has-tooltip-arrow trash" class:has-tooltip-left={scene.mode == 'present'} data-tooltip="Delete Card" on:click={handleDelete}>
-            <i class="fa-solid fa-trash"></i>
-        </span>
-        {/if}
+        <div class="dropdown is-hoverable is-right">
+            <div class="dropdown-trigger">
+                <button class="button cardtool" aria-haspopup="true" aria-controls="dropdown-menu2">
+                    <span class="icon is-small">
+                        <i class="fa-solid fa-bars"></i>
+                    </span>
+                </button>
+            </div>
+            <div class="dropdown-menu" id="dropdown-menu2" role="menu">
+                <div class="dropdown-content">
+                    {#if isFacilitator}
+                    {#if card.type != 'default' }
+                    <a href="#" class="dropdown-item" on:click={()=>setCardType("default")}>
+                        <span class="icon is-small"><i class="fa-solid fa-cards-blank"></i></span>
+                        <span> Make Card</span>
+                    </a>
+                    {/if}
+                    {#if card.type != 'rating' }
+                    <a href="#" class="dropdown-item" on:click={()=>setCardType("rating")}>
+                        <span class="icon is-small"><i class="fa-solid fa-square-poll-vertical"></i></span>
+                        <span> Make Rating</span>
+                    </a>
+                    {/if}
+                    {#if card.type != 'vote' }
+                    <a href="#" class="dropdown-item" on:click={()=>setCardType("vote")}>
+                        <span class="icon is-small"><i class="fa-solid fa-poll-people"></i></span>
+                        <span> Make Vote</span>
+                    </a>
+                    {/if}
+                    <hr class="dropdown-divider">
+                    {/if}
+                    {#if (cardIsCurrentUsers && scene.do("doAdd")) || isFacilitator }
+                    <a href="#" class="dropdown-item" on:click={handleDelete}>
+                        <span class="icon is-small"><i class="fa-solid fa-trash"></i></span>
+                        <span> Delete Card</span>
+                    </a>
+                    {/if}
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
-{#if card.type == 'rating' && !dragEnabled}
+{#if card.type == 'rating' }
 <div class="card-content">
-    <input class="slider is-fullwidth" step="1" min="1" max="5" value="{cardRating}" type="range" disabled={dragEnabled} on:change={setRating}>
+    {#key card.options}
+    <div class="level">
+        
+        <span class="unsetrating icon is-small has-tooltip-arrow" data-tooltip="Unset Rating" on:click={()=>setRating(0)}>
+            {#if card.options && card.options.ratings && card.options.ratings[user.id] && card.options.ratings[user.id] > 0}
+            <i class="fa-regular fa-square-check mx-3"></i>
+            {:else}
+            <i class="fa-regular fa-square has-text-danger mx-3"></i>
+            {/if}
+        </span>
+        <span class="mx-3">{cardRating}</span>
+        <input class="slider is-fullwidth" step="1" min="1" max="5" value="{cardRating}" type="range" disabled={dragEnabled || !scene.do('doEdit')} on:change={(e)=>setRating(e.target.value)}>
+    </div>
+    {/key}
 </div>
 {/if}
 
@@ -524,7 +659,7 @@ use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTyp
     }
     .cardcontentedit {
         flex-grow: 0;
-        max-width: 16px;
+        max-width: 2rem;
         padding-left: 1rem;
     }
     .comment {
@@ -593,6 +728,9 @@ use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTyp
     :global(.avatar svg) {
         width: 16px;
     }
+    .avatar {
+        padding: 10.5px 6.5px;
+    }
     .statbox {
         display: flex;
         align-items: center;
@@ -636,5 +774,18 @@ use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTyp
     }
     .slider {
         color: green;
+    }
+    .dirty {
+        /* background-color: yellow; */
+    }
+    .cardtool {
+        background-color: transparent;
+    }
+    .barchart {
+        width: 80%;
+        margin: auto;
+    }
+    .unsetrating {
+        cursor: pointer;
     }
 </style>
