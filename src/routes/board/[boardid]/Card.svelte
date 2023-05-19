@@ -110,7 +110,7 @@
     }
     
     function setRating(value) {
-        if (dragEnabled || !scene.do('doEdit')) return
+        if (dragEnabled || !scene.do('doVote')) return
         if(card.options.ratings == undefined) {
             card.options.ratings = {}
         }
@@ -885,6 +885,7 @@ use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTyp
     }
     .dirty {
         /* background-color: yellow; */
+        background: transparent;
     }
     .cardtool {
         background-color: transparent;
