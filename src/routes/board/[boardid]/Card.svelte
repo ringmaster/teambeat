@@ -269,7 +269,7 @@
         $pbStore.collection('cards').update(card.id, card)
     }
     
-    function getCardBarData(card) {
+    function getCardRatingData(card) {
         let actual = [0,0,0,0,0]
         let total = 0
         
@@ -311,7 +311,41 @@
         }
     }
     
-    $: cardBarData = getCardBarData(card)
+    function getCardVoteData(card) {
+        let actual = {}
+        let total = 0
+        let labels = []
+        
+        if(card.type == 'vote') {
+            if(card.options.choices != undefined) {
+                Object.keys(card.options.choices).forEach((choice)=>{actual[choice] = 0})
+                labels = Object.values(card.options.choices)
+            }
+            
+            if(card.options.votes != undefined) {
+                total = Object.values(card.options.votes).length;
+                Object.values(card.options.votes).forEach((vote)=>{
+                    actual[vote]++
+                })
+                
+                actual = Object.values(actual).map((item)=> Math.round(100 * item / total))
+            }
+        }
+        
+        return {
+            labels: labels,
+            datasets: [
+            {
+                label: `% of ${total} Votes`,
+                data: actual,
+                borderWidth: 2
+            },
+            ],
+        }
+    }
+    
+    $: cardRatingData = getCardRatingData(card)
+    $: cardVoteData = getCardVoteData(card)
 </script>
 
 {#if present}
@@ -355,7 +389,13 @@
             
             {#if card.type == 'rating'}
             <div class="barchart">
-                <Bar data={cardBarData} options={{ responsive: true, animation: {duration: 0} }} />
+                <Bar data={cardRatingData} options={{ responsive: true, animation: {duration: 0} }} />
+            </div>
+            {/if}
+            
+            {#if card.type == 'vote'}
+            <div class="barchart">
+                <Bar data={cardVoteData} options={{ responsive: true, animation: {duration: 0}, indexAxis: 'y' }} />
             </div>
             {/if}
             
@@ -583,7 +623,7 @@ use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTyp
     {#if !scene.do('doVote') && scene.mode == 'columns'}
     <div class="notification is-warning is-light is-size-7">Voting is not enabled for this scene.</div>
     {/if}
-
+    
     {#key card.options}
     <div class="level">
         
