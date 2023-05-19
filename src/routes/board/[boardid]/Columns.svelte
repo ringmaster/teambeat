@@ -147,6 +147,9 @@
                     <div class="level-left">
                         <div class="level-item">
                             <h2 class="subtitle">{column.title}</h2>
+                            {#if column.description != '' && column.description != undefined}
+                            <div>{column.description}</div>
+                            {/if}
                         </div>
                         {#if currentScene.do("doAdd")}
                         <div class="level-item">

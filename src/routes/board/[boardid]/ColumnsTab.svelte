@@ -35,6 +35,7 @@
 <table class="table does">
     <thead><tr>
         <th>Column</th>
+        <th>Description</th>
         <th>Decks</th>
         <th>Delete</th>
     </tr></thead>
@@ -42,6 +43,7 @@
         {#each board.columns as column}
         <tr>
             <td>{column.title}</td>
+            <td>{column.description}</td>
             <td>
                 <button class="button is-small is-primary is-light" on:click={addDeck}>
                     <span class="icon is-small"><i class="fas fa-cards"></i></span>
@@ -59,7 +61,7 @@
         </tr>
         {/each}
         <tr>
-            <td colspan="2"><input type="text" class="input" bind:value={newColumnName} on:keypress={(e)=>{if(e.key == 'Enter')addColumn()}}></td>
+            <td colspan="3"><input type="text" class="input" bind:value={newColumnName} on:keypress={(e)=>{if(e.key == 'Enter')addColumn()}}></td>
             <td>
                 <button class="button is-small is-success is-light" on:click={addColumn}>
                     <span class="icon is-small">

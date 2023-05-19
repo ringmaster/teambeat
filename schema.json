@@ -546,60 +546,6 @@
         "options": {}
     },
     {
-        "id": "0m5589a5c6zbh1x",
-        "name": "columns",
-        "type": "base",
-        "system": false,
-        "schema": [
-            {
-                "id": "d38nndoc",
-                "name": "title",
-                "type": "text",
-                "system": false,
-                "required": true,
-                "options": {
-                    "min": null,
-                    "max": null,
-                    "pattern": ""
-                }
-            },
-            {
-                "id": "nj9ipi4f",
-                "name": "seq",
-                "type": "number",
-                "system": false,
-                "required": true,
-                "options": {
-                    "min": null,
-                    "max": null
-                }
-            },
-            {
-                "id": "9ut77p7t",
-                "name": "board",
-                "type": "relation",
-                "system": false,
-                "required": true,
-                "options": {
-                    "collectionId": "okipigcv64f5rtw",
-                    "cascadeDelete": true,
-                    "minSelect": null,
-                    "maxSelect": 1,
-                    "displayFields": null
-                }
-            }
-        ],
-        "indexes": [
-            "CREATE INDEX `_0m5589a5c6zbh1x_created_idx` ON `columns` (`created`)"
-        ],
-        "listRule": "board.users.id ?= @request.auth.id",
-        "viewRule": "board.users.id ?= @request.auth.id",
-        "createRule": "board.users.id ?= @request.auth.id",
-        "updateRule": "board.users.id ?= @request.auth.id",
-        "deleteRule": "board.users.id ?= @request.auth.id",
-        "options": {}
-    },
-    {
         "id": "_pb_users_auth_",
         "name": "users",
         "type": "auth",
@@ -762,93 +708,6 @@
         "options": {}
     },
     {
-        "id": "okipigcv64f5rtw",
-        "name": "boards",
-        "type": "base",
-        "system": false,
-        "schema": [
-            {
-                "id": "uslyii8k",
-                "name": "name",
-                "type": "text",
-                "system": false,
-                "required": true,
-                "options": {
-                    "min": null,
-                    "max": null,
-                    "pattern": ""
-                }
-            },
-            {
-                "id": "qcodij7m",
-                "name": "users",
-                "type": "relation",
-                "system": false,
-                "required": false,
-                "options": {
-                    "collectionId": "_pb_users_auth_",
-                    "cascadeDelete": false,
-                    "minSelect": null,
-                    "maxSelect": null,
-                    "displayFields": null
-                }
-            },
-            {
-                "id": "egdfduag",
-                "name": "facilitators",
-                "type": "relation",
-                "system": false,
-                "required": true,
-                "options": {
-                    "collectionId": "_pb_users_auth_",
-                    "cascadeDelete": false,
-                    "minSelect": null,
-                    "maxSelect": null,
-                    "displayFields": null
-                }
-            },
-            {
-                "id": "dwyzkdv1",
-                "name": "timerlength",
-                "type": "number",
-                "system": false,
-                "required": false,
-                "options": {
-                    "min": null,
-                    "max": null
-                }
-            },
-            {
-                "id": "i0bzknnx",
-                "name": "timerstart",
-                "type": "number",
-                "system": false,
-                "required": false,
-                "options": {
-                    "min": null,
-                    "max": null
-                }
-            },
-            {
-                "id": "owkljuly",
-                "name": "votes",
-                "type": "json",
-                "system": false,
-                "required": false,
-                "options": {}
-            }
-        ],
-        "indexes": [
-            "CREATE INDEX `_okipigcv64f5rtw_created_idx` ON `boards` (`created`)"
-        ],
-        "listRule": "facilitators.id ?= @request.auth.id || users.id ?= @request.auth.id",
-        "viewRule": "",
-        "createRule": "@request.auth.id != \"\" && @request.auth.anonymous != true",
-        "updateRule": "",
-        "deleteRule": "@request.data.facilitators.id ?= @request.auth.id",
-        "options": {}
-    },
-    {
         "id": "fjodrjzhrdqlb34",
         "name": "votestatus",
         "type": "view",
@@ -933,5 +792,251 @@
         "options": {
             "query": "select votetypes.id, votetypes.typename, votetypes.board, votetypes.amount, count(votes.id) as voted, boardpresence.total as userspresent, max(0,((boardpresence.total * votetypes.amount) - count(votes.id))) as remaining\nfrom votetypes\nleft join votes on votes.votetype = votetypes.id\ninner join boardpresence on boardpresence.board = votetypes.board\ngroup by votetypes.id"
         }
+    },
+    {
+        "id": "vy5ticct5hnpz9s",
+        "name": "outstandingvotes",
+        "type": "view",
+        "system": false,
+        "schema": [
+            {
+                "id": "rqqaev3s",
+                "name": "used",
+                "type": "number",
+                "system": false,
+                "required": false,
+                "options": {
+                    "min": null,
+                    "max": null
+                }
+            },
+            {
+                "id": "0gjqf2xw",
+                "name": "remaining",
+                "type": "json",
+                "system": false,
+                "required": false,
+                "options": {}
+            },
+            {
+                "id": "khhtf2os",
+                "name": "user",
+                "type": "relation",
+                "system": false,
+                "required": false,
+                "options": {
+                    "collectionId": "_pb_users_auth_",
+                    "cascadeDelete": true,
+                    "minSelect": null,
+                    "maxSelect": 1,
+                    "displayFields": [
+                        "email"
+                    ]
+                }
+            },
+            {
+                "id": "i0niciuq",
+                "name": "board",
+                "type": "relation",
+                "system": false,
+                "required": false,
+                "options": {
+                    "collectionId": "okipigcv64f5rtw",
+                    "cascadeDelete": true,
+                    "minSelect": null,
+                    "maxSelect": 1,
+                    "displayFields": [
+                        "name"
+                    ]
+                }
+            },
+            {
+                "id": "5ilizf5q",
+                "name": "amount",
+                "type": "number",
+                "system": false,
+                "required": false,
+                "options": {
+                    "min": 0,
+                    "max": null
+                }
+            },
+            {
+                "id": "ptgmibbl",
+                "name": "votetype",
+                "type": "relation",
+                "system": false,
+                "required": false,
+                "options": {
+                    "collectionId": "hn3w1shsrrwkwgs",
+                    "cascadeDelete": false,
+                    "minSelect": null,
+                    "maxSelect": 1,
+                    "displayFields": null
+                }
+            }
+        ],
+        "indexes": [],
+        "listRule": "",
+        "viewRule": "",
+        "createRule": null,
+        "updateRule": null,
+        "deleteRule": null,
+        "options": {
+            "query": "SELECT (ROW_NUMBER() OVER()) AS id, count(*) as used, (votetypes.amount - count(*)) as remaining, votes.user, votetypes.board, votetypes.amount, votetypes.id as votetype\nfrom votes\ninner join votetypes on votetypes.id = votes.votetype\ngroup by votes.user, votetypes.board"
+        }
+    },
+    {
+        "id": "okipigcv64f5rtw",
+        "name": "boards",
+        "type": "base",
+        "system": false,
+        "schema": [
+            {
+                "id": "uslyii8k",
+                "name": "name",
+                "type": "text",
+                "system": false,
+                "required": true,
+                "options": {
+                    "min": null,
+                    "max": null,
+                    "pattern": ""
+                }
+            },
+            {
+                "id": "qcodij7m",
+                "name": "users",
+                "type": "relation",
+                "system": false,
+                "required": false,
+                "options": {
+                    "collectionId": "_pb_users_auth_",
+                    "cascadeDelete": false,
+                    "minSelect": null,
+                    "maxSelect": null,
+                    "displayFields": null
+                }
+            },
+            {
+                "id": "egdfduag",
+                "name": "facilitators",
+                "type": "relation",
+                "system": false,
+                "required": true,
+                "options": {
+                    "collectionId": "_pb_users_auth_",
+                    "cascadeDelete": false,
+                    "minSelect": null,
+                    "maxSelect": null,
+                    "displayFields": null
+                }
+            },
+            {
+                "id": "dwyzkdv1",
+                "name": "timerlength",
+                "type": "number",
+                "system": false,
+                "required": false,
+                "options": {
+                    "min": null,
+                    "max": null
+                }
+            },
+            {
+                "id": "i0bzknnx",
+                "name": "timerstart",
+                "type": "number",
+                "system": false,
+                "required": false,
+                "options": {
+                    "min": null,
+                    "max": null
+                }
+            },
+            {
+                "id": "owkljuly",
+                "name": "votes",
+                "type": "json",
+                "system": false,
+                "required": false,
+                "options": {}
+            }
+        ],
+        "indexes": [
+            "CREATE INDEX `_okipigcv64f5rtw_created_idx` ON `boards` (`created`)"
+        ],
+        "listRule": "facilitators.id ?= @request.auth.id || facilitators.id ?= @request.auth.id",
+        "viewRule": "",
+        "createRule": "@request.auth.id != \"\" && @request.auth.anonymous != true",
+        "updateRule": "",
+        "deleteRule": "",
+        "options": {}
+    },
+    {
+        "id": "0m5589a5c6zbh1x",
+        "name": "columns",
+        "type": "base",
+        "system": false,
+        "schema": [
+            {
+                "id": "d38nndoc",
+                "name": "title",
+                "type": "text",
+                "system": false,
+                "required": true,
+                "options": {
+                    "min": null,
+                    "max": null,
+                    "pattern": ""
+                }
+            },
+            {
+                "id": "nj9ipi4f",
+                "name": "seq",
+                "type": "number",
+                "system": false,
+                "required": true,
+                "options": {
+                    "min": null,
+                    "max": null
+                }
+            },
+            {
+                "id": "9ut77p7t",
+                "name": "board",
+                "type": "relation",
+                "system": false,
+                "required": true,
+                "options": {
+                    "collectionId": "okipigcv64f5rtw",
+                    "cascadeDelete": true,
+                    "minSelect": null,
+                    "maxSelect": 1,
+                    "displayFields": null
+                }
+            },
+            {
+                "id": "ebpqtk2i",
+                "name": "description",
+                "type": "text",
+                "system": false,
+                "required": false,
+                "options": {
+                    "min": null,
+                    "max": null,
+                    "pattern": ""
+                }
+            }
+        ],
+        "indexes": [
+            "CREATE INDEX `_0m5589a5c6zbh1x_created_idx` ON `columns` (`created`)"
+        ],
+        "listRule": "board.users.id ?= @request.auth.id",
+        "viewRule": "board.users.id ?= @request.auth.id",
+        "createRule": "board.users.id ?= @request.auth.id",
+        "updateRule": "board.users.id ?= @request.auth.id",
+        "deleteRule": "board.users.id ?= @request.auth.id",
+        "options": {}
     }
 ]

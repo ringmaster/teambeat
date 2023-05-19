@@ -19,6 +19,8 @@
         CategoryScale,
         LinearScale,
     } from 'chart.js';
+    import { v4 } from 'uuid';
+    import { debounce } from 'debounce';
     
     export let card;
     export let scene;
@@ -113,6 +115,50 @@
             card.options.ratings = {}
         }
         card.options.ratings[user.id] = value;
+        $pbStore.collection("cards").update(card.id, card).then(()=>{
+        })
+    }
+    
+    let newChoiceTitle = ''
+    
+    function addChoice() {
+        if (!scene.do('doEdit')) return
+        if(card.options.choices == undefined) {
+            card.options.choices = {}
+        }
+        const newindex = Object.keys(card.options.choices).reduce((prev, cur)=>Math.max(prev,cur), 0) + 1
+        card.options.choices[newindex] = '';
+        $pbStore.collection("cards").update(card.id, card).then(()=>{
+        })
+    }
+    
+    function updateChoice(id, value) {
+        card.options.choices[id] = value;
+        $pbStore.collection("cards").update(card.id, card).then(()=>{
+        })
+    }
+    
+    function deleteChoice(id) {
+        delete card.options.choices[id]
+        $pbStore.collection("cards").update(card.id, card).then(()=>{
+        })        
+    }
+    
+    function getCardVote() {
+        if(card.options && card.options.votes && card.options.votes[user.id]) {
+            return card.options.votes[user.id]
+        }
+        else {
+            return false
+        }
+    }
+    
+    function setCardVote(value) {
+        if (!scene.do('doVote')) return
+        if(card.options.votes == undefined) {
+            card.options.votes = {}
+        }
+        card.options.votes[user.id] = value;
         $pbStore.collection("cards").update(card.id, card).then(()=>{
         })
     }
@@ -534,6 +580,10 @@ use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTyp
 
 {#if card.type == 'rating' }
 <div class="card-content">
+    {#if !scene.do('doVote') && scene.mode == 'columns'}
+    <div class="notification is-warning is-light is-size-7">Voting is not enabled for this scene.</div>
+    {/if}
+
     {#key card.options}
     <div class="level">
         
@@ -545,8 +595,66 @@ use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTyp
             {/if}
         </span>
         <span class="mx-3">{cardRating}</span>
-        <input class="slider is-fullwidth" step="1" min="1" max="5" value="{cardRating}" type="range" disabled={dragEnabled || !scene.do('doEdit')} on:change={(e)=>setRating(e.target.value)}>
+        <input class="slider is-fullwidth" step="1" min="1" max="5" value="{cardRating}" type="range" disabled={dragEnabled || !scene.do('doVote')} on:change={(e)=>setRating(e.target.value)}>
     </div>
+    {/key}
+</div>
+{/if}
+
+{#if card.type == 'vote' }
+<div class="card-content">
+    {#if !scene.do('doVote') && scene.mode == 'columns'}
+    <div class="notification is-warning is-light is-size-7">Voting is not enabled for this scene.</div>
+    {/if}
+    {#if (card.options.choices == undefined || Object.keys(card.options.choices).length == 0)}
+    <div class="notification is-warning is-light is-size-7">There are no choices available for this voting card.
+        {#if isFacilitator && scene.do('doEdit')}
+        Switch to a scene that has Edit enabled to add choices, or add the Edit capability to the current scene.
+        {/if}
+    </div>
+    {/if}
+    {#if (isFacilitator || cardIsCurrentUsers) && scene.do('doEdit')}
+    <div class="control">
+        <a class="button is-small" href="#" on:click={()=>addChoice()}>
+            Add Choice
+        </a>
+    </div>
+    {/if}
+    {#key card.options}
+    {#if card.options.choices}
+    {#each Object.entries(card.options.choices) as [id,choice]}
+    <label class="in-card-vote">
+        <div class="level">
+            <div class="level-left">
+                <div class="level-item mr-1">
+                    <input type="radio" disabled={!scene.do('doVote')} name={`in-card-vote-${card.id}`} value={id} data-cardvote={getCardVote()} checked={getCardVote() == id} on:click={()=>setCardVote(id)}> 
+                </div>
+            </div>
+            {#if (isFacilitator || cardIsCurrentUsers) && scene.do('doEdit')}
+            <div class="level-item field has-addons">
+                <div class="control is-flex-grow-1">
+                    <input type="text" class="input is-small" value={choice} on:keypress={(e)=>{if(e.key == 'Enter') updateChoice(id, e.target.value)}}>
+                </div>
+                <div class="control">
+                    <a class="button is-success is-small is-light" href="#">
+                        <span class="icon is-small"><i class="fa-solid fa-check"></i></span>
+                    </a>
+                </div>
+                <div class="control">
+                    <a class="button is-danger is-small is-light" href="#" on:click={()=>deleteChoice(id)}>
+                        <span class="icon is-small"><i class="fa-solid fa-trash"></i></span>
+                    </a>
+                </div>
+            </div>
+            {:else}
+            <div class="level-item">
+                {choice}
+            </div>
+            {/if}
+        </div>
+    </label>
+    {/each}
+    {/if}
     {/key}
 </div>
 {/if}
@@ -787,5 +895,15 @@ use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTyp
     }
     .unsetrating {
         cursor: pointer;
+    }
+    .in-card-vote {
+        display: block;
+        padding: 1rem;
+        margin: 0 0 0.5rem;
+        border: 2px solid rgba(52, 73, 94, 0.2);
+        border-radius: 9px;
+    }
+    .in-card-vote:has(input:checked) {
+        border-color: rgba(52, 73, 94, 1.00);
     }
 </style>
