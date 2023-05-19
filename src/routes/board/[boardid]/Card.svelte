@@ -644,11 +644,12 @@ use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTyp
 {#if card.type == 'vote' }
 <div class="card-content">
     {#if !scene.do('doVote') && scene.mode == 'columns'}
-    <div class="notification is-warning is-light is-size-7">Voting is not enabled for this scene.</div>
+    <div class="notification is-warning is-light is-size-7">Vote capability is not enabled for this scene.
+    </div>
     {/if}
     {#if (card.options.choices == undefined || Object.keys(card.options.choices).length == 0)}
     <div class="notification is-warning is-light is-size-7">There are no choices available for this voting card.
-        {#if isFacilitator && scene.do('doEdit')}
+        {#if isFacilitator && !scene.do('doEdit')}
         Switch to a scene that has Edit enabled to add choices, or add the Edit capability to the current scene.
         {/if}
     </div>
