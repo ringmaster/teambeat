@@ -369,6 +369,29 @@
     }
     
     $: cardEmojis = emojiData(card)
+    
+    function userSetEmoji(card, emoji) {
+        let userSetEmoji = false
+        if(card.expand["comments(card)"] != undefined) {
+            userSetEmoji = card.expand["comments(card)"].reduce((prev, comment)=> prev || (comment.emoji == emoji && comment.user == user.id), userSetEmoji)
+        }
+        return userSetEmoji
+    }
+    
+    function toggleReaction(card, emoji){
+        if(userSetEmoji(card, emoji)) {
+            
+        }
+        else {
+            let comment = {
+                body: "",
+                user: user.id,
+                emoji: emoji,
+                card: card.id
+            }
+            $pbStore.collection("comments").create(comment)
+        }
+    }
 </script>
 
 {#if present}
@@ -609,18 +632,18 @@ use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTyp
             <div class="dropdown-menu" id="dropdown-menu2" role="menu">
                 <div class="dropdown-content">
                     <div class="reactji">
-                        <a href="#" class="reactji">👍</a>
-                        <a href="#" class="reactji">👎</a>
-                        <a href="#" class="reactji">&#x2764;&#xfe0f;</a>
-                        <a href="#" class="reactji">&#127881;</a>
-                        <a href="#" class="reactji">&#128079;</a>
+                        <a href="#" class="reactji" on:click={()=>toggleReaction(card, "+1")}>👍</a>
+                        <a href="#" class="reactji" on:click={()=>toggleReaction(card, "-1")}>👎</a>
+                        <a href="#" class="reactji" on:click={()=>toggleReaction(card, "heart")}>&#x2764;&#xfe0f;</a>
+                        <a href="#" class="reactji" on:click={()=>toggleReaction(card, "party")}>&#127881;</a>
+                        <a href="#" class="reactji" on:click={()=>toggleReaction(card, "clap")}>&#128079;</a>
                     </div>
                     <div class="reactji">
-                        <a href="#" class="reactji">&#128513;</a>
-                        <a href="#" class="reactji">&#128562;</a>
-                        <a href="#" class="reactji">&#129300;</a>
-                        <a href="#" class="reactji">&#128545;</a>
-                        <a href="#" class="reactji">&#128546;</a>
+                        <a href="#" class="reactji" on:click={()=>toggleReaction(card, "smile")}>&#128513;</a>
+                        <a href="#" class="reactji" on:click={()=>toggleReaction(card, "surprise")}>&#128562;</a>
+                        <a href="#" class="reactji" on:click={()=>toggleReaction(card, "thinking")}>&#129300;</a>
+                        <a href="#" class="reactji" on:click={()=>toggleReaction(card, "angry")}>&#128545;</a>
+                        <a href="#" class="reactji" on:click={()=>toggleReaction(card, "sad")}>&#128546;</a>
                     </div>
                     {#if isFacilitator}
                     <hr class="dropdown-divider" />
@@ -750,13 +773,13 @@ use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTyp
 </div>
 {/if}
 {#if scene.do("doShowVotes") || scene.do("doVote") || scene.do("doShowComments")}
-<div class="card-footer level">
-    <div class="level-left">
+<div class="card-footer">
+    <div class="field is-flex">
         {#if scene.do("doShowVotes") || scene.do("doVote")}
-        {#each board.votetypes as votetype}
-        {#if votetype.amount > 0}
-        <div class="level-item votewidget">
-            <div class="field is-grouped is-grouped-multiline">
+        <div class="field is-grouped is-grouped-multiline">
+            {#each board.votetypes as votetype}
+            {#if votetype.amount > 0}
+            <div class="field is-grouped votewidget">
                 {#if scene.do("doVote")}
                 <div class="control">
                     <button class="downvote udvote button is-small" class:is-disabled={cardvotes[votetype.typename].yours<=0} on:click={()=>voteDel(votetype)}><i class="fa-solid fa-minus"></i></button>
@@ -797,18 +820,21 @@ use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTyp
                 </div>
                 {/if}
             </div>
+            {/if}
+            {/each}
         </div>
         {/if}
-        {/each}
-        {/if}
-    </div>
-    <div class="level-right">
-        {#each cardEmojis as [emoji, count]}
-        <div class="tags has-addons">
-            <span class="tag is-primary">{getEmoji(emoji)}</span>
-            <span class="tag is-white">{count}</span>
+        <div class="field is-grouped is-grouped-multiline">
+            
+            {#each cardEmojis as [emoji, count]}
+            <div class="control">
+                <div class="tags has-addons">
+                    <span class="tag is-primary">{@html getEmoji(emoji)}</span>
+                    <span class="tag is-white">{count}</span>
+                </div>
+            </div>
+            {/each}
         </div>
-        {/each}
     </div>
 </div>
 {/if}
@@ -882,6 +908,9 @@ use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTyp
     }
     .votewidget:hover .udvote.is-disabled {
         visibility: hidden;
+    }
+    .votewidget {
+        min-width: 9rem;
     }
     .downvote:hover {
         background-color: rgb(255, 219, 219);
