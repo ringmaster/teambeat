@@ -169,6 +169,7 @@
                     }, 100);                    
                 }
                 $pbStore.collection('cards').subscribe('*', item.debounceUpdate);
+                $pbStore.collection('comments').subscribe('*', item.debounceUpdate);
                 $pbStore.collection('agreements').subscribe('*', item.debounceUpdate);
                 item.update();
                 return item;

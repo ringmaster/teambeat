@@ -359,10 +359,15 @@
         if(card.expand["comments(card)"] == undefined) return [] 
         let emojis = {}
         emojis = card.expand["comments(card)"].reduce((emojis, comment)=>{
-            if(emojis[comment.emoji] == undefined) {
-                emojis[comment.emoji] = 0
+            if(comment.emoji != '') {
+                if(emojis[comment.emoji] == undefined) {
+                    emojis[comment.emoji] = {count: 0, userset: false}
+                }
+                emojis[comment.emoji].count++
+                if(comment.user == user.id) {
+                    emojis[comment.emoji].userset = true;
+                }
             }
-            emojis[comment.emoji]++
             return emojis
         }, emojis)
         return Object.entries(emojis);
@@ -380,9 +385,15 @@
     
     function toggleReaction(card, emoji){
         if(userSetEmoji(card, emoji)) {
-            
+            console.log(`Deleteing ${emoji}`)
+            $pbStore.collection('comments').getFullList(200, {filter: `emoji='${emoji}' && user='${user.id}' && card='${card.id}'`}).then((comments)=>{
+                comments.forEach((comment)=>{
+                    $pbStore.collection("comments").delete(comment.id)
+                })
+            })
         }
         else {
+            console.log(`Adding ${emoji}`)
             let comment = {
                 body: "",
                 user: user.id,
@@ -826,11 +837,11 @@ use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTyp
         {/if}
         <div class="field is-grouped is-grouped-multiline">
             
-            {#each cardEmojis as [emoji, count]}
-            <div class="control">
+            {#each cardEmojis as [emoji, data]}
+            <div class="control" on:click={toggleReaction(card, emoji)}>
                 <div class="tags has-addons">
-                    <span class="tag is-primary">{@html getEmoji(emoji)}</span>
-                    <span class="tag is-white">{count}</span>
+                    <span class="tag" class:is-primary={!data.userset} class:is-success={data.userset}>{@html getEmoji(emoji)}</span>
+                    <span class="tag is-white">{data.count}</span>
                 </div>
             </div>
             {/each}
