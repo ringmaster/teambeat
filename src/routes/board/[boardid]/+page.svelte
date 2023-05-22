@@ -183,7 +183,7 @@
         let cardData = await $pbStore.collection('cards').getFullList(10, {
             sort: "-created",
             filter: 'column = "' + column.id + '"',
-            expand: 'user,comments(card),votes(card),cards(groupedto),groupedto,agreements(card)',
+            expand: 'user,comments(card),votes(card),cards(groupedto),agreements(card),cards_emojis(card)',
             '$cancelKey': column.id // Wihtout this, the client cancels separate column requests as non-unique
         })
         return cardData;

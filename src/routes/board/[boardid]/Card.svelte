@@ -72,8 +72,16 @@
     
     function getEmoji(emoji) {
         switch(emoji) {
-            case "+1": return 'fa-regular fa-face-smile';
-            case "-1": return "fa-regular fa-face-frown";
+            case "+1": return '👍';
+            case "-1": return "👎";
+            case "heart": return "&#x2764;&#xfe0f;";
+            case "party": return "&#127881;";
+            case "clap": return "&#128079;";
+            case "smile": return "&#128513;";
+            case "surprise": return "&#128562;";
+            case "thinking": return "&#129300;";
+            case "angry": return "&#128545;";
+            case "sad": return "&#128546;";
         }
     }
     
@@ -346,6 +354,21 @@
     
     $: cardRatingData = getCardRatingData(card)
     $: cardVoteData = getCardVoteData(card)
+    
+    function emojiData(card) {
+        if(card.expand["comments(card)"] == undefined) return [] 
+        let emojis = {}
+        emojis = card.expand["comments(card)"].reduce((emojis, comment)=>{
+            if(emojis[comment.emoji] == undefined) {
+                emojis[comment.emoji] = 0
+            }
+            emojis[comment.emoji]++
+            return emojis
+        }, emojis)
+        return Object.entries(emojis);
+    }
+    
+    $: cardEmojis = emojiData(card)
 </script>
 
 {#if present}
@@ -585,7 +608,22 @@ use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTyp
             </div>
             <div class="dropdown-menu" id="dropdown-menu2" role="menu">
                 <div class="dropdown-content">
+                    <div class="reactji">
+                        <a href="#" class="reactji">👍</a>
+                        <a href="#" class="reactji">👎</a>
+                        <a href="#" class="reactji">&#x2764;&#xfe0f;</a>
+                        <a href="#" class="reactji">&#127881;</a>
+                        <a href="#" class="reactji">&#128079;</a>
+                    </div>
+                    <div class="reactji">
+                        <a href="#" class="reactji">&#128513;</a>
+                        <a href="#" class="reactji">&#128562;</a>
+                        <a href="#" class="reactji">&#129300;</a>
+                        <a href="#" class="reactji">&#128545;</a>
+                        <a href="#" class="reactji">&#128546;</a>
+                    </div>
                     {#if isFacilitator}
+                    <hr class="dropdown-divider" />
                     {#if card.type != 'default' }
                     <a href="#" class="dropdown-item" on:click={()=>setCardType("default")}>
                         <span class="icon is-small"><i class="fa-solid fa-cards-blank"></i></span>
@@ -703,13 +741,10 @@ use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTyp
 {#if card.expand["comments(card)"] && scene.do("doShowComments")}
 <div class="card-content">
     {#each card.expand["comments(card)"] as comment}
-    <sl-divider></sl-divider>
     <div class="comment">
-        {#if comment.emoji != ""}
-        <i class="{getEmoji(comment.emoji)}"></i>
-        {:else}
-        <i class="fa-regular fa-message-lines"></i>
-        {/if} {comment.body}
+        {#if comment.body != ""}
+        {comment.body}
+        {/if} 
     </div>
     {/each}
 </div>
@@ -721,55 +756,60 @@ use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTyp
         {#each board.votetypes as votetype}
         {#if votetype.amount > 0}
         <div class="level-item votewidget">
-            {#if scene.do("doVote")}
-            <button class="downvote udvote button is-small" class:is-disabled={cardvotes[votetype.typename].yours<=0} on:click={()=>voteDel(votetype)}><i class="fa-solid fa-minus"></i></button>
-            {/if}
-            {#if scene.do("doVote")}
-            <span>{cardvotes[votetype.typename].yours}</span>
-            {/if}
-            {#if scene.do("doShowVotes") && scene.do("doVote")}
-            <span>/</span>
-            {/if}
-            {#if scene.do("doShowVotes") }
-            <span>{cardvotes[votetype.typename].total}</span>
-            {/if}
-            <span class="icon" class:is-voted={cardvotes[votetype.typename].yours>0}>
-                {#if votetype.typename == 'gems'}
-                <i class="fa-light fa-gem"></i>
-                {:else if votetype.typename == 'bananas'}
-                <i class="fa-light fa-banana"></i>
-                {:else if votetype.typename == 'award'}
-                <i class="fa-light fa-award"></i>
-                {:else}
-                <i class="fak fa-vote"></i>
+            <div class="field is-grouped is-grouped-multiline">
+                {#if scene.do("doVote")}
+                <div class="control">
+                    <button class="downvote udvote button is-small" class:is-disabled={cardvotes[votetype.typename].yours<=0} on:click={()=>voteDel(votetype)}><i class="fa-solid fa-minus"></i></button>
+                </div>
                 {/if}
-            </span>
-            {#if scene.do("doVote")}
-            <button class="upvote udvote button is-small" class:is-disabled={$votedata.yours[votetype.typename]>=votetype.amount} on:click={()=>voteAdd(votetype)}><i class="fa-solid fa-plus"></i></button>
-            {/if}
+                
+                <div class="control">
+                    <div class="tags has-addons">
+                        <span class="tag" class:is-primary={cardvotes[votetype.typename].yours==0} class:is-success={cardvotes[votetype.typename].yours>0}>
+                            <span class="icon" class:is-voted={cardvotes[votetype.typename].yours>0}>
+                                {#if votetype.typename == 'gems'}
+                                <i class="fa-light fa-gem"></i>
+                                {:else if votetype.typename == 'bananas'}
+                                <i class="fa-light fa-banana"></i>
+                                {:else if votetype.typename == 'award'}
+                                <i class="fa-light fa-award"></i>
+                                {:else}
+                                <i class="fak fa-vote"></i>
+                                {/if}
+                            </span>
+                        </span>
+                        <span class="tag is-white">
+                            {#if scene.do("doVote")}
+                            <span>{cardvotes[votetype.typename].yours}</span>
+                            {/if}
+                            {#if scene.do("doShowVotes") && scene.do("doVote")}
+                            <span>/</span>
+                            {/if}
+                            {#if scene.do("doShowVotes") }
+                            <span>{cardvotes[votetype.typename].total}</span>
+                            {/if}
+                        </span>
+                    </div>
+                </div>
+                {#if scene.do("doVote")}
+                <div class="control">
+                    <button class="upvote udvote button is-small" class:is-disabled={$votedata.yours[votetype.typename]>=votetype.amount} on:click={()=>voteAdd(votetype)}><i class="fa-solid fa-plus"></i></button>
+                </div>
+                {/if}
+            </div>
         </div>
         {/if}
         {/each}
         {/if}
     </div>
-    {#if scene.do("doShowComments")}
     <div class="level-right">
-        <div class="level-item">
-            <sl-button-group label="Comment Group">
-                <sl-button ><i class="fa-regular fa-message-medical"></i></sl-button>
-                <sl-dropdown placement="bottom-end">
-                    <sl-button slot="trigger" caret>
-                        <sl-visually-hidden>More comment options</sl-visually-hidden>
-                    </sl-button>
-                    <sl-menu>
-                        <sl-menu-item><i class="fa-regular fa-face-smile"></i></sl-menu-item>
-                        <sl-menu-item><i class="fa-regular fa-face-frown"></i></sl-menu-item>
-                    </sl-menu>
-                </sl-dropdown>
-            </sl-button-group>
+        {#each cardEmojis as [emoji, count]}
+        <div class="tags has-addons">
+            <span class="tag is-primary">{getEmoji(emoji)}</span>
+            <span class="tag is-white">{count}</span>
         </div>
+        {/each}
     </div>
-    {/if}
 </div>
 {/if}
 {/key}
@@ -851,18 +891,15 @@ use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTyp
     }
     .udvote {
         border: none;
+        padding: 0;
     }
     .udvote {
         border-radius: 1rem; 
         width: 1.5rem; 
         height: 1.5rem; 
     }
-    .is-voted {
-        border: 1px solid #999;
-        border-radius: 1rem;
-        margin-left: 0.2rem;
-        background: #999;
-        color: white;
+    .udvote * {
+        margin: auto;
     }
     .cardeditor {
         outline: none;
@@ -947,5 +984,15 @@ use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTyp
     }
     .in-card-vote:has(input:checked) {
         border-color: rgba(52, 73, 94, 1.00);
+    }
+    .reactji {
+        padding: 0.375rem 1rem 0.375rem 1rem;
+    }
+    .reactji a {
+        padding: 0.375rem;
+    }
+    .reactji a:hover {
+        background-color: #ecf0f1;
+        color: hsl(0, 0%, 4%);
     }
 </style>
