@@ -39,7 +39,13 @@
     
     $: avatarsvg = avatar.toString();
     
-    $: cardRating = card.options.ratings ? card.options.ratings[user.id] ? card.options.ratings[user.id] : 0 : 0
+    function getCardRating(card) {
+        if((card.options && card.options.ratings != undefined) && card.options.ratings[user.id])
+        return card.options.ratings[user.id]
+        return 0
+    }
+    
+    $: cardRating = getCardRating(card)
     
     Chart.register(
     Title,
@@ -199,7 +205,7 @@
     $: cardOperations = (scene.do("doMove") ? 'move' : '') + ' ' + (groupEnabled ? 'link' : '')
     
     function dynamicDummy(extras) {
-        console.log(extras)
+        //console.log(extras)
         let proxy = document.createElement('div');
         proxy.style.cssText = 'width:20rem;';
         proxy.classList.add("card");
@@ -221,18 +227,24 @@
     
     function dropZoneCard(x,y, Operation, DataOffered, sourceCard, targetCard) {        
         if(sourceCard.id == targetCard.id) return false;
+        let promises = [];
         console.log('DROP ON CARD', targetCard);
         
         sourceCard.column = null;
         sourceCard.groupedto = targetCard.id;
-        $pbStore.collection('cards').update(sourceCard.id, sourceCard)
         $pbStore.collection('cards').getFullList(200, {filter: `groupedto = "${sourceCard.id}"`}).then((results)=>{
             results.forEach((subcard)=>{
-                console.log(subcard);
+                console.log(`  SUBCARD ${subcard.id}:${subcard.description} being grouped...`);
                 subcard.column = null;
                 subcard.groupedto = targetCard.id;
-                $pbStore.collection('cards').update(subcard.id, subcard)
+                
+                promises.push($pbStore.collection('cards').update(subcard.id, subcard))
             })
+        })
+        Promise.all(promises).then(()=>{
+            $pbStore.collection('cards').update(sourceCard.id, sourceCard)
+        }).catch((e)=>{
+            console.error("  FAILED to drop child", e)
         })
     }
     
@@ -384,6 +396,7 @@
     }
     
     function toggleReaction(card, emoji){
+        if(!scene.do('doComment')) return
         if(userSetEmoji(card, emoji)) {
             console.log(`Deleteing ${emoji}`)
             $pbStore.collection('comments').getFullList(200, {filter: `emoji='${emoji}' && user='${user.id}' && card='${card.id}'`}).then((comments)=>{
@@ -574,7 +587,7 @@
 
 {:else}
 
-<div class="card" id="card-{card.id}" class:cangroup={groupEnabled} class:canmove={dragEnabled}
+<div class="card" id="card-{card.id}" class:cangroup={groupEnabled} class:canmove={dragEnabled} class:hovered={false}
 use:asDroppable={{Extras: card, Dummy:dynamicDummy, Pannable: '.boardscroll', Operations: cardOperations , PanSensorWidth: 50, Operations: 'move', onlyFrom: dragOnlyFrom, DataToOffer: {"text/card": card.id} }}
 use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTypes}}
 >
@@ -634,7 +647,7 @@ use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTyp
         {/if}
         <div class="dropdown is-hoverable is-right">
             <div class="dropdown-trigger">
-                <button class="button cardtool" aria-haspopup="true" aria-controls="dropdown-menu2">
+                <button class="button cardtool is-borderless" aria-haspopup="true" aria-controls="dropdown-menu2">
                     <span class="icon is-small">
                         <i class="fa-solid fa-bars"></i>
                     </span>
@@ -642,6 +655,7 @@ use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTyp
             </div>
             <div class="dropdown-menu" id="dropdown-menu2" role="menu">
                 <div class="dropdown-content">
+                    {#if scene.do('doComment')}
                     <div class="reactji">
                         <a href="#" class="reactji" on:click={()=>toggleReaction(card, "+1")}>👍</a>
                         <a href="#" class="reactji" on:click={()=>toggleReaction(card, "-1")}>👎</a>
@@ -656,6 +670,9 @@ use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTyp
                         <a href="#" class="reactji" on:click={()=>toggleReaction(card, "angry")}>&#128545;</a>
                         <a href="#" class="reactji" on:click={()=>toggleReaction(card, "sad")}>&#128546;</a>
                     </div>
+                    {:else}
+                    <div class="dropdown-item disabled">Commenting is disabled</div>
+                    {/if}
                     {#if isFacilitator}
                     <hr class="dropdown-divider" />
                     {#if card.type != 'default' }
@@ -772,22 +789,11 @@ use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTyp
 </div>
 {/if}
 
-{#if card.expand["comments(card)"] && scene.do("doShowComments")}
-<div class="card-content">
-    {#each card.expand["comments(card)"] as comment}
-    <div class="comment">
-        {#if comment.body != ""}
-        {comment.body}
-        {/if} 
-    </div>
-    {/each}
-</div>
-{/if}
 {#if scene.do("doShowVotes") || scene.do("doVote") || scene.do("doShowComments")}
 <div class="card-footer">
     <div class="field is-flex">
         {#if scene.do("doShowVotes") || scene.do("doVote")}
-        <div class="field is-grouped is-grouped-multiline">
+        <div class="field is-grouped is-grouped-multiline" class:is-voting={scene.do("doVote")}>
             {#each board.votetypes as votetype}
             {#if votetype.amount > 0}
             <div class="field is-grouped votewidget">
@@ -835,8 +841,8 @@ use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTyp
             {/each}
         </div>
         {/if}
+        {#if scene.do("doShowComments")}
         <div class="field is-grouped is-grouped-multiline">
-            
             {#each cardEmojis as [emoji, data]}
             <div class="control" on:click={toggleReaction(card, emoji)}>
                 <div class="tags has-addons">
@@ -846,6 +852,7 @@ use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTyp
             </div>
             {/each}
         </div>
+        {/if}
     </div>
 </div>
 {/if}
@@ -911,6 +918,9 @@ use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTyp
     .votecontrols {
         display: inline;
     }
+    .field.is-grouped.votewidget {
+        margin-right: 1rem;
+    }
     .votewidget .downvote, .votewidget .upvote {
         visibility: hidden;
     }
@@ -920,7 +930,7 @@ use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTyp
     .votewidget:hover .udvote.is-disabled {
         visibility: hidden;
     }
-    .votewidget {
+    .is-voting .votewidget {
         min-width: 9rem;
     }
     .downvote:hover {

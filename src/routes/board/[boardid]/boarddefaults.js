@@ -19,7 +19,7 @@ export default [
             {seq: 1, title: "collect", options: ["doAdd", "doEdit", "doMove", "doHidden"], mode: "columns"},
             {seq: 2, title: "group", options: ["doMove", "doGroup"], mode: "columns"},
             {seq: 3, title: "kvetch", options: ["solo:$Kvetches"], mode: "present"},
-            {seq: 4, title: "vote", options: ["doVote", "doMove", "hide:$Appreciations", "hide:$Kvetches"], mode: "columns"},
+            {seq: 4, title: "vote", options: ["hide:$Appreciations", "hide:$Kvetches", "doComment"], mode: "columns"},
             {seq: 5, title: "discuss", options: ["doShowVotes", "hide:$Kvetches", "hide:$Appreciations"], mode: "present"},
             {seq: 6, title: "appreciate", options: ["solo:$Appreciations"], mode: "present"},
             {seq: 7, title: "review", options: [], mode: "review"},

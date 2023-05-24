@@ -27,9 +27,12 @@
     let presenceInterval;
     let presenceId = null;
     let audioFile = [new Audio("/alarmding2.mp3"), new Audio("/alarmding1.mp3")];
-    let boardData;
-    let board = {columns: [], scenes: [], facilitators: [], currentScene: {title: ''}, votetypes: [], votecounts: []};
-
+    let boardData = false;
+    let loaded = false;
+    const votesDefault = {show: false, choices: {}, auto: false, didauto: false}
+    let board = {columns: [], scenes: [], facilitators: [], currentScene: {title: ''}, votetypes: [], votecounts: [], votes: votesDefault};
+    let cardsRemaining;
+    
     function showColumn(columnId) {
         const soloed = currentScene.options.reduce( (reduced, flag) => /^solo:(\S+)/.test(flag) ? flag.match(/^solo:(\S+)/)[1] : reduced, false)
         if(soloed) {
@@ -41,12 +44,6 @@
     $: isFacilitator = board?.facilitators?.indexOf(user.id) !== -1;
     $: totalCards = board?.columns?.reduce((prev, column)=>{return prev + (showColumn(column.id) ? column.cards.length : 0)}, 0)
     $: pureVoteCount = Math.ceil(Math.sqrt(totalCards))
-    
-    if($pbStore.authStore.isValid) {
-        getBoard();
-    } else {
-        goto("/share/" + data.boardid);
-    }
     
     onDestroy(()=>{
         board.columns.forEach((column) => {
@@ -62,6 +59,12 @@
     onMount(()=>{
         presenceInterval = setInterval(doPresence, 12345)
         doPresence();
+        
+        if($pbStore.authStore.isValid) {
+            getBoard();
+        } else {
+            goto("/share/" + data.boardid);
+        }
     })
     
     function doPresence() {
@@ -107,7 +110,8 @@
                 users: boardData.users,
                 expandedusers: boardData.expand['users'],
                 votetypes: boardData.expand["votetypes(board)"],
-                votecounts: {}
+                votecounts: {},
+                votes: {...votesDefault, ...(typeof boardData.votes !== 'undefined') ? boardData.votes : {}}
             }
             board.votecounts = getVoteCounts();
             board.voteStatus = {};
@@ -125,13 +129,22 @@
             checkTimer();
             
             $pbStore.collection('boards').subscribe(data.boardid, (b)=>{
-                board.timerstart = b.record.timerstart;
-                board.timerlength = b.record.timerlength;
-                checkTimer();
+                if(b.action == 'delete') {
+                    loaded = false;
+                }
+                else {
+                    board.timerstart = b.record.timerstart;
+                    board.timerlength = b.record.timerlength;
+                    board.votes = {...votesDefault, ...b.record.votes};
+                    checkTimer();
+                }
             })
             
             $pbStore.collection('votes').subscribe('*', votesSubUpdate);
             votesSubUpdate();
+            loaded = true;
+        }).catch((e)=>{
+            notify('Teambeat was not able to load that board.  Please click "Boards" in the main menu to return to the list of boards that are available to you.', 'error', 'error')
         })
     }
     
@@ -204,31 +217,35 @@
             newstart = board.timerstart;
             newlength = board.timerlength + sec;
         }
-        let boardData = {
-            "name": board.name,
-            "users": board.users,
-            "facilitators": board.facilitators,
-            "timerstart": newstart,
-            "timerlength": newlength
-        };
+        let boardData = {...board, ...{timerstart: newstart, timerlength: newlength, votes: {choices: {}, show: false, auto: board.votes.auto, didauto: false}}}
+        
         $pbStore.collection("boards").update(data.boardid, boardData)
     }
     
     function endTimer() {
-        let boardData = {
-            "name": board.name,
-            "users": board.users,
-            "facilitators": board.facilitators,
-            "timerstart": 0,
-            "timerlength": 0
-        };
+        let boardData = {...board, ...{timerstart: 0, timerlength: 0, votes: {choices: {}, show: false, auto: board.votes.auto, didauto: false}}}
         $pbStore.collection("boards").update(data.boardid, boardData)
         if(typeof stopTimer == 'function') stopTimer();
         timer = false;
     }
     
     function doTimerClick() {
-        timerexpanded = !timerexpanded
+        if(!isFacilitator) return;
+        let boardData = {...board};
+        boardData.votes.choices = {}
+        boardData.votes.show = !board.votes.show
+        boardData.votes.didauto = false;
+        $pbStore.collection("boards").update(data.boardid, boardData)
+    }
+    
+    function doMoreTimeMoveOn(user, option) {
+        let boardData = {...board};
+        boardData.votes.choices[user.id] = option
+        $pbStore.collection("boards").update(data.boardid, boardData)
+    }
+    
+    function getOptimalTimer(cardsRemaining, timeLeft = 60 - new Date().getMinutes()) {
+        return timeLeft * 60 / cardsRemaining
     }
     
     function setScene(scene) {
@@ -315,11 +332,26 @@
     }
     
     function alarm(e) {
+        console.log(e);
         if(e.detail.length < 60) {
             audioFile[0].play();
         }
         else {
             audioFile[1].play();
+        }
+    }
+    
+    function alarmWarn(e) {
+        if(true /*board.votes.auto*/) {
+            if(!isFacilitator) return;
+            if(board.votes.didauto) return
+            let boardData = {...board};
+            if(!boardData.votes.show) {
+                boardData.votes.choices = {}
+            }
+            boardData.votes.show = true;
+            boardData.votes.didauto = true;
+            $pbStore.collection("boards").update(data.boardid, boardData)
         }
     }
     
@@ -354,8 +386,41 @@
             notify("There was a problem copying the share link to the clipboard.", "error");
         });
     }
-
+    
     $: openVotes =  board.votetypes.reduce((prev, voteType) => voteType.amount + prev, 0)
+    
+    function getMoreTimeMoveOnPercent(board, index) {
+        if(board.votes == undefined || board.votes.choices == undefined) {
+            return 0
+        }
+        if(Object.values(board.votes.choices).length == 0) {
+            return 0
+        }
+        let x= Math.floor(100*Object.values(board.votes.choices).reduce((prev, cur)=> cur == index ? prev+1 : prev, 0) / Object.values(board.votes.choices).length )
+        return x
+    }
+    
+    function getSelectedMoreTimeMoveOn(board, index) {
+        if(board.votes == undefined || board.votes.choices == undefined) {
+            return false
+        }
+        if(Object.values(board.votes.choices).length == 0) {
+            return false
+        }
+        return board.votes.choices[user.id] == index
+    }
+    
+    $: moreTimePercent = getMoreTimeMoveOnPercent(board, 1)
+    $: moveOnPercent = getMoreTimeMoveOnPercent(board, 2)
+    
+    $: selectedMoreTime = getSelectedMoreTimeMoveOn(board, 1)
+    $: selectedMoveOn = getSelectedMoreTimeMoveOn(board, 2)
+    
+    function toggleAutoVote() {
+        let boardData = {...board};
+        boardData.votes.auto = !board.votes.auto
+        $pbStore.collection("boards").update(data.boardid, boardData)
+    }
 </script>
 
 
@@ -368,13 +433,13 @@
 </svelte:head>
 
 
-{#await boardData}
-<div class="container">
+{#if !loaded}
+<div class="container content">
     <h1>Loading Board {data.boardid}</h1>
     <p>Loading...</p>
 </div>
 <div>Loading...</div>
-{:then foo} 
+{:else} 
 <div class="container content">
     <div class="level">
         <div class="level-left">
@@ -440,7 +505,7 @@
                     </div>
                 </div>
             </div>
-
+            
             <div class="field has-addons">
                 <!-- svelte-ignore a11y-click-events-have-key-events -->
                 <div class="control dropdown is-right" class:is-hoverable={currentScene.do("doVote")}>
@@ -489,20 +554,32 @@
                     <div class="dropdown-menu" id="dropdown-menu" role="menu">
                         <div class="dropdown-content">
                             <a href="#" class="dropdown-item" on:click={()=>extendTimer(3)}>
-                                + 0:03
+                                <span class="icon"><i class="fa-kit fa-solid-timer-circle-plus"></i></span> 
+                                <span>+ 0:03</span>
                             </a>
                             <a href="#" class="dropdown-item" on:click={()=>extendTimer(30)}>
-                                + 0:30
+                                <span class="icon"><i class="fa-kit fa-solid-timer-circle-plus"></i></span> 
+                                <span>+ 0:30</span>
                             </a>
                             <a href="#" class="dropdown-item" on:click={()=>extendTimer(60)}>
-                                + 1:00
+                                <span class="icon"><i class="fa-kit fa-solid-timer-circle-plus"></i></span> 
+                                <span>+ 1:00</span>
                             </a>
                             <a href="#" class="dropdown-item" on:click={()=>extendTimer(300)}>
-                                + 5:00
+                                <span class="icon"><i class="fa-kit fa-solid-timer-circle-plus"></i></span> 
+                                <span>+ 5:00</span>
                             </a>
+                            <!-- 
+                                <hr class="dropdown-divider">
+                                <a href="#" class="dropdown-item" class:is-active={board.votes.auto} on:click={toggleAutoVote}>
+                                    <span class="icon"><i class="fa-solid fa-clock-rotate-left"></i></span>
+                                    <span>Auto-Vote More Time</span>
+                                </a>
+                            -->
                             <hr class="dropdown-divider">
                             <a href="#" class="dropdown-item" on:click={endTimer}>
-                                Stop Timer
+                                <span class="icon"><i class="fa-kit fa-solid-timer-circle-xmark"></i></span>
+                                <span>Stop Timer</span>
                             </a>
                         </div>
                     </div>
@@ -529,40 +606,42 @@
 
 
 {#if currentScene.mode == 'present'}
-<Present bind:board bind:currentScene />
+<Present bind:board bind:currentScene bind:cardsRemaining />
 {:else if currentScene.mode == 'review'}
 <Review bind:board bind:currentScene />
 {:else}
 <Columns bind:board bind:currentScene />
 {/if}
 
-{/await}
+{/if}
 
 <Drawer bind:board bind:visible={showDrawer} />
 
 {#if timer}
 <div class="timer" in:fly="{{ y: 200, duration: 500 }}" out:fly="{{ y: 200, duration: 500 }}">
     <!-- svelte-ignore a11y-click-events-have-key-events -->
-    <div class="timerbox" class:expanded={timerexpanded} >
-        {#if timerexpanded}
+    <div class="timerbox" class:expanded={board.votes.show} >
+        {#if board.votes.show}
         <div class="timerdetail" in:fade="{{delay: 1000}}" out:fade>
-            <button class="button">
-                Continue Discussion
+            <button class="button is-primary is-light" on:click={()=>doMoreTimeMoveOn(user, 1)}>
+                More Time
+                <progress class="progress is-small" class:is-success={selectedMoreTime} value={moreTimePercent} max="100">20%</progress>
             </button>
-            <button class="button">
+            <button class="button is-primary is-light" on:click={()=>doMoreTimeMoveOn(user, 2)}>
                 Move On
+                <progress class="progress is-small" class:is-success={selectedMoveOn} value={moveOnPercent} max="100">20%</progress>
             </button>
         </div>
         {/if}
         
-        <TimerDial on:click={doTimerClick} on:timeup={alarm} bind:timeLimit bind:startedAt bind:start={startTimer} bind:stop={stopTimer}/>
+        <TimerDial on:click={doTimerClick} on:timeup={alarm} on:warn={alarmWarn} bind:timeLimit bind:startedAt bind:start={startTimer} bind:stop={stopTimer}/>
     </div>
 </div>
 {/if}
 
 <style lang="scss">
     @import "../node_modules/bulmaswatch/flatly/variables";
-
+    
     .container {
         padding-bottom: 0;
     }
@@ -581,17 +660,25 @@
         align-content: center;
         align-items: flex-end;
         flex-wrap: nowrap;
-        background-color: #fff;
-        transition: width 200ms 400ms;
+        background-color: rgba(255,255,255,0.5);
+        transition: width 200ms 400ms, height 200ms 400ms, border-radius 200ms 400ms;
         box-shadow: 3px 3px 3px #ccc;
     }
     .timer .timerbox.expanded {
         width: 300px;
+        border-top-left-radius: 5px;
+        border-top-right-radius: 5px;
+        border-bottom-left-radius: 5px;
+        border-bottom-right-radius: 30px;
     }
     .timerdetail {
         margin-left: 30px;
         width: 210px;
         min-height: 58px;
+    }
+    .timerdetail button {
+        flex-wrap: wrap;
+        height: auto;
     }
     .dropdown-menu {
         z-index: 200;

@@ -23,6 +23,7 @@
     
     export let timeLimit;
     export let timePassed = 0;
+    export let timeLeft;
     let timerInterval = null;
     
     let isInfo = true;
@@ -50,6 +51,9 @@
             setCircleDasharray(timeLeft);
             setRemainingPathColor(timeLeft);
             tick().then(()=>{
+                if (timeLeft <= WARNING_THRESHOLD) {
+                    dispatch('warn', {length: timeLimit, remaining: timeLeft});
+                }
                 if (timeLeft === 0) {
                     dispatch('timeup', {length: timeLimit});
                     stop();
@@ -138,6 +142,7 @@
         // bottom: 17px;
         width: 58px;
         height: 58px;
+        flex-shrink: 0;
     }
     
     .base-timer__svg {
@@ -145,7 +150,7 @@
     }
     
     .base-timer__circle {
-        fill: none;
+        fill: white;
         stroke: none;
     }
     
@@ -165,7 +170,7 @@
     }
     
     .isInfo {
-        color: rgb(65, 184, 131);
+        color: #569150;
     }
     
     .isWarning {
@@ -173,7 +178,7 @@
     }
     
     .isAlert {
-        color: red;
+        color: #915050;
     }
     
     .base-timer__label {

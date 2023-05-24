@@ -176,14 +176,16 @@
                 </div>
                 {/if}
                 
-                <div class="columncontent">
-                    
-                    {#each maybeSort([...column.cards], currentScene.do("doShowVotes")) as card(card.id)}
-                    <div in:receive|local="{{key: card.id}}" out:send|local="{{key: card.id}}" animate:flip|local="{{duration: 200}}">
-                        <Card bind:card={card} bind:scene={currentScene} bind:board={board} />
+                <div class="columncolumn">
+                    <div class="columncontent">
+                        
+                        {#each maybeSort([...column.cards], currentScene.do("doShowVotes")) as card(card.id)}
+                        <div class="cardanimator" in:receive|local="{{key: card.id}}" out:send|local="{{key: card.id}}" animate:flip|local="{{duration: 200}}">
+                            <Card bind:card={card} bind:scene={currentScene} bind:board={board} />
+                        </div>
+                        {/each}
+                        
                     </div>
-                    {/each}
-                    
                 </div>
                 
                 
@@ -244,6 +246,10 @@
     }
     .cardcolumn {
         min-width: 20rem;
+        box-sizing: content-box;
+    }
+    .cardcolumn * {
+        box-sizing: border-box;
     }
     :global(.column.hovered .columnheader h2) {
         text-shadow: 0px 0px 10px #034a91;
@@ -286,5 +292,6 @@
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
         gap: 1rem;
+
     }
 </style>

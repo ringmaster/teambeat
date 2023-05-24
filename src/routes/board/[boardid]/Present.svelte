@@ -9,6 +9,7 @@
     
     export let board;
     export let currentScene;
+    export let cardsRemaining;
     
     $: user = $pbStore.authStore.model
     $: isFacilitator = board?.facilitators?.indexOf(user.id) !== -1;
@@ -48,6 +49,23 @@
         }).filter((card) => !onlyvoted || decompVotes(card.id, voteSort) > 0 )
         return cards;
     }
+
+    function getCardsRemaining(columns, onlyvoted) {
+        const cards = presentSort(columns, onlyvoted);
+        let flag = false
+        let total = 0
+        cards.forEach((card)=> {
+            if(card.id === currentScene.presenting) {
+                flag = true
+            }
+            if(flag) {
+                total++
+            }
+        })
+        return total
+    }
+
+    $: cardsRemaining = getCardsRemaining([...board.columns], onlyvoted)
     
     function presentCard(columns) {
         let cards = [];
@@ -110,14 +128,14 @@
                     {/if}
                     <label class="checkbox">
                         <input type="checkbox" bind:checked={onlyvoted}>
-                        Only Voted 
+                        Only Voted
                     </label>
                 </div>
             </div>
             {#each presentSort([...board.columns], onlyvoted) as card(card.id)}
             <div class="cardrow">
                 <div class="cardcontrols">
-                    {#key voteSort, currentScene.presenting}
+                    {#key voteSort, currentScene.presenting, onlyvoted}
                     {#if currentScene.presenting == card.id}
                     <span class="icon chevron">
                         <i class="fa-solid fa-circle-chevron-left"></i>

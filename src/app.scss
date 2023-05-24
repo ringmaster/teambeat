@@ -9,3 +9,21 @@ $success: #ab813d;
 @import "../node_modules/bulmaswatch/flatly/overrides";
 @import '@creativebulma/bulma-tooltip';
 @import '@creativebulma/bulma-tagsinput/src/sass/index';
+
+
+.button:not(.is-white):not(.is-light):not(.is-borderless) {
+    border-color: #6f8dab;
+}
+
+.button:hover, .button.is-hovered {
+    border-color: #4d7cab;
+    color: #2b3c4e;
+}
+
+.button, .tags-input, .input, .textarea, .select select, .file-cta, .file-name, .pagination-previous, .pagination-next, .pagination-link, .pagination-ellipsis {
+    border-color: #eee;
+}
+
+.select:not(.is-multiple):not(.is-loading)::after, .navbar-link:not(.is-arrowless)::after {
+    border-color: #999;
+}
