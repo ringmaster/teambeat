@@ -678,7 +678,6 @@ use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTyp
                     </div>
                     {:else}
                     <div class="dropdown-item disabled">Commenting is disabled</div>
-                    <a href="#" class="dropdown-item" on:click={()=>card.update()}>Refresh card data</a>
                     {/if}
                     {#if isFacilitator}
                     <hr class="dropdown-divider" />
