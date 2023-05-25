@@ -229,20 +229,26 @@
         if(sourceCard.id == targetCard.id) return false;
         let promises = [];
         console.log('DROP ON CARD', targetCard);
+        console.log('  CARDS(groupedto)', sourceCard);
         
         sourceCard.column = null;
         sourceCard.groupedto = targetCard.id;
-        $pbStore.collection('cards').getFullList(200, {filter: `groupedto = "${sourceCard.id}"`}).then((results)=>{
-            results.forEach((subcard)=>{
+
+        if(sourceCard.expand["cards(groupedto)"]) {
+            sourceCard.expand["cards(groupedto)"].forEach((subcard)=>{
                 console.log(`  SUBCARD ${subcard.id}:${subcard.description} being grouped...`);
                 subcard.column = null;
                 subcard.groupedto = targetCard.id;
                 
                 promises.push($pbStore.collection('cards').update(subcard.id, subcard))
             })
-        })
+        }
+
         Promise.all(promises).then(()=>{
-            $pbStore.collection('cards').update(sourceCard.id, sourceCard)
+            $pbStore.collection('cards').update(sourceCard.id, sourceCard).then(()=>{
+                if(targetCard.update) targetCard.update()
+                if(sourceCard.update) sourceCard.update()
+            })
         }).catch((e)=>{
             console.error("  FAILED to drop child", e)
         })
@@ -672,6 +678,7 @@ use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTyp
                     </div>
                     {:else}
                     <div class="dropdown-item disabled">Commenting is disabled</div>
+                    <a href="#" class="dropdown-item" on:click={()=>card.update()}>Refresh card data</a>
                     {/if}
                     {#if isFacilitator}
                     <hr class="dropdown-divider" />

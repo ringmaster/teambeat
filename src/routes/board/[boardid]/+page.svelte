@@ -1,5 +1,5 @@
 <script>
-    import { pbStore } from "svelte-pocketbase";
+    import { Record, pbStore } from "svelte-pocketbase";
     import { votes } from "$stores/votes.js";
     import Columns from "./Columns.svelte";
     import Present from "./Present.svelte";
@@ -167,7 +167,7 @@
             columnData.map((item) => {
                 item.cards = [];
                 item.update = function(){
-                    loadCards(item).then((cards) => {
+                    loadColumnCards(item).then((cards) => {
                         item.cards = cards;
                         board = board;
                     })
@@ -193,13 +193,29 @@
         return columnData;
     }
     
-    async function loadCards(column) {
+    function instrumentCard(card) {
+        card.update = async function(){
+            let cardData = await $pbStore.collection('cards').getOne(card.id, {
+                expand: 'user,comments(card),votes(card),cards(groupedto),agreements(card),cards_emojis(card)',
+                '$cancelKey': card.id // Without this, the client cancels separate column requests as non-unique
+            })
+            console.log(`UPDATING CARD ${this.id}:${this.description}`, cardData, cardData.expand['cards(groupedto)']);
+            if(cardData.expand['cards(groupedto'] != undefined) {
+                cardData.expand['cards(groupedto'] = cardData.expand['cards(groupedto'].map((subcard)=>instrumentCard(subcard))
+            }
+            Object.entries(cardData).forEach(([key, value])=>this[key] = value)
+        }
+        return card
+    }
+    
+    async function loadColumnCards(column) {
         let cardData = await $pbStore.collection('cards').getFullList(10, {
             sort: "-created",
             filter: 'column = "' + column.id + '"',
             expand: 'user,comments(card),votes(card),cards(groupedto),agreements(card),cards_emojis(card)',
-            '$cancelKey': column.id // Wihtout this, the client cancels separate column requests as non-unique
+            '$cancelKey': column.id // Without this, the client cancels separate column requests as non-unique
         })
+        cardData = cardData.map((card)=>instrumentCard(card))
         return cardData;
     }
     
