@@ -95,4 +95,25 @@ export default [
             {seq: 7, title: "review", options: [], mode: "review"},
         ]
     },
+    {
+        "title": "Lean Coffee",
+        "description": `<p>A "Lean Coffee" meeting is a structured and collaborative gathering designed to facilitate focused discussions and knowledge sharing among participants. It follows the principles of Lean thinking and encourages open participation, continuous improvement, and efficient use of time.</p>
+        <p>The steps of a Teambeat "Lean Coffee" meeting include:</p>
+        <ol><li>Agenda Creation: Prior to or at the start of the meeting, participants propose discussion topics by adding them to the Topics column of the Teambeat board.</li>
+        <li>Topic Voting: Participants then have the opportunity to vote on the topics they find most interesting or relevant. The votes help prioritize the discussion topics for the meeting.</li>
+        <li>Time Boxing: Once the topics have been prioritized, use the timer to ensure that discussions remain focused so that the overall meeting time is managed well.</li>
+        <li>Action Items and Reflection: As discussions unfold, actionable items or key takeaways are noted down. At the end of the meeting, a brief reflection may take place, discussing any outcomes, insights gained, or follow-up actions required.</li>
+        </ol>
+        <p>The "Lean Coffee" format is designed to foster engagement, empower participants to drive the conversation, and maximize the value of time spent in meetings. It encourages active participation, shared ownership of topics, and continuous improvement through the exchange of ideas and experiences. The structure of "Lean Coffee" promotes efficiency, focus, and collaborative learning within a group setting.</p>`,
+        "columns": [
+            {seq: 1, title: "Ice Breaker", description: "What is your favorite ice cream flavor?"},
+            {seq: 2, title: "Topics"},
+        ],
+        scenes: [
+            {seq: 1, title: "collect", options: ["doAdd", "doEdit", "doComment", "doShowComments"], mode: "columns"},
+            {seq: 2, title: "vote", options: ["doVote", "doComment", "doShowComments", "solo:$Topics"], mode: "columns"},
+            {seq: 3, title: "discuss", options: ["doShowVotes", "doShowComments", "solo:$Topics"], mode: "present"},
+            {seq: 4, title: "review", options: ["solo:$Topics"], mode: "review"},
+        ]
+    },
 ]

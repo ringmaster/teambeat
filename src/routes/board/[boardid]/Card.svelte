@@ -390,6 +390,11 @@
         }, emojis)
         return Object.entries(emojis);
     }
+
+    function emojiUserSet(card, emoji) {
+        const data = emojiData(card)
+        return data[emoji] && data[emoji].userset
+    }
     
     $: cardEmojis = emojiData(card)
     
@@ -850,7 +855,7 @@ use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTyp
         {#if scene.do("doShowComments")}
         <div class="field is-grouped is-grouped-multiline">
             {#each cardEmojis as [emoji, data]}
-            <div class="control" on:click={toggleReaction(card, emoji)}>
+            <div class="control emoji" on:click={toggleReaction(card, emoji)}>
                 <div class="tags has-addons">
                     <span class="tag" class:is-primary={!data.userset} class:is-success={data.userset}>{@html getEmoji(emoji)}</span>
                     <span class="tag is-white">{data.count}</span>
@@ -1044,11 +1049,17 @@ use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTyp
     .reactji {
         padding: 0.375rem 1rem 0.375rem 1rem;
     }
+    .reactji.is-set {
+        border: 1px solid #ab813d;
+    }
     .reactji a {
         padding: 0.375rem;
     }
     .reactji a:hover {
         background-color: #ecf0f1;
         color: hsl(0, 0%, 4%);
+    }
+    .emoji {
+        cursor: pointer;
     }
 </style>

@@ -12,8 +12,8 @@
     
     function deleteBoard(){
         if(confirmDelete) {
+            goto("/");
             $pbStore.collection('boards').delete(board.id).then(()=>{
-                goto("/");
             }).catch(err => notify(err.message, "error"))
         } else {
             notify("Check the box to confirm the deletion of this board.", "warning", "exclamation-triangle")

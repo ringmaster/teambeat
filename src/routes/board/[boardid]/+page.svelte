@@ -129,8 +129,10 @@
             checkTimer();
             
             $pbStore.collection('boards').subscribe(data.boardid, (b)=>{
+                console.log('BOARD SUB')
                 if(b.action == 'delete') {
                     loaded = false;
+                    go('/')
                 }
                 else {
                     board.timerstart = b.record.timerstart;
@@ -199,12 +201,14 @@
                 expand: 'user,comments(card),votes(card),cards(groupedto),agreements(card),cards_emojis(card)',
                 '$cancelKey': card.id // Without this, the client cancels separate column requests as non-unique
             })
-            console.log(`UPDATING CARD ${this.id}:${this.description}`, cardData, cardData.expand['cards(groupedto)']);
+            console.log(`UPDATING CARD ${card.id}:${card.description}`, cardData, cardData.expand['cards(groupedto)']);
             if(cardData.expand['cards(groupedto'] != undefined) {
                 cardData.expand['cards(groupedto'] = cardData.expand['cards(groupedto'].map((subcard)=>instrumentCard(subcard))
             }
-            Object.entries(cardData).forEach(([key, value])=>this[key] = value)
+            Object.entries(cardData).forEach(([key, value])=>card[key] = value)
         }
+        //$pbStore.collection('cards').subscribe(card.id, card.update);
+
         return card
     }
     

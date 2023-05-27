@@ -142,14 +142,16 @@
             {#each board.columns as column}
             {#if showColumn(column.id)}
             
-            <div class="column cardcolumn content" use:asDropZone={{Extras: column, onDrop: dropZoneDrop, TypesToAccept: acceptDropTypes}} id="column-{column.id}">
+            <div class="column cardcolumn content" class:constrain={column.description} use:asDropZone={{Extras: column, onDrop: dropZoneDrop, TypesToAccept: acceptDropTypes}} id="column-{column.id}">
                 <div class="columnheader level">
                     <div class="level-left">
                         <div class="level-item">
-                            <h2 class="subtitle">{column.title}</h2>
-                            {#if column.description != '' && column.description != undefined}
-                            <div>{column.description}</div>
-                            {/if}
+                            <div>
+                                <h2 class="subtitle">{column.title}</h2>
+                                {#if column.description != '' && column.description != undefined}
+                                <div>{column.description}</div>
+                                {/if}
+                            </div>
                         </div>
                         {#if currentScene.do("doAdd")}
                         <div class="level-item">
@@ -248,6 +250,10 @@
         min-width: 20rem;
         box-sizing: content-box;
     }
+    .cardcolumn.constrain {
+        max-width: 20rem;
+        border-right: 1px solid #aaa;
+    }
     .cardcolumn * {
         box-sizing: border-box;
     }
@@ -292,6 +298,6 @@
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
         gap: 1rem;
-
+        
     }
 </style>
