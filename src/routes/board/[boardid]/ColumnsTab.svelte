@@ -21,7 +21,11 @@
         $pbStore.collection('columns').create(columnData).then(()=>{
             newColumnName = '';
         })
-    }    
+    }
+
+    function updateColumn(column) {
+        $pbStore.collection('columns').update(column.id, column);
+    }
     
     function delColumn(id) {
         $pbStore.collection('columns').delete(id);
@@ -36,6 +40,7 @@
     <thead><tr>
         <th>Column</th>
         <th>Description</th>
+        <th>Display</th>
         <th>Decks</th>
         <th>Delete</th>
     </tr></thead>
@@ -43,7 +48,15 @@
         {#each board.columns as column}
         <tr>
             <td>{column.title}</td>
-            <td>{column.description}</td>
+            <td><input type="text" bind:value={column.description} on:change={updateColumn(column)}/></td>
+            <td>
+                <div class="select">
+                    <select bind:value={column.display} on:change={updateColumn(column)}>
+                        <option value="default">Default</option>
+                        <option value="narrow">Narrow</option>
+                    </select>
+                </div>
+            </td>
             <td>
                 <button class="button is-small is-primary is-light" on:click={addDeck}>
                     <span class="icon is-small"><i class="fas fa-cards"></i></span>
@@ -61,7 +74,7 @@
         </tr>
         {/each}
         <tr>
-            <td colspan="3"><input type="text" class="input" bind:value={newColumnName} on:keypress={(e)=>{if(e.key == 'Enter')addColumn()}}></td>
+            <td colspan="4"><input type="text" class="input" bind:value={newColumnName} on:keypress={(e)=>{if(e.key == 'Enter')addColumn()}}></td>
             <td>
                 <button class="button is-small is-success is-light" on:click={addColumn}>
                     <span class="icon is-small">

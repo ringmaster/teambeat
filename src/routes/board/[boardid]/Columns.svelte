@@ -142,7 +142,7 @@
             {#each board.columns as column}
             {#if showColumn(column.id)}
             
-            <div class="column cardcolumn content" class:constrain={column.description} use:asDropZone={{Extras: column, onDrop: dropZoneDrop, TypesToAccept: acceptDropTypes}} id="column-{column.id}">
+            <div class="column cardcolumn content" class:narrow={column.display=='narrow'} use:asDropZone={{Extras: column, onDrop: dropZoneDrop, TypesToAccept: acceptDropTypes}} id="column-{column.id}">
                 <div class="columnheader level">
                     <div class="level-left">
                         <div class="level-item">
@@ -250,7 +250,7 @@
         min-width: 20rem;
         box-sizing: content-box;
     }
-    .cardcolumn.constrain {
+    .cardcolumn.narrow {
         max-width: 20rem;
         border-right: 1px solid #aaa;
     }
