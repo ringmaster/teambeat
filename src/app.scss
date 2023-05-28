@@ -1,6 +1,7 @@
 @charset "utf-8";
 $grey-dark: #111;
 $success: #ab813d;
+$input-focus-color: #569150;
 
 
 @import "../node_modules/bulmaswatch/flatly/variables";
@@ -26,4 +27,9 @@ $success: #ab813d;
 
 .select:not(.is-multiple):not(.is-loading)::after, .navbar-link:not(.is-arrowless)::after {
     border-color: #999;
+}
+
+.input:focus {
+    border-color: $input-focus-color;
+    box-shadow: 0 0 0 0.125em rgba($input-focus-color, 0.25);
 }

@@ -48,7 +48,7 @@
         {#each board.columns as column}
         <tr>
             <td>{column.title}</td>
-            <td><input type="text" bind:value={column.description} on:change={updateColumn(column)}/></td>
+            <td><input type="text" class="input" bind:value={column.description} on:change={updateColumn(column)}/></td>
             <td>
                 <div class="select">
                     <select bind:value={column.display} on:change={updateColumn(column)}>

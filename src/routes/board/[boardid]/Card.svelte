@@ -906,10 +906,6 @@ use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTyp
         max-width: 2rem;
         padding-left: 1rem;
     }
-    .comment {
-        font-size: smaller;
-        padding-left: 2rem;
-    }
     :global(.skeleton-paragraphs span) {
         margin: 0.2rem 0.25rem;
         background-color: #efefef;
@@ -925,9 +921,6 @@ use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTyp
     :global(.ProseMirror:focus-visible) {
         outline: none;
         background: #f8f8f8;
-    }
-    .votecontrols {
-        display: inline;
     }
     .field.is-grouped.votewidget {
         margin-right: 1rem;
@@ -1049,7 +1042,7 @@ use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTyp
     .reactji {
         padding: 0.375rem 1rem 0.375rem 1rem;
     }
-    .reactji.is-set {
+    :global(.reactji.is-set) {
         border: 1px solid #ab813d;
     }
     .reactji a {

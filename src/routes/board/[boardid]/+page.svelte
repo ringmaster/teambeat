@@ -208,7 +208,7 @@
             Object.entries(cardData).forEach(([key, value])=>card[key] = value)
         }
         //$pbStore.collection('cards').subscribe(card.id, card.update);
-
+        
         return card
     }
     
@@ -314,6 +314,18 @@
         $pbStore.collection('columns').getFullList(200, {filter: `board = "${data.boardid}"`, sort: "+seq"}).then((columnData)=>{
             board.columns = makeColumns(columnData)
         })
+    }
+
+    function nextScene() {
+        let index = board.scenes.indexOf(currentScene)
+        if(index == -1 || index >= board.scenes.length) return
+        let scene = board.scenes[index + 1]
+
+        currentScene.current = false;
+        $pbStore.collection('scenes').update(currentScene.id, currentScene);
+        currentScene = scene;
+        currentScene.current = true;
+        $pbStore.collection('scenes').update(currentScene.id, currentScene);
     }
     
     function getVoteCounts() {
@@ -505,24 +517,35 @@
         {/if}
         {#if isFacilitator}
         <div class="level-right is-flex is-justify-content-right is-align-content-center">
-            <div class="dropdown is-hoverable mx-1">
-                <div class="dropdown-trigger">
-                    <button class="button is-small is-rounded is-primary is-light" aria-haspopup="true" aria-controls="dropdown-menu">
-                        <span class="icon"><i class="fa-light fa-clapperboard"></i></span>
-                        <span>{currentScene.title}</span>
+            <div class="field has-addons mx-2 my-0">
+                <div class="control">
+                    <div class="dropdown is-hoverable">
+                        <div class="dropdown-trigger">
+                            <button class="button is-small is-rounded is-primary is-light" aria-haspopup="true" aria-controls="dropdown-menu">
+                                <span class="icon"><i class="fa-light fa-clapperboard"></i></span>
+                                <span>{currentScene.title}</span>
+                                <span class="icon is-small">
+                                    <i class="fas fa-angle-down" aria-hidden="true"></i>
+                                </span>
+                            </button>
+                        </div>
+                        <div class="dropdown-menu" id="dropdown-menu" role="menu">
+                            <div class="dropdown-content">
+                                {#each board.scenes as scene}
+                                <a href="#" class="dropdown-item" on:click={()=>setScene(scene)} class:is-active={scene == currentScene}>
+                                    {scene.title}
+                                </a>
+                                {/each}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="control">
+                    <button class="button is-small is-rounded is-primary is-light" on:click={nextScene} disabled={board.scenes.indexOf(currentScene) + 1 >= board.scenes.length}>
                         <span class="icon is-small">
-                            <i class="fas fa-angle-down" aria-hidden="true"></i>
+                            <i class="fa-solid fa-forward"></i>
                         </span>
                     </button>
-                </div>
-                <div class="dropdown-menu" id="dropdown-menu" role="menu">
-                    <div class="dropdown-content">
-                        {#each board.scenes as scene}
-                        <a href="#" class="dropdown-item" on:click={()=>setScene(scene)} class:is-active={scene == currentScene}>
-                            {scene.title}
-                        </a>
-                        {/each}
-                    </div>
                 </div>
             </div>
             
