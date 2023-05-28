@@ -60,15 +60,20 @@
         let promises = []
         let collist = {};
         selectedPreset.columns.forEach((column)=>{
-            column.board = board.id;
-            promises.push($pbStore.collection('columns').create(column).then((col)=>{
+            var newColumn = {...column}
+            if(Array.isArray(newColumn.description)) {
+                newColumn.description = newColumn.description[Math.floor(Math.random() * newColumn.description.length)]
+            }
+            newColumn.board = board.id;
+            promises.push($pbStore.collection('columns').create(newColumn).then((col)=>{
                 collist[col.title] = col.id;
             }));
         })
         let delscenes = board.scenes.map((scene) => scene.id);
         Promise.all(promises).then(()=>{
             let promises = [];
-            selectedPreset.scenes.forEach((scene)=>{
+            const sel = structuredClone(selectedPreset)
+            sel.scenes.forEach((scene)=>{
                 scene.board = board.id;
                 scene.options = scene.options.map((item) => {
                     let r = item.match(/\$(.+)$/)
@@ -143,40 +148,32 @@
             {#if showColumn(column.id)}
             
             <div class="column cardcolumn content" class:narrow={column.display=='narrow'} use:asDropZone={{Extras: column, onDrop: dropZoneDrop, TypesToAccept: acceptDropTypes}} id="column-{column.id}">
-                <div class="columnheader level">
-                    <div class="level-left">
-                        <div class="level-item">
-                            <div>
-                                <h2 class="subtitle">{column.title}</h2>
-                                {#if column.description != '' && column.description != undefined}
-                                <div>{column.description}</div>
-                                {/if}
-                            </div>
-                        </div>
-                        {#if currentScene.do("doAdd")}
-                        <div class="level-item">
-                        </div>
+                <div class="columnheader">
+                    <div>
+                        <h2 class="subtitle">{column.title}</h2>
+                        {#if column.description != '' && column.description != undefined}
+                        <div>{column.description}</div>
                         {/if}
                     </div>
-                </div>
-                {#if currentScene.do("doAdd")}
-                <!-- svelte-ignore a11y-click-events-have-key-events -->
-                <div class="card" on:click={()=>{focusEditor(column)}}>
-                    <div class="card-content cardcontent">
-                        
-                        <!-- THE EDITOR IS HERE-->
-                        <div class="cardcontentdescription cardeditor">
-                            <div class="editor" bind:this={column.editor} contenteditable="true" on:keypress={(e)=>editorKeypress(e,column)}></div>
-                        </div>
-                        
-                        <div class="cardcontentedit">
-                            <span class="has-tooltip-arrow" data-tooltip="Add This Card" on:click={()=>addCard(column)}>
-                                <i class="fa-solid fa-plus"></i>
-                            </span>
+                    {#if currentScene.do("doAdd")}
+                    <!-- svelte-ignore a11y-click-events-have-key-events -->
+                    <div class="card" on:click={()=>{focusEditor(column)}}>
+                        <div class="card-content cardcontent">
+                            
+                            <!-- THE EDITOR IS HERE-->
+                            <div class="cardcontentdescription cardeditor">
+                                <div class="editor" bind:this={column.editor} contenteditable="true" on:keypress={(e)=>editorKeypress(e,column)}></div>
+                            </div>
+                            
+                            <div class="cardcontentedit">
+                                <span class="has-tooltip-arrow" data-tooltip="Add This Card" on:click={()=>addCard(column)}>
+                                    <i class="fa-solid fa-plus"></i>
+                                </span>
+                            </div>
                         </div>
                     </div>
+                    {/if}
                 </div>
-                {/if}
                 
                 <div class="columncolumn">
                     <div class="columncontent">
