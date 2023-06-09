@@ -17,6 +17,7 @@
     
     const redirectUrl = location.protocol + '//' + location.host + "/redirect"
     
+    debugger
     if($pbStore.authStore.isValid) {
         $pbStore.collection('boards').getFirstListItem(`id = "${data.boardid}"`).then((board)=>{
             if(board.users.indexOf($pbStore.authStore.model.id) == -1) {
@@ -105,7 +106,7 @@
     async function doLogin() {
         loading = true;
         $pbStore.collection('boards').getOne(data.boardid).then((board)=>{
-            $pbStore.collection('users').authWithPassword(email, password).then((authData)=>{
+            $pbStore.collection('users').authWithPassword(useremail, password).then((authData)=>{
                 document.cookie = $pbStore.authStore.exportToCookie({ httpOnly: false, secure: false })
                 
                 if(board.users.indexOf($pbStore.authStore.model.id) == -1) {
@@ -119,7 +120,7 @@
                 }
             }).catch((error)=>{
                 notify("There was a problem authenticating.  Please check your credentials and try again.", "error", "error");
-                loggingin = false;
+                loading = false;
             })
         }).catch(()=>{
             notify("This board doesn't actually exist.", "error");

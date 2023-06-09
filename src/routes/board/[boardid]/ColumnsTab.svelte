@@ -5,6 +5,7 @@
     export let board;
     
     let newColumnName = '';
+    let showDecks = false;
     
     function addColumn() {
         if(newColumnName == '') {
@@ -32,6 +33,7 @@
     }
 
     function addDeck() {
+        showDecks = true
         notify('This feature is incomplete, but will eventually allow you to add a deck of pre-defined cards to the column, which will be useful for pulse check surveys.')
     }
 </script>
@@ -86,6 +88,14 @@
         </tr>
     </tbody>
 </table>
+
+<div class="modal" class:is-active={showDecks}>
+    <div class="modal-background"></div>
+    <div class="modal-content">
+      <!-- Any other Bulma elements you want -->
+    </div>
+    <button class="modal-close is-large" aria-label="close" on:click={()=>showDecks = false}></button>
+</div>
 
 <style>
     .table thead {
