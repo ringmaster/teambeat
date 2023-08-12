@@ -16,6 +16,8 @@
     
     let onlyvoted = false;
     let voteSort = 'votes';
+    let listtop;
+    let cardlist;
     
     function decompVotes(cardid, votetype) {
         let v = $votedata.cards[cardid];
@@ -26,7 +28,7 @@
         if(v == undefined) return 0
         return v;
     }
-
+    
     function showColumn(columnId) {
         const soloed = currentScene.options.reduce( (reduced, flag) => /^solo:(\S+)/.test(flag) ? flag.match(/^solo:(\S+)/)[1] : reduced, false)
         if(soloed) {
@@ -49,7 +51,7 @@
         }).filter((card) => !onlyvoted || decompVotes(card.id, voteSort) > 0 )
         return cards;
     }
-
+    
     function getCardsRemaining(columns, onlyvoted) {
         const cards = presentSort(columns, onlyvoted);
         let flag = false
@@ -64,7 +66,7 @@
         })
         return total
     }
-
+    
     $: cardsRemaining = getCardsRemaining([...board.columns], onlyvoted)
     
     function presentCard(columns) {
@@ -114,7 +116,7 @@
             {/if}
             {/if}
         </div>
-        <div class="column is-one-third cardlist">
+        <div class="column is-one-third cardlist" bind:this={cardlist} on:scroll={(e)=>listtop=e.target.scrollTop}>
             <div class="level filtercontrols">
                 <div class="level-item">
                     {#if board.votetypes.length > 1}
@@ -152,6 +154,13 @@
                 <Card bind:card={card} bind:scene={currentScene} bind:board={board} />
             </div>
             {/each}
+            {#if listtop > 60}
+            <button class="button gototop is-borderless"  on:click={(e)=>cardlist.scrollTo({top: 0, behavior: "smooth"})}>
+                <span class="icon is-small">
+                    <i class="fa-sharp fa-solid fa-arrow-up-to-line"></i>
+                </span>
+            </button>
+            {/if}
         </div>
     </div>
 </div>
@@ -198,5 +207,10 @@
     :global(.chevron svg) {
         height: 2rem;
         width: 2rem;
+    }
+    .gototop {
+        position: fixed;
+        bottom: 1rem;
+        right: 3rem;
     }
 </style>
