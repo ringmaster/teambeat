@@ -163,6 +163,7 @@
     .cardlist {
         overflow: scroll;
         padding-top: 0px;
+        z-index: 0;
     }
     .filtercontrols {
         position: sticky;

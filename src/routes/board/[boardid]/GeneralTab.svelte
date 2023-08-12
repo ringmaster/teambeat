@@ -6,6 +6,7 @@
     
     let confirmDelete =false;
     let confirmDemo =false;
+    let confirmAnonymize =false;
     export let board;
     
     $: users = board.expandedusers ? board.expandedusers : []
@@ -28,10 +29,21 @@
             notify("Check the box to confirm adding demo content to this board.", "warning", "exclamation-triangle")
         }
     }
+
+    function anonymizeBoard(){
+        if(confirmAnonymize) {
+            board.anonymous = true;
+            $pbStore.collection('boards').update(board.id, board).then(()=>{
+                notify("This board will no longer display user-associated information.", "info")
+            }).catch(err => notify(err.message, "error"))
+        } else {
+            notify("Check the box to permanently remove display of user-associated contributions.", "warning", "exclamation-triangle")
+        }
+    }
 </script>
 
 <div class="columns">
-    <div class="column is-two-thirds">
+    <div class="column is-one-third">
         <table class="table">
             <thead>
                 <tr>
@@ -58,6 +70,14 @@
     </div>
     <div class="column">
         <div class="field is-grouped">
+            {#if !board.anonymous}
+            <div class="control">
+                <button class="button is-link is-light" on:click={anonymizeBoard}>
+                    <span class="icon is-small"><input class="checkbox" type="checkbox" bind:checked={confirmAnonymize} on:click={(e)=>e.stopPropagation()}></span>
+                    <span>Anonymize Board</span>
+                </button>
+            </div>
+            {/if}
             <div class="control">
                 <button class="button is-link is-light" on:click={deleteBoard}>
                     <span class="icon is-small"><input class="checkbox" type="checkbox" bind:checked={confirmDelete} on:click={(e)=>e.stopPropagation()}></span>

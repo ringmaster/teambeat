@@ -548,6 +548,7 @@
         
     </div>
     <div class="column is-one-quarter presentationfacets">
+        {#if !board.anonymous}
         <div class="card">
             <div class="card-content userbox">
                 <div class="avatar">{@html avatarsvg}</div>
@@ -558,6 +559,7 @@
                 {/if}    
             </div>
         </div>
+        {/if}
         
         {#if scene.do("doShowVotes") || scene.do("doVote")}
         {#each board.votetypes as votetype}
@@ -645,6 +647,7 @@ use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTyp
     {/if}
     
     <div class="cardcontentedit">
+        {#if !board.anonymous}
         {#if card.expand.user.anonymous}
         <span class="has-tooltip-arrow" class:has-tooltip-left={scene.mode == 'present'} data-tooltip="Anonymous: {card.expand.user.name}">
             <!-- i class="fa-regular fa-user-secret"></i -->
@@ -655,6 +658,7 @@ use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTyp
             <!-- i class="fa-solid fa-user"></i -->
             <span class="avatar">{@html avatarsvg}</span>
         </span>
+        {/if}
         {/if}
         <div class="dropdown is-hoverable is-right">
             <div class="dropdown-trigger">

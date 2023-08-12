@@ -30,7 +30,7 @@
     let boardData = false;
     let loaded = false;
     const votesDefault = {show: false, choices: {}, auto: false, didauto: false}
-    let board = {columns: [], scenes: [], facilitators: [], currentScene: {title: ''}, votetypes: [], votecounts: [], votes: votesDefault};
+    let board = {columns: [], scenes: [], facilitators: [], currentScene: {title: ''}, votetypes: [], votecounts: [], votes: votesDefault, anonymous: false};
     let cardsRemaining;
     
     function showColumn(columnId) {
@@ -111,7 +111,8 @@
                 expandedusers: boardData.expand['users'],
                 votetypes: boardData.expand["votetypes(board)"],
                 votecounts: {},
-                votes: {...votesDefault, ...(typeof boardData.votes !== 'undefined') ? boardData.votes : {}}
+                votes: {...votesDefault, ...(typeof boardData.votes !== 'undefined') ? boardData.votes : {}},
+                anonymous: boardData.anonymous
             }
             board.votecounts = getVoteCounts();
             board.voteStatus = {};
@@ -546,7 +547,7 @@
                     </div>
                 </div>
                 <div class="control">
-                    <button class="button is-small is-rounded is-primary is-light" on:click={nextScene} disabled={board.scenes.indexOf(currentScene) + 1 >= board.scenes.length}>
+                    <button class="button is-small is-rounded is-primary is-light has-tooltip-arrow has-tooltip-bottom" on:click={nextScene} disabled={board.scenes.indexOf(currentScene) + 1 >= board.scenes.length}  data-tooltip="Go to the next scene">
                         <span class="icon is-small">
                             <i class="fa-solid fa-forward"></i>
                         </span>
@@ -633,14 +634,14 @@
                     </div>
                 </div>
                 <div class="control">
-                    <button class="button is-small is-rounded is-primary is-light" on:click={shareLink}>
+                    <button class="button is-small is-rounded is-primary is-light has-tooltip-arrow has-tooltip-bottom" on:click={shareLink} data-tooltip="Copy a link to this board">
                         <span class="icon is-small">
-                            <i class="fa-light fa-share"></i>
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i>
                         </span>
                     </button>
                 </div>                
                 <div class="control">
-                    <button class="button is-small is-rounded is-primary is-light" on:click={configBoard}>
+                    <button class="button is-small is-rounded is-primary is-light has-tooltip-arrow has-tooltip-bottom" on:click={configBoard} data-tooltip="Configure this board">
                         <span class="icon is-small">
                             <i class="fa-light fa-gear"></i>
                         </span>
