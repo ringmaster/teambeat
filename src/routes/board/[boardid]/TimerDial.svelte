@@ -143,6 +143,8 @@
         width: 58px;
         height: 58px;
         flex-shrink: 0;
+
+        cursor: pointer;
     }
     
     .base-timer__svg {

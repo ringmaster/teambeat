@@ -677,7 +677,9 @@
         </div>
         {/if}
         
-        <TimerDial on:click={doTimerClick} on:timeup={alarm} on:warn={alarmWarn} bind:timeLimit bind:startedAt bind:start={startTimer} bind:stop={stopTimer}/>
+        <span class="is-small has-tooltip-arrow has-tooltip-left" data-tooltip="Toggle Discussion Voting">
+            <TimerDial on:click={doTimerClick} on:timeup={alarm} on:warn={alarmWarn} bind:timeLimit bind:startedAt bind:start={startTimer} bind:stop={stopTimer}/>
+        </span>
     </div>
 </div>
 {/if}
