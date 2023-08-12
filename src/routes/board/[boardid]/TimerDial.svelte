@@ -101,8 +101,8 @@
         circleDasharray = `${fractional} 283`;
     }
     
-    function dialClick(){
-        dispatch('click', {});
+    function dialClick(e){
+        dispatch('click', e);
     }
 </script>
 

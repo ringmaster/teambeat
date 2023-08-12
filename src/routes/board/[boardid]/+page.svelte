@@ -249,8 +249,13 @@
         timer = false;
     }
     
-    function doTimerClick() {
+    function doTimerClick(e) {
         if(!isFacilitator) return;
+        if(e.detail.shiftKey) {
+            endTimer();
+            e.detail.stopPropagation();
+            return;
+        }
         let boardData = {...board};
         boardData.votes.choices = {}
         boardData.votes.show = !board.votes.show
@@ -677,7 +682,7 @@
         </div>
         {/if}
         
-        <span class="is-small has-tooltip-arrow has-tooltip-left" data-tooltip="Toggle Discussion Voting">
+        <span class="is-small has-tooltip-arrow has-tooltip-left" data-tooltip="{isFacilitator?'Toggle Discussion Voting':'time remaining'}">
             <TimerDial on:click={doTimerClick} on:timeup={alarm} on:warn={alarmWarn} bind:timeLimit bind:startedAt bind:start={startTimer} bind:stop={stopTimer}/>
         </span>
     </div>
