@@ -326,7 +326,7 @@
         let index = board.scenes.indexOf(currentScene)
         if(index == -1 || index >= board.scenes.length) return
         let scene = board.scenes[index + 1]
-
+        
         currentScene.current = false;
         $pbStore.collection('scenes').update(currentScene.id, currentScene);
         currentScene = scene;

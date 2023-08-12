@@ -112,14 +112,28 @@
     
     const updateNotes = (notes) => {
         if(card.notes != notes) {
+            if(card.options['notelock']) {
+                if(card.options['notelock'].id != user.id) {
+                    console.log(card.options['notelock'], user)
+                    return;
+                }
+            }
+            else {
+                card.options['notelock'] = user
+                console.log(card.options);
+                $pbStore.collection("cards").update(card.id, card).then(()=>{
+                    console.log("Saved notelock");
+                });
+            }
             clearTimeout(noteTimer);
             noteDirty = true;
             card.notes = notes;
             noteTimer = setTimeout(() => {
+                delete card.options.notelock;
                 $pbStore.collection("cards").update(card.id, card).then(()=>{
                     noteDirty = false;
                 })
-            }, 250);
+            }, 500);
         }
     }
     
@@ -483,7 +497,7 @@
         </div>
         
         <h3 class="subtitle">Notes:</h3>
-        <div class="card">
+        <div class="card lockable" class:locked={noteDirty}>
             <div class="card-content cardcontent" class:dirty={noteDirty}>
                 <!-- THE EDITOR IS HERE-->
                 
@@ -503,6 +517,14 @@
                         }
                     }}/>
                 </div>
+            </div>
+            <div class="lockstatus">
+                {#if noteDirty}
+                Waiting to autosave...
+                {/if}
+                {#if !noteDirty && card.options['notelock'] }
+                Being edited by {card.options['notelock'].name}
+                {/if}
             </div>
         </div>
         
@@ -1058,5 +1080,18 @@ use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTyp
     }
     .emoji {
         cursor: pointer;
+    }
+    .locked {
+        
+    }
+    .lockable .cardcontent {
+        padding-bottom: 0.5rem;
+    }
+    .lockstatus {
+        height: 1rem;
+        text-align: right;
+        padding: 0 0.5rem 0 0;
+        font-size: x-small;
+        color: dimgray;
     }
 </style>
