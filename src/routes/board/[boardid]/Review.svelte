@@ -1,7 +1,7 @@
 <script>
     import { pbStore } from "svelte-pocketbase";
     import { votes as votedata } from "$stores/votes.js";
-    import InkMde from 'ink-mde/svelte'
+    import SvelteMarkdown from 'svelte-markdown'
     import notify from "../../../utils/notify";
     
     export let board;
@@ -93,11 +93,12 @@
             notify("Your browser does not support this feature.", "error");
             return;
         }
-        var typeHtml = "text/html";
+        var typeHtml = "text/plain";
         var blobHtml = new Blob([getAgreementsConfluence()], { type: typeHtml });
-        var typePlain = "text/html";
-        var blobPlain = new Blob([agreementText], { type: typePlain });
+        // var typePlain = "text/html";
+        // var blobPlain = new Blob([agreementText], { type: typePlain });
         var data = [new ClipboardItem({ [typeHtml]: blobHtml }) ];
+        console.log(data);
         
         navigator.clipboard.write(data).then(
         function () {
@@ -109,6 +110,7 @@
         }
         );
     }
+    */
     
     function copyAgreementsText() {
         if (!navigator.clipboard) {
@@ -129,36 +131,25 @@
         }
         );
     }
-    */
+    
 </script>
 
 <div class="container">
     <h1 class="title">Review</h1>
     
     {#if clipboardOk}
-    <!--
         <div class="buttons">
             <button class="button" on:click={copyAgreementsText}>Copy Agreements Markdown</button>
-            <button class="button" on:click={copyAgreementsConfluence}>Copy Agreements for Confluence</button>
+            <!--button class="button" on:click={copyAgreementsConfluence}>Copy Agreements for Confluence</button-->
         </div>
-    -->
     {/if}
     
     <div class="cardrow">
-        <InkMde bind:value={agreementText} bind:this={ink} options={{
-            doc: agreementText,
-            hooks: {
-            },
-            interface: {
-                appearance: 'light',
-                attribution: false,
-                lists: true,
-                images: false,
-                readonly: false
-            }
-        }}/>
-        
-        
+        <div class="content">
+            <SvelteMarkdown 
+            source={agreementText}
+            options={{gfm: true, breaks: true}}/>
+        </div>
     </div>
     
 </div>

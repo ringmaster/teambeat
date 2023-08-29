@@ -86,6 +86,10 @@
             $pbStore.collection('scenes').update(currentScene.id, currentScene);
         }
     }
+
+    function scrollCardList(e) {
+        listtop=e.target.scrollTop
+    }
 </script>
 
 <div class="container">
@@ -116,7 +120,7 @@
             {/if}
             {/if}
         </div>
-        <div class="column is-one-third cardlist" bind:this={cardlist} on:scroll={(e)=>listtop=e.target.scrollTop}>
+        <div class="column is-one-third cardlist" bind:this={cardlist} on:scroll={scrollCardList}>
             <div class="level filtercontrols">
                 <div class="level-item">
                     {#if board.votetypes.length > 1}
