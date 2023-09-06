@@ -13,14 +13,14 @@
     
     function deleteBoard(){
         if(confirmDelete) {
-            goto("/");
             $pbStore.collection('boards').delete(board.id).then(()=>{
+                goto("/");
             }).catch(err => notify(err.message, "error"))
         } else {
             notify("Check the box to confirm the deletion of this board.", "warning", "exclamation-triangle")
         }
     }
-
+    
     function demoBoard(){
         if(confirmDemo) {
             addDemoData(board);
@@ -29,7 +29,7 @@
             notify("Check the box to confirm adding demo content to this board.", "warning", "exclamation-triangle")
         }
     }
-
+    
     function anonymizeBoard(){
         if(confirmAnonymize) {
             board.anonymous = true;
@@ -62,34 +62,34 @@
                         {:else}
                         <i class="fa-regular fa-square"></i>
                         {/if}
-                    <td><input class="checkbox" type="checkbox" checked={board.facilitators.indexOf(user.id) != -1}></td>
-                </tr>
-                {/each}
-            </tbody>
-        </table>
-    </div>
-    <div class="column">
-        <div class="field is-grouped">
-            {#if !board.anonymous}
-            <div class="control">
-                <button class="button is-link is-light" on:click={anonymizeBoard}>
-                    <span class="icon is-small"><input class="checkbox" type="checkbox" bind:checked={confirmAnonymize} on:click={(e)=>e.stopPropagation()}></span>
-                    <span>Anonymize Board</span>
-                </button>
-            </div>
-            {/if}
-            <div class="control">
-                <button class="button is-link is-light" on:click={deleteBoard}>
-                    <span class="icon is-small"><input class="checkbox" type="checkbox" bind:checked={confirmDelete} on:click={(e)=>e.stopPropagation()}></span>
-                    <span>Delete Board</span>
-                </button>
-            </div>
-            <div class="control">
-                <button class="button is-link is-light" on:click={demoBoard}>
-                    <span class="icon is-small"><input class="checkbox" type="checkbox" bind:checked={confirmDemo} on:click={(e)=>e.stopPropagation()}></span>
-                    <span>Demo Data</span>
-                </button>
+                        <td><input class="checkbox" type="checkbox" checked={board.facilitators.indexOf(user.id) != -1}></td>
+                    </tr>
+                    {/each}
+                </tbody>
+            </table>
+        </div>
+        <div class="column">
+            <div class="field is-grouped">
+                {#if !board.anonymous}
+                <div class="control">
+                    <button class="button is-link is-light" on:click={anonymizeBoard}>
+                        <span class="icon is-small"><input class="checkbox" type="checkbox" bind:checked={confirmAnonymize} on:click={(e)=>e.stopPropagation()}></span>
+                        <span>Anonymize Board</span>
+                    </button>
+                </div>
+                {/if}
+                <div class="control">
+                    <button class="button is-link is-light" on:click={deleteBoard}>
+                        <span class="icon is-small"><input class="checkbox" type="checkbox" bind:checked={confirmDelete} on:click={(e)=>e.stopPropagation()}></span>
+                        <span>Delete Board</span>
+                    </button>
+                </div>
+                <div class="control">
+                    <button class="button is-link is-light" on:click={demoBoard}>
+                        <span class="icon is-small"><input class="checkbox" type="checkbox" bind:checked={confirmDemo} on:click={(e)=>e.stopPropagation()}></span>
+                        <span>Demo Data</span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
-</div>

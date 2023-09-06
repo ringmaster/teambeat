@@ -42,6 +42,7 @@
 		"debounce": "^1.2.1",
 		"ink-mde": "^0.22.0-dev.3",
 		"milligram": "^1.4.1",
+		"moment": "^2.29.4",
 		"svelte-chartjs": "^3.1.2",
 		"svelte-drag-and-drop-actions": "^1.0.0",
 		"svelte-markdown": "^0.2.3",
