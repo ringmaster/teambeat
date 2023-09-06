@@ -1081,9 +1081,6 @@ use:asDropZone={{Extras: card, onDrop:dropZoneCard, TypesToAccept: acceptDropTyp
     .emoji {
         cursor: pointer;
     }
-    .locked {
-        
-    }
     .lockable .cardcontent {
         padding-bottom: 0.5rem;
     }

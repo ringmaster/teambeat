@@ -2,6 +2,7 @@
     import { pbStore } from "svelte-pocketbase";
     import { votes as votedata } from "$stores/votes.js";
     import SvelteMarkdown from 'svelte-markdown'
+    import InkMde from 'ink-mde/svelte'
     import notify from "../../../utils/notify";
     
     export let board;
@@ -10,6 +11,8 @@
     let agreementText = '';
     let clipboardOk = false;
     let ink;
+    
+    const useInk = false;
     
     const voteSort = 'votes'
     
@@ -60,7 +63,12 @@
             }
             if(card.expand['agreements(card)']) {
                 card.expand['agreements(card)'].forEach((agreement)=>{
-                    agreementText += `- [ ] ${agreement.content}\n`
+                    if(useInk) {
+                        agreementText += `- [ ] ${agreement.content}\n`
+                    }
+                    else {
+                        agreementText += `> ☑ ${agreement.content}\n`
+                    }
                 })
             }
             agreementText += `\n---\n`
@@ -138,17 +146,35 @@
     <h1 class="title">Review</h1>
     
     {#if clipboardOk}
-        <div class="buttons">
-            <button class="button" on:click={copyAgreementsText}>Copy Agreements Markdown</button>
-            <!--button class="button" on:click={copyAgreementsConfluence}>Copy Agreements for Confluence</button-->
-        </div>
+    <div class="buttons">
+        <button class="button" on:click={copyAgreementsText}>Copy Agreements Markdown</button>
+        <!--button class="button" on:click={copyAgreementsConfluence}>Copy Agreements for Confluence</button-->
+    </div>
     {/if}
     
     <div class="cardrow">
         <div class="content">
+            {#if useInk }
+            <InkMde bind:value={agreementText} bind:this={ink} options={{
+                doc: agreementText,
+                hooks: {
+                },
+                interface: {
+                    appearance: 'light',
+                    attribution: false,
+                    lists: true,
+                    images: false,
+                    readonly: false
+                }
+            }}/>
+            {:else}
             <SvelteMarkdown 
             source={agreementText}
-            options={{gfm: true, breaks: true}}/>
+            options={{
+                gfm: true, 
+                breaks: true,
+            }}/>
+            {/if}
         </div>
     </div>
     
