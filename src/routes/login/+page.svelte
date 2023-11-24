@@ -16,15 +16,22 @@
   
   async function doLogin() {
     loggingin = true;
-    $pbStore.collection('users').authWithPassword(username, password)
-    .then((authData)=>{
-      document.cookie = $pbStore.authStore.exportToCookie({ httpOnly: false, secure: false })
-      goto("/");
-    })
-    .catch((error)=>{
-      notify("There was a problem authenticating.  Please check your credentials and try again.", "error", "error");
-      loggingin = false;
-    })
+    try {
+      $pbStore.collection('users').authWithPassword(username, password)
+      .then((authData)=>{
+        document.cookie = $pbStore.authStore.exportToCookie({ httpOnly: false, secure: false })
+        goto("/");
+      })
+      .catch((error)=>{
+        console.log(error);
+        notify("There was a problem authenticating.  Please check your credentials and try again.", "error", "error");
+        loggingin = false;
+      })
+      
+    } catch (error) {
+      console.log(error);
+      alert('error');
+    }
   }
   
   function doLogout() {
@@ -74,7 +81,7 @@
           </div>
         </div>
       </form>
-
+      
       <p>
         <small>
           <a href="/forgot">Darn, I forgot my password.</a>

@@ -1,5 +1,6 @@
 <script>
     import { goto } from '$app/navigation';
+    import { redirect } from '@sveltejs/kit'
     import { pbStore } from 'svelte-pocketbase';
     import { onMount } from 'svelte';
     import moment from 'moment'
@@ -87,8 +88,10 @@
     
     function collapseErrData(err) {
         let output = '';
-        Object.keys(err.data.data).forEach((key)=>{
-            output += "\n" + `${key}: ${err.data.data[key].message}`;
+        let x = err
+        while(Object.hasOwn(x, 'data')) x = x.data
+        Object.keys(x).forEach((key)=>{
+            output += "\n" + `${key}: ${x[key].message}`;
         })
         return output;
     }
@@ -100,15 +103,16 @@
             $pbStore.authStore.clear();
             $pbStore.collection('users').authWithPassword(user.username, userdata.password).then((user)=>{
                 document.cookie = $pbStore.authStore.exportToCookie({ httpOnly: false, secure: false });
-                $pbStore.authStore.authRefresh().then(()=>{
-                    goto('/');
-                })
+                $pbStore.authStore.isValid
+                loggedIn = true
             }).catch((err)=>{
                 loading = false;
+                console.log("Auth fail", err)
                 notify("There was a problem authenticating the user record." + collapseErrData(err), "error");
             })
         }).catch((err)=>{
             loading = false;
+            console.log("Create fail", err)
             notify("There was a problem creating the user record." + collapseErrData(err), "error");
         })
     }

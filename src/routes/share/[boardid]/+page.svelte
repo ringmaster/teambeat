@@ -63,8 +63,10 @@
     
     function collapseErrData(err) {
         let output = '';
-        Object.keys(err.data.data).forEach((key)=>{
-            output += "\n" + `${key}: ${err.data.data[key].message}`;
+        let x = err
+        while(Object.hasOwn(x, 'data')) x = x.data
+        Object.keys(x).forEach((key)=>{
+            output += "\n" + `${key}: ${x[key].message}`;
         })
         return output;
     }
