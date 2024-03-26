@@ -667,11 +667,11 @@
 <Drawer bind:board bind:visible={showDrawer} />
 
 {#if timer}
-<div class="timer" in:fly="{{ y: 200, duration: 500 }}" out:fly="{{ y: 200, duration: 500 }}">
+<div class="timer" in:fly|global="{{ y: 200, duration: 500 }}" out:fly|global="{{ y: 200, duration: 500 }}">
     <!-- svelte-ignore a11y-click-events-have-key-events -->
     <div class="timerbox" class:expanded={board.votes.show} >
         {#if board.votes.show}
-        <div class="timerdetail" in:fade="{{delay: 1000}}" out:fade>
+        <div class="timerdetail" in:fade|global="{{delay: 1000}}" out:fade|global>
             <button class="button is-primary is-light" on:click={()=>doMoreTimeMoveOn(user, 1)}>
                 More Time
                 <progress class="progress is-small" class:is-success={selectedMoreTime} value={moreTimePercent} max="100">20%</progress>

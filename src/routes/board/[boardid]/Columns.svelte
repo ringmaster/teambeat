@@ -179,7 +179,7 @@
                     <div class="columncontent">
                         
                         {#each maybeSort([...column.cards], currentScene.do("doShowVotes")) as card(card.id)}
-                        <div class="cardanimator" in:receive|local="{{key: card.id}}" out:send|local="{{key: card.id}}" animate:flip|local="{{duration: 200}}">
+                        <div class="cardanimator" in:receive="{{key: card.id}}" out:send="{{key: card.id}}" animate:flip|local="{{duration: 200}}">
                             <Card bind:card={card} bind:scene={currentScene} bind:board={board} />
                         </div>
                         {/each}

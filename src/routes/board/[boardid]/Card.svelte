@@ -547,7 +547,7 @@
         {/if}
         {#if card.expand['agreements(card)']?.length > 0}
         {#each [...card.expand['agreements(card)']].reverse() as agreement(agreement.id)}
-        <div class="card" transition:fade>
+        <div class="card" transition:fade|global>
             <div class="card-content columns">
                 <!-- THE EDITOR IS HERE-->
                 <div class="cardcontentdescription cardeditor column">
