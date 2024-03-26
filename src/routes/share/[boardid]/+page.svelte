@@ -139,6 +139,14 @@
             <p><b>But you are not logged in!</b> You have these options:</p>
         </div>
     </div>
+
+    <div class="notification is-info is-light content">
+        <p><button class="button" on:click={goAnon} class:is-loading={loading} disabled={loading}>Continue without logging in.</button></p>
+        <ul class="ul">
+        <li><i class="fa-regular fa-triangle-exclamation"></i> You will lose access to edit your data if your session ends.</li>
+        <li><i class="fa-regular fa-triangle-exclamation"></i>You will be assigned a random animal name.</li>
+        </ul>
+    </div>
     
     <div class="columns">
         <div class="column">
@@ -225,9 +233,5 @@
             {/await}
             
         </div>
-    </div>
-    <div class="notification is-info is-light">
-        <button class="button" on:click={goAnon} class:is-loading={loading} disabled={loading}>Continue without logging in.</button>  <br/>
-        <i>You will lose access to edit your data if your session ends.</i>
     </div>
 </div>
